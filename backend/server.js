@@ -22,7 +22,41 @@ const PORT = process.env.PORT || 5000;
 // SECURITY MIDDLEWARE
 // ============================================
 app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" }
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://www.gstatic.com",
+                "https://www.googletagmanager.com"
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://cdnjs.cloudflare.com",
+                "https://fonts.googleapis.com"
+            ],
+            fontSrc: [
+                "'self'",
+                "https://cdnjs.cloudflare.com",
+                "https://fonts.gstatic.com"
+            ],
+            connectSrc: [
+                "'self'",
+                "https://*.googleapis.com",
+                "https://*.firebaseio.com",
+                "https://firebasestorage.googleapis.com",
+                "https://www.gstatic.com",
+                "https://www.google-analytics.com"
+            ],
+            imgSrc: ["'self'", "data:", "https:"],
+            frameSrc: ["'self'", "https://dvary-9a7d0.firebaseapp.com"],
+            objectSrc: ["'none'"]
+        }
+    }
 }));
 
 app.use(cors({
