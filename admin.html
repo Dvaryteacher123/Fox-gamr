@@ -1,0 +1,83 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameZone - Dashibodi ya Admin</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h2>Dashibodi ya Admin - Ongeza Game na URLs 7</h2>
+            <a href="index.html" class="back-home">Rudi Ukurasa wa Mbele</a>
+        </header>
+
+        <main class="admin-main">
+            <form id="add-game-form">
+                <div class="input-group">
+                    <label for="game-title">Jina la Game</label>
+                    <input type="text" id="game-title" required placeholder="Andika jina la game...">
+                </div>
+                
+                <div class="input-group">
+                    <label for="game-image">URL ya Picha ya Game</label>
+                    <input type="url" id="game-image" required placeholder="https://mfano.com/picha.jpg">
+                </div>
+
+                <h3>Viungo vya Kupakua (Hadi URL 7)</h3>
+                <div class="input-group">
+                    <label>Link 1 (Server 1)</label>
+                    <input type="url" name="download-url" placeholder="https://...">
+                </div>
+                <div class="input-group">
+                    <label>Link 2 (Server 2)</label>
+                    <input type="url" name="download-url" placeholder="https://...">
+                </div>
+                <div class="input-group">
+                    <label>Link 3 (Server 3)</label>
+                    <input type="url" name="download-url" placeholder="https://...">
+                </div>
+                <div class="input-group">
+                    <label>Link 4 (Server 4)</label>
+                    <input type="url" name="download-url" placeholder="https://...">
+                </div>
+                <div class="input-group">
+                    <label>Link 5 (Server 5)</label>
+                    <input type="url" name="download-url" placeholder="https://...">
+                </div>
+                <div class="input-group">
+                    <label>Link 6 (Server 6)</label>
+                    <input type="url" name="download-url" placeholder="https://...">
+                </div>
+                <div class="input-group">
+                    <label>Link 7 (Server 7)</label>
+                    <input type="url" name="download-url" placeholder="https://...">
+                </div>
+
+                <button type="submit" class="admin-btn">Chapisha Game (Publish)</button>
+            </form>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        
+        const firebaseConfig = {
+          apiKey: "AIzaSyCmwASW4XXQ3O0AvsCM_r1WLlrUmGjYVxI",
+          authDomain: "dvary-9a7d0.firebaseapp.com",
+          projectId: "dvary-9a7d0",
+          storageBucket: "dvary-9a7d0.firebasestorage.app",
+          messagingSenderId: "107370806066",
+          appId: "1:107370806066:web:4c2ce1e6f7b6c32909f52b",
+          measurementId: "G-07361LFJEP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+    </script>
+    <script src="assets/js/admin.js" type="module"></script>
+</body>
+</html>
+
