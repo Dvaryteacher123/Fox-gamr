@@ -1,0 +1,394 @@
+/* assets/css/style.css - Ongeza maboresho haya ya muonekano wa Premium Dark Gaming */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #121212;
+    color: #ffffff;
+    overflow-x: hidden;
+}
+
+/* Get Started Screen Overlay */
+.get-started-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: radial-gradient(circle at center, #1e1e2f 0%, #0b0b0f 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    text-align: center;
+    padding: 1rem;
+}
+
+.get-started-content h1.logo-glow {
+    font-size: 3rem;
+    color: #ff4757;
+    text-shadow: 0 0 20px rgba(255, 71, 87, 0.6);
+    margin-bottom: 0.5rem;
+}
+
+.tagline {
+    font-size: 1.2rem;
+    color: #ccc;
+    margin-bottom: 0.3rem;
+}
+
+.sub-tagline {
+    font-size: 0.95rem;
+    color: #888;
+    margin-bottom: 2rem;
+}
+
+.get-started-btn {
+    background: linear-gradient(135deg, #ff4757, #ff6b81);
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.get-started-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.6);
+}
+
+.main-website-hidden {
+    display: none;
+}
+
+/* Navbar & Glass Effect */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(31, 31, 31, 0.85);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ff4757;
+    letter-spacing: 1px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+}
+
+.nav-links a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    color: #ff4757;
+}
+
+.badge {
+    background-color: #ff4757;
+    color: white;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+    padding: 4rem 2rem;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 2rem;
+    border: 1px solid #2a2a2a;
+}
+
+.hero-content h1 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.hero-content p {
+    color: #aaa;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Search and Categories */
+.search-category-section {
+    margin-bottom: 2rem;
+}
+
+.search-box-container input {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background-color: #1f1f1f;
+    color: white;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.categories-grid {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.cat-btn {
+    background-color: #1f1f1f;
+    color: #ccc;
+    border: 1px solid #333;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s;
+}
+
+.cat-btn:hover, .cat-btn.active {
+    background-color: #ff4757;
+    color: white;
+    border-color: #ff4757;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.games-section, .chat-section {
+    margin-bottom: 3rem;
+}
+
+.games-section h2, .chat-section h2 {
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    border-bottom: 2px solid #ff4757;
+    display: inline-block;
+    padding-bottom: 0.3rem;
+}
+
+.grid-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Game Card Design */
+.game-card {
+    background-color: #1f1f1f;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    padding: 1rem;
+    border: 1px solid #2a2a2a;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(255, 71, 87, 0.2);
+    border-color: #ff4757;
+}
+
+.game-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.game-card h3 {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+}
+
+.game-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-bottom: 0.8rem;
+}
+
+.download-links-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 1rem;
+}
+
+.download-btn {
+    background-color: #2ed573;
+    color: white;
+    text-align: center;
+    padding: 0.5rem;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.download-btn:hover {
+    background-color: #26af5f;
+}
+
+/* Chat Styles */
+.chat-box {
+    background-color: #1f1f1f;
+    height: 320px;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    border: 1px solid #333;
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-input-area input {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #333;
+    background-color: #1f1f1f;
+    color: white;
+}
+
+.chat-input-area button {
+    padding: 0.75rem 1.2rem;
+    background-color: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.chat-message-item {
+    margin-bottom: 0.8rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-message-item.my-message { align-items: flex-end; }
+.chat-message-item.other-message { align-items: flex-start; }
+
+.chat-bubble {
+    background-color: #2a2a2a;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    max-width: 75%;
+    word-break: break-word;
+    border: 1px solid #333;
+    font-size: 0.9rem;
+}
+
+.my-message .chat-bubble {
+    background-color: #ff4757;
+    color: white;
+}
+
+.chat-user-name {
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-bottom: 0.2rem;
+}
+
+.message-actions {
+    font-size: 0.7rem;
+    margin-top: 0.2rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.message-actions button {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+}
+
+.message-actions button:hover { color: #ff4757; }
+
+/* Premium Footer */
+.premium-footer {
+    background-color: #0d0d0d;
+    border-top: 1px solid #222;
+    padding: 3rem 1rem;
+    text-align: center;
+    margin-top: 4rem;
+}
+
+.premium-footer h3 {
+    color: #ff4757;
+    margin-bottom: 0.3rem;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.footer-links a:hover { color: #ff4757; }
+
+.copyright {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+/* Responsive kwa simu */
+@media (max-width: 768px) {
+    .navbar { padding: 0.8rem 1rem; }
+    .nav-links { gap: 0.8rem; font-size: 0.8rem; }
+    .hero-content h1 { font-size: 1.8rem; }
+}
+
