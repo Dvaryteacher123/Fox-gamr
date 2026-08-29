@@ -1,0 +1,161 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES – Your Ultimate Gaming Hub</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- 1. GET STARTED SCREEN (Inaanza kuonekana kabla ya website kuu) -->
+    <div id="get-started-screen" class="get-started-overlay">
+        <div class="get-started-content">
+            <div class="gaming-particles"></div>
+            <h1 class="logo-glow">DVARY GAMES</h1>
+            <p class="tagline">Your Ultimate Gaming Hub 🎮</p>
+            <p class="sub-tagline">Discover. Download. Play.</p>
+            <button id="get-started-btn" class="get-started-btn">🚀 GET STARTED</button>
+        </div>
+    </div>
+
+    <!-- MAIN WEBSITE CONTAINER (Itajificha mpaka user abonyeze Get Started) -->
+    <div id="main-website-container" class="main-website-hidden">
+        <!-- Top Navbar -->
+        <nav class="navbar">
+            <div class="logo">DVARY GAMES</div>
+            <ul class="nav-links">
+                <li><a href="#home" class="active">🏠 Home</a></li>
+                <li><a href="#games">🎮 Games</a></li>
+                <li><a href="#community">👥 Community</a></li>
+                <li><a href="#vip">⭐ VIP</a></li>
+                <li><a href="#free-games">🆓 Free Games</a></li>
+                <li><a href="#notifications">🔔 Notifications <span id="notification-badge" class="badge">0</span></a></li>
+                <li><a href="profile.html" id="auth-link">👤 Profile</a></li>
+            </ul>
+        </nav>
+
+        <div class="container">
+            <!-- HERO SECTION -->
+            <section id="home" class="hero-section">
+                <div class="hero-content">
+                    <h1>PLAY THE NEXT LEVEL</h1>
+                    <p>Discover premium games, free games and exciting gaming experiences in one place.</p>
+                    <div class="hero-buttons">
+                        <a href="#games" class="download-btn" style="background-color: #ff4757;">🎮 Explore Games</a>
+                        <a href="#vip" class="download-btn" style="background-color: #2ed573;">⭐ Explore VIP</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEARCH & CATEGORIES -->
+            <section class="search-category-section">
+                <div class="search-box-container">
+                    <input type="text" id="game-search-input" placeholder="🔍 Search games... (e.g. Truck)">
+                </div>
+                <div class="categories-grid">
+                    <button class="cat-btn" data-cat="Action">🎮 Action</button>
+                    <button class="cat-btn" data-cat="Racing">🏎️ Racing</button>
+                    <button class="cat-btn" data-cat="Sports">⚽ Sports</button>
+                    <button class="cat-btn" data-cat="Shooter">🔫 Shooter</button>
+                    <button class="cat-btn" data-cat="Puzzle">🧩 Puzzle</button>
+                    <button class="cat-btn" data-cat="Adventure">🌍 Adventure</button>
+                    <button class="cat-btn" data-cat="Strategy">🏆 Strategy</button>
+                    <button class="cat-btn" data-cat="Arcade">👾 Arcade</button>
+                </div>
+            </section>
+
+            <!-- FEATURED / ALL GAMES SECTION -->
+            <section id="games" class="games-section">
+                <h2>🔥 Featured & Trending Games</h2>
+                <div id="games-container" class="grid-cards">
+                    <!-- Skeleton loading ya awali -->
+                    <div class="game-card skeleton-card">Loading Games...</div>
+                    <div class="game-card skeleton-card">Loading Games...</div>
+                </div>
+            </section>
+
+            <!-- VIP GAMES SECTION -->
+            <section id="vip" class="games-section">
+                <h2>👑 VIP GAMES</h2>
+                <div id="vip-games-container" class="grid-cards">
+                    <!-- VIP games zitaingizwa hapa -->
+                </div>
+            </section>
+
+            <!-- FREE GAMES SECTION -->
+            <section id="free-games" class="games-section">
+                <h2>🆓 FREE GAMES</h2>
+                <div id="free-games-container" class="grid-cards">
+                    <!-- Free games zitaingizwa hapa -->
+                </div>
+            </section>
+
+            <!-- COMMUNITY SECTION -->
+            <section id="community" class="chat-section">
+                <h2>👥 DVARY Community</h2>
+                
+                <div id="auth-warning" style="display: none; background: #1f1f1f; padding: 1.5rem; border-radius: 8px; text-align: center; border: 1px solid #333;">
+                    <p style="margin-bottom: 1rem; color: #ccc;">Tafadhali ingia kwenye account yako ili kujiunga na Community.</p>
+                    <a href="login.html" class="download-btn" style="display: inline-block; width: auto; padding: 0.5rem 1.5rem; margin-right: 0.5rem;">Login</a>
+                    <a href="signup.html" class="download-btn" style="display: inline-block; width: auto; padding: 0.5rem 1.5rem; background-color: #ff4757;">Register</a>
+                </div>
+
+                <div id="chat-main-container">
+                    <p style="font-size: 0.85rem; color: #2ed573; margin-bottom: 0.5rem;">🟢 Online Status: Active</p>
+                    <div id="chat-box" class="chat-box"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Andika ujumbe...">
+                        <button id="send-btn">➤</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- NOTIFICATIONS SECTION -->
+            <section id="notifications" class="games-section" style="background: #1f1f1f; padding: 1.5rem; border-radius: 8px; border: 1px solid #333;">
+                <h2>🔔 Notifications</h2>
+                <div id="notifications-list" style="margin-top: 1rem; color: #ccc;">
+                    <p>• Karibu DVARY Games! Mfumo wa notification uko tayari.</p>
+                    <p>• Magame mapya yameongezwa kwenye server.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- PREMIUM FOOTER -->
+        <footer class="premium-footer">
+            <div class="footer-content">
+                <h3>DVARY GAMES</h3>
+                <p>Your Ultimate Gaming Hub 🎮</p>
+                <div class="footer-links">
+                    <a href="#home">Home</a>
+                    <a href="#games">Games</a>
+                    <a href="#community">Community</a>
+                    <a href="#vip">VIP</a>
+                    <a href="#free-games">Free Games</a>
+                </div>
+                <p class="copyright">© 2026 DVARY GAMES. Haki zote zimehifadhiwa.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JavaScript zilizopo kuunganisha kila kitu -->
+    <script src="assets/js/chat.js" type="module"></script>
+    <script>
+        // Msimbo maalum wa Get Started Screen Transition
+        document.getElementById('get-started-btn').addEventListener('click', () => {
+            const screen = document.getElementById('get-started-screen');
+            const mainSite = document.getElementById('main-website-container');
+            
+            screen.style.opacity = '0';
+            screen.style.transition = 'opacity 0.5s ease';
+            
+            setTimeout(() => {
+                screen.style.display = 'none';
+                mainSite.style.display = 'block';
+                window.scrollTo(0, 0);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+
