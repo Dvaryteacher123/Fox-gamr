@@ -1,0 +1,61 @@
+/* Mitindo ya Ziada kwa ajili ya Community Chat */
+.chat-message-item {
+    margin-bottom: 0.8rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-message-item.my-message {
+    align-items: flex-end;
+}
+
+.chat-message-item.other-message {
+    align-items: flex-start;
+}
+
+.chat-bubble {
+    background-color: #2a2a2a;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    max-width: 75%;
+    word-break: break-word;
+    border: 1px solid #333;
+}
+
+.my-message .chat-bubble {
+    background-color: #ff4757;
+    color: white;
+}
+
+.chat-user-name {
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-bottom: 0.2rem;
+}
+
+.chat-time {
+    font-size: 0.65rem;
+    color: #888;
+    margin-top: 0.2rem;
+    text-align: right;
+}
+
+.message-actions {
+    font-size: 0.7rem;
+    margin-top: 0.2rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.message-actions button {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+.message-actions button:hover {
+    color: #ff4757;
+}
+
