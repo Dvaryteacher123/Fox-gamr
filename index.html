@@ -1,0 +1,63 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameZone</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">GameZone</div>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Nyumbani</a></li>
+                <li><a href="login.html">Ingia</a></li>
+            </ul>
+            <div class="notification-container">
+                <span id="notification-bell">🔔</span>
+                <span id="notification-badge" class="badge">0</span>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="games-section">
+            <h2>Magame Yanayopatikana</h2>
+            <div id="games-container" class="grid-cards">
+                <!-- Kadi za download zitaingizwa hapa na JavaScript -->
+            </div>
+        </section>
+
+        <section class="chat-section">
+            <h2>Jumuiya ya Chat</h2>
+            <div id="chat-box" class="chat-box"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Andika ujumbe wako...">
+                <button id="send-btn">Tuma</button>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        
+        const firebaseConfig = {
+          apiKey: "AIzaSyCmwASW4XXQ3O0AvsCM_r1WLlrUmGjYVxI",
+          authDomain: "dvary-9a7d0.firebaseapp.com",
+          projectId: "dvary-9a7d0",
+          storageBucket: "dvary-9a7d0.firebasestorage.app",
+          messagingSenderId: "107370806066",
+          appId: "1:107370806066:web:4c2ce1e6f7b6c32909f52b",
+          measurementId: "G-07361LFJEP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
+    <script src="assets/js/chat.js" type="module"></script>
+</body>
+</html>
+
