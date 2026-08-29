@@ -1,0 +1,49 @@
+<!-- signup.html -->
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameZone - Jisajili</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>Tengeneza Akaunti Mpya</h2>
+            <form id="signup-form">
+                <div class="input-group">
+                    <label for="email">Barua pepe (Email)</label>
+                    <input type="email" id="email" required placeholder="mfano@gmail.com">
+                </div>
+                <div class="input-group">
+                    <label for="password">Nenosiri (Password)</label>
+                    <input type="password" id="password" required placeholder="Weka nenosiri lako">
+                </div>
+                <button type="submit" class="auth-btn">Jisajili</button>
+            </form>
+            <p class="auth-link-text">Una akaunti tayari? <a href="login.html">Ingia hapa</a></p>
+            <p><a href="index.html" class="back-home">← Rudi Ukurasa wa Mbele</a></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        
+        const firebaseConfig = {
+          apiKey: "AIzaSyCmwASW4XXQ3O0AvsCM_r1WLlrUmGjYVxI",
+          authDomain: "dvary-9a7d0.firebaseapp.com",
+          projectId: "dvary-9a7d0",
+          storageBucket: "dvary-9a7d0.firebasestorage.app",
+          messagingSenderId: "107370806066",
+          appId: "1:107370806066:web:4c2ce1e6f7b6c32909f52b",
+          measurementId: "G-07361LFJEP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+    </script>
+    <script src="assets/js/auth.js" type="module"></script>
+</body>
+</html>
+
