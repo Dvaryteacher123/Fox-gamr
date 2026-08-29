@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>DVARY GAMES – Your Ultimate Gaming Hub</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <style>
+        /* ============================================================
+           INLINE STYLES – Clean Home, Bottom Nav, Full Pages
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            padding-bottom: 80px;
+            background: #0b0b0b;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+        #main-website-container {
+            display: none;
+        }
+
+        /* ---------- GET STARTED (Premium Landing) ---------- */
+        #get-started-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 30% 20%, #1a1a2e, #0a0a12 80%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.7s ease;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+        }
+        .get-started-content {
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+        .get-started-logo {
+            font-size: 3.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f5e56b, #ff7e5f, #ff4757);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 60px rgba(255, 200, 50, 0.15);
+            letter-spacing: 2px;
+        }
+        .get-started-sub {
+            font-size: 1.6rem;
+            font-weight: 300;
+            color: #ddd;
+            margin: 0.5rem 0 0.2rem;
+            letter-spacing: 3px;
+        }
+        .get-started-desc {
+            color: #999;
+            font-size: 1rem;
+            max-width: 450px;
+            margin: 0.8rem auto 1.5rem;
+            line-height: 1.7;
+        }
+        .get-started-preview {
+            margin: 2rem 0 2.2rem;
+        }
+        .get-started-preview h4 {
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            font-weight: 400;
+        }
+        .preview-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+        .preview-card {
+            background: rgba(22, 22, 36, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 0.8rem;
+            transition: 0.3s;
+        }
+        .preview-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 71, 87, 0.2);
+        }
+        .preview-card img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            background: #1a1a2a;
+        }
+        .preview-card h5 {
+            font-size: 0.85rem;
+            margin: 0.5rem 0 0.1rem;
+            color: #fff;
+        }
+        .preview-card .preview-meta {
+            font-size: 0.7rem;
+            color: #999;
+            display: flex;
+            justify-content: space-between;
+        }
+        .get-started-btn {
+            margin-top: 0.5rem;
+            background: linear-gradient(145deg, #ff4757, #e8354a);
+            border: none;
+            padding: 1rem 3.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 60px;
+            color: #fff;
+            box-shadow: 0 12px 40px rgba(255, 71, 87, 0.3);
+            transition: 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 1px;
+        }
+        .get-started-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 18px 50px rgba(255, 71, 87, 0.5);
+        }
+        .get-started-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ---------- BOTTOM NAV ---------- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 10, 20, 0.92);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 6px 0 12px;
+            z-index: 999;
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.6);
+        }
+        .bottom-nav a {
+            color: #8a8aa0;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.6rem;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 30px;
+            min-width: 48px;
+            transition: 0.25s;
+            position: relative;
+        }
+        .bottom-nav a i {
+            font-size: 1.4rem;
+            margin-bottom: 2px;
+            color: #8a8aa0;
+            transition: 0.25s;
+        }
+        .bottom-nav a span {
+            opacity: 0.7;
+            font-size: 0.55rem;
+        }
+        .bottom-nav a.active {
+            color: #ff4757;
+        }
+        .bottom-nav a.active i {
+            color: #ff4757;
+            text-shadow: 0 0 20px rgba(255, 71, 87, 0.25);
+        }
+        .bottom-nav a.active::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 28px;
+            height: 3px;
+            background: #ff4757;
+            border-radius: 0 0 10px 10px;
+        }
+
+        /* ---------- PAGE CONTAINERS ---------- */
+        .page {
+            display: none;
+            padding: 1rem 1rem 2rem;
+            max-width: 1280px;
+            margin: 0 auto;
+            animation: fadeUp 0.4s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---------- HERO ---------- */
+        .hero-simple {
+            background: radial-gradient(ellipse at 30% 40%, rgba(255,71,87,0.05), transparent 70%);
+            padding: 2.5rem 1.5rem;
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.03);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .hero-simple h1 {
+            font-size: 2.6rem;
+            background: linear-gradient(135deg, #f5e56b, #ff7e5f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-simple p {
+            color: #b2b2b2;
+            max-width: 500px;
+            margin: 0.6rem auto;
+        }
+        .hero-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.2rem;
+        }
+        .hero-btns a {
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: #ff4757;
+            color: #fff;
+            box-shadow: 0 4px 25px rgba(255, 71, 87, 0.25);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 35px rgba(255, 71, 87, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.06);
+            color: #ddd;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* ---------- GAME CARDS (reusable) ---------- */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1.2rem;
+        }
+        .game-card {
+            background: rgba(22, 22, 34, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 18px;
+            padding: 0.9rem 0.9rem 1rem;
+            transition: 0.35s ease;
+        }
+        .game-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255, 71, 87, 0.2);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .game-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 12px;
+            background: #1a1a2a;
+        }
+        .game-card h3 {
+            font-size: 0.95rem;
+            margin: 0.6rem 0 0.1rem;
+            color: #fff;
+        }
+        .game-card .meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: #9a9ab0;
+        }
+        .badge-vip {
+            background: #ff4757;
+            color: #fff;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 0.6rem;
+            font-weight: 700;
+        }
+        .badge-free {
+            background: #2ed573;
+            color: #0b0b0b;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 0.6rem;
+            font-weight: 700;
+        }
+        .view-all {
+            display: inline-block;
+            color: #ff4757;
+            font-weight: 600;
+            margin-top: 0.8rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .view-all:hover {
+            color: #ff6b81;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 1.8rem 0 1rem;
+            border-left: 4px solid #ff4757;
+            padding-left: 1rem;
+        }
+
+        /* ---------- COMMUNITY PREVIEW (Home) ---------- */
+        .community-preview {
+            background: rgba(22, 22, 36, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+        .community-preview p {
+            color: #b2b2b2;
+        }
+        .community-preview .chat-bubble-mini {
+            background: rgba(255,255,255,0.02);
+            padding: 0.8rem 1rem;
+            border-radius: 16px;
+            max-width: 300px;
+            margin: 0.8rem auto;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+        .community-preview .chat-bubble-mini strong {
+            color: #ff4757;
+        }
+
+        /* ---------- FULL GAMES PAGE ---------- */
+        .search-box {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 60px;
+            border: 1px solid #2f2f42;
+            background: #16161f;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            margin-bottom: 1rem;
+        }
+        .search-box:focus {
+            border-color: rgba(255, 71, 87, 0.3);
+            box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.05);
+        }
+
+        /* ---------- PROFILE PAGE ---------- */
+        .profile-card {
+            background: rgba(22, 22, 36, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 24px;
+            padding: 2rem 1.5rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .profile-card .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #2a2a3e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #ff4757;
+            margin: 0 auto 1rem;
+            border: 2px solid rgba(255, 71, 87, 0.2);
+        }
+        .profile-card p {
+            margin: 0.6rem 0;
+            color: #ccc;
+        }
+        .profile-card p strong {
+            color: #fff;
+        }
+        .logout-btn {
+            background: #ff4757;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 1rem;
+        }
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 71, 87, 0.3);
+        }
+
+        /* ---------- VIP PAGE ---------- */
+        .vip-banner {
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.08), rgba(255, 215, 0, 0.05));
+            border: 1px solid rgba(255, 215, 0, 0.08);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ---------- COMMUNITY MODAL (full screen) ---------- */
+        .community-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.94);
+            backdrop-filter: blur(24px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+        }
+        .community-modal.active {
+            display: flex;
+        }
+        .community-modal-content {
+            background: rgba(14,14,26,0.96);
+            width: 100%;
+            max-width: 750px;
+            height: 90vh;
+            max-height: 650px;
+            border-radius: 28px;
+            padding: 1.2rem 1.5rem 1.5rem;
+            border: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            flex-direction: column;
+        }
+        .community-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            flex-shrink: 0;
+        }
+        .community-modal-header h2 {
+            font-size: 1.2rem;
+            border-left: none;
+            margin: 0;
+        }
+        .community-modal-header .close-modal-btn {
+            background: rgba(255,255,255,0.04);
+            border: none;
+            color: #aaa;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        .community-modal-header .close-modal-btn:hover {
+            background: rgba(255, 71, 87, 0.1);
+            color: #ff4757;
+        }
+        .community-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.6rem 0;
+        }
+        .community-modal-body .chat-box {
+            background: rgba(10,10,20,0.5);
+            border-radius: 16px;
+            padding: 1rem;
+            min-height: 250px;
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        .community-modal-footer {
+            display: flex;
+            gap: 10px;
+            padding-top: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            flex-shrink: 0;
+        }
+        .community-modal-footer input {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(20,20,34,0.8);
+            color: #f0f0f0;
+            outline: none;
+        }
+        .community-modal-footer input:focus {
+            border-color: rgba(255, 71, 87, 0.3);
+        }
+        .community-modal-footer button {
+            background: linear-gradient(135deg, #ff4757, #e8354a);
+            border: none;
+            border-radius: 50px;
+            padding: 0 28px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 20px rgba(255, 71, 87, 0.25);
+        }
+        .community-modal-footer button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 71, 87, 0.4);
+        }
+        .message {
+            margin-bottom: 10px;
+            animation: fadeUp 0.3s ease;
+        }
+        .message .username {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #ff4757;
+        }
+        .message .bubble {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            background: rgba(40,40,58,0.7);
+            color: #ddd;
+            max-width: 85%;
+            word-break: break-word;
+        }
+        .message.my-message {
+            text-align: right;
+        }
+        .message.my-message .bubble {
+            background: linear-gradient(135deg, #ff4757, #e8354a);
+            color: #fff;
+        }
+        .message .time {
+            font-size: 0.55rem;
+            color: #666;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 600px) {
+            .get-started-logo { font-size: 2.6rem; }
+            .get-started-sub { font-size: 1.2rem; }
+            .preview-cards { grid-template-columns: repeat(2, 1fr); }
+            .hero-simple h1 { font-size: 2rem; }
+            .grid-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .bottom-nav a { min-width: 40px; font-size: 0.5rem; }
+            .bottom-nav a i { font-size: 1.2rem; }
+            .community-modal-content { padding: 0.8rem; max-height: 95vh; }
+        }
+        @media (min-width: 768px) {
+            .grid-cards { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        /* skeleton */
+        .skeleton-card {
+            background: linear-gradient(90deg, #1a1a2a 25%, #2a2a3e 50%, #1a1a2a 75%);
+            background-size: 200% 100%;
+            animation: skeletonLoad 1.8s ease-in-out infinite;
+            border-radius: 16px;
+            padding: 2rem;
+            color: transparent;
+        }
+        @keyframes skeletonLoad {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- 1. GET STARTED SCREEN (Premium Landing) -->
+<!-- ============================================================ -->
+<div id="get-started-screen">
+    <div class="get-started-content">
+        <div class="get-started-logo">DVARY GAMES</div>
+        <div class="get-started-sub">Your Ultimate Gaming Hub</div>
+        <p class="get-started-desc">Discover amazing games, explore premium VIP titles, find free games and connect with other gamers in our community.</p>
+
+        <!-- Game Preview Cards -->
+        <div class="get-started-preview">
+            <h4>🔥 Featured Games</h4>
+            <div class="preview-cards" id="previewCards">
+                <div class="preview-card skeleton-card">Loading...</div>
+                <div class="preview-card skeleton-card">Loading...</div>
+                <div class="preview-card skeleton-card">Loading...</div>
+            </div>
+        </div>
+
+        <button id="get-started-btn" class="get-started-btn">
+            <i class="fas fa-rocket"></i> GET STARTED
+        </button>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. MAIN WEBSITE -->
+<!-- ============================================================ -->
+<div id="main-website-container">
+
+    <!-- ===== HOME PAGE ===== -->
+    <div id="page-home" class="page active">
+        <div class="hero-simple">
+            <h1>PLAY THE NEXT LEVEL</h1>
+            <p>Discover games, unlock premium experiences and join the DVARY gaming community.</p>
+            <div class="hero-btns">
+                <a href="#" onclick="navigateTo('games')" class="btn-primary"><i class="fas fa-gamepad"></i> Explore Games</a>
+                <a href="#" onclick="navigateTo('vip')" class="btn-secondary"><i class="fas fa-crown"></i> Explore VIP</a>
+            </div>
+        </div>
+
+        <h2 class="section-title">🔥 Featured Games</h2>
+        <div id="home-featured" class="grid-cards">
+            <div class="game-card skeleton-card">Loading...</div>
+            <div class="game-card skeleton-card">Loading...</div>
+            <div class="game-card skeleton-card">Loading...</div>
+            <div class="game-card skeleton-card">Loading...</div>
+        </div>
+        <a href="#" onclick="navigateTo('games')" class="view-all">View All Games →</a>
+
+        <h2 class="section-title">🔥 Trending Now</h2>
+        <div id="home-trending" class="grid-cards">
+            <div class="game-card skeleton-card">Loading...</div>
+            <div class="game-card skeleton-card">Loading...</div>
+        </div>
+
+        <!-- Community Preview -->
+        <div class="community-preview">
+            <h3 style="color:#fff; margin-bottom:0.5rem;"><i class="fas fa-users" style="color:#4a9eff;"></i> Community</h3>
+            <p>Join the conversation with other gamers</p>
+            <div class="chat-bubble-mini">
+                <strong>Dulla:</strong> Habari wote 👋
+            </div>
+            <div class="chat-bubble-mini">
+                <strong>Juma:</strong> Karibuni DVARY 🔥
+            </div>
+            <button onclick="openCommunityModal()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.06); padding:10px 28px; border-radius:40px; color:#fff; cursor:pointer; margin-top:0.5rem; font-weight:600;">
+                <i class="fas fa-comment-dots"></i> Open Chat
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== GAMES PAGE ===== -->
+    <div id="page-games" class="page">
+        <h2 style="border-left:4px solid #ff4757; padding-left:1rem; margin-bottom:1rem;"><i class="fas fa-gamepad" style="color:#ff4757;"></i> All Games</h2>
+        <input type="text" id="game-search-input" class="search-box" placeholder="🔍 Search games... (e.g. Truck)">
+        <div class="categories-grid" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:1.2rem;">
+            <button class="cat-btn" data-cat="All" style="background:rgba(255,71,87,0.12); border-color:#ff4757; color:#fff;">All</button>
+            <button class="cat-btn" data-cat="Action">Action</button>
+            <button class="cat-btn" data-cat="Racing">Racing</button>
+            <button class="cat-btn" data-cat="Sports">Sports</button>
+            <button class="cat-btn" data-cat="Shooter">Shooter</button>
+            <button class="cat-btn" data-cat="Puzzle">Puzzle</button>
+            <button class="cat-btn" data-cat="Adventure">Adventure</button>
+            <button class="cat-btn" data-cat="Strategy">Strategy</button>
+            <button class="cat-btn" data-cat="Arcade">Arcade</button>
+        </div>
+        <div id="games-container" class="grid-cards">
+            <div class="game-card skeleton-card">Loading...</div>
+            <div class="game-card skeleton-card">Loading...</div>
+        </div>
+    </div>
+
+    <!-- ===== VIP PAGE ===== -->
+    <div id="page-vip" class="page">
+        <div class="vip-banner">
+            <h2 style="border-left:none; margin-bottom:0.2rem;"><i class="fas fa-crown" style="color:#ffb347;"></i> VIP GAMES</h2>
+            <p style="color:#b2b2b2;">Premium games for our VIP members</p>
+        </div>
+        <div id="vip-games-container" class="grid-cards">
+            <div class="game-card skeleton-card">Loading VIP...</div>
+        </div>
+    </div>
+
+    <!-- ===== PROFILE PAGE ===== -->
+    <div id="page-profile" class="page">
+        <h2 style="border-left:4px solid #ff4757; padding-left:1rem; margin-bottom:1.5rem;"><i class="fas fa-user-circle"></i> Profile</h2>
+        <div class="profile-card">
+            <div class="avatar"><i class="fas fa-user"></i></div>
+            <p><strong>Jina:</strong> <span id="profile-display-name">Mgeni</span></p>
+            <p><strong>Email:</strong> <span id="profile-email">-</span></p>
+            <p><strong>VIP Status:</strong> <span id="profile-vip" style="color:#ffb347;">Standard</span></p>
+            <button id="logout-btn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <div style="margin-top:1rem;">
+                <a href="profile.html" style="color:#4a9eff; text-decoration:none; font-weight:600;"><i class="fas fa-external-link-alt"></i> View Full Profile</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer style="background:rgba(10,10,18,0.9); border-top:1px solid rgba(255,255,255,0.03); padding:1.5rem 1rem; text-align:center; margin-top:1rem;">
+        <h4 style="color:#ffb347; font-size:1.2rem;">DVARY GAMES</h4>
+        <p style="color:#888; font-size:0.85rem;">Your Ultimate Gaming Hub 🎮</p>
+        <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin:0.6rem 0; font-size:0.85rem;">
+            <a href="#" onclick="navigateTo('home')" style="color:#aaa; text-decoration:none;">Home</a>
+            <a href="#" onclick="navigateTo('games')" style="color:#aaa; text-decoration:none;">Games</a>
+            <a href="#" onclick="navigateTo('vip')" style="color:#aaa; text-decoration:none;">VIP</a>
+            <a href="#" onclick="navigateTo('profile')" style="color:#aaa; text-decoration:none;">Profile</a>
+        </div>
+        <p style="color:#555; font-size:0.7rem;">© 2026 DVARY GAMES</p>
+    </footer>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. BOTTOM NAVIGATION -->
+<!-- ============================================================ -->
+<nav class="bottom-nav" id="bottomNav">
+    <a href="#" class="active" data-page="home"><i class="fas fa-home"></i><span>Home</span></a>
+    <a href="#" data-page="games"><i class="fas fa-gamepad"></i><span>Games</span></a>
+    <a href="#" id="community-nav-btn"><i class="fas fa-users"></i><span>Community</span></a>
+    <a href="#" data-page="vip"><i class="fas fa-crown"></i><span>VIP</span></a>
+    <a href="#" data-page="profile"><i class="fas fa-user"></i><span>Profile</span></a>
+</nav>
+
+<!-- ============================================================ -->
+<!-- 4. COMMUNITY MODAL (Full Screen) -->
+<!-- ============================================================ -->
+<div id="communityModal" class="community-modal">
+    <div class="community-modal-content">
+        <div class="community-modal-header">
+            <h2><i class="fas fa-users" style="color:#4a9eff;"></i> DVARY Community</h2>
+            <button class="close-modal-btn" id="closeCommunityModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="community-modal-body">
+            <div id="auth-warning-modal" style="display:none; background:#1f1f2a; padding:1.5rem; border-radius:20px; text-align:center; border:1px solid #333;">
+                <p style="margin-bottom:1rem; color:#ccc;">Tafadhali ingia kwenye account yako ili kujiunga na Community.</p>
+                <a href="login.html" style="display:inline-block; padding:0.5rem 1.8rem; margin-right:0.5rem; background:#4a9eff; border-radius:40px; color:#fff; text-decoration:none;">Login</a>
+                <a href="signup.html" style="display:inline-block; padding:0.5rem 1.8rem; background:#ff4757; border-radius:40px; color:#fff; text-decoration:none;">Register</a>
+            </div>
+            <div id="chat-main-container-modal" style="display:flex; flex-direction:column; flex:1;">
+                <div id="chat-box-modal" class="chat-box" style="flex:1; min-height:200px;"></div>
+            </div>
+        </div>
+        <div class="community-modal-footer">
+            <input type="text" id="chat-input-modal" placeholder="Andika ujumbe...">
+            <button id="send-btn-modal"><i class="fas fa-paper-plane"></i> Send</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. SCRIPTS -->
+<!-- ============================================================ -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<script type="module">
+    // ===== FIREBASE =====
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, collection, getDocs, addDoc, onSnapshot, serverTimestamp, orderBy, query, doc, setDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBfXZz8nL2mE2pJmYQjQ5jQkQjQ5jQkQjQ5jQkQ",
+        authDomain: "dvary-games.firebaseapp.com",
+        projectId: "dvary-games",
+        storageBucket: "dvary-games.appspot.com",
+        messagingSenderId: "123456789012",
+        appId: "1:123456789012:web:abcdef123456"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // ===== DOM REFS =====
+    const getStartedBtn = document.getElementById('get-started-btn');
+    const getStartedScreen = document.getElementById('get-started-screen');
+    const mainSite = document.getElementById('main-website-container');
+
+    const communityNavBtn = document.getElementById('community-nav-btn');
+    const communityModal = document.getElementById('communityModal');
+    const closeCommunityBtn = document.getElementById('closeCommunityModal');
+    const chatBoxModal = document.getElementById('chat-box-modal');
+    const chatInputModal = document.getElementById('chat-input-modal');
+    const sendBtnModal = document.getElementById('send-btn-modal');
+    const authWarningModal = document.getElementById('auth-warning-modal');
+    const chatContainerModal = document.getElementById('chat-main-container-modal');
+
+    let currentUser = null;
+    let allGames = [];
+
+    // ===== GET STARTED =====
+    getStartedBtn.addEventListener('click', () => {
+        getStartedScreen.style.opacity = '0';
+        setTimeout(() => {
+            getStartedScreen.style.display = 'none';
+            mainSite.style.display = 'block';
+            window.scrollTo(0, 0);
+        }, 500);
+    });
+
+    // ===== NAVIGATION =====
+    window.navigateTo = function(page) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const target = document.getElementById('page-' + page);
+        if (target) target.classList.add('active');
+        document.querySelectorAll('.bottom-nav a').forEach(l => l.classList.remove('active'));
+        const navLink = document.querySelector(`.bottom-nav a[data-page="${page}"]`);
+        if (navLink) navLink.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    document.querySelectorAll('.bottom-nav a[data-page]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = link.dataset.page;
+            navigateTo(page);
+        });
+    });
+
+    // ===== COMMUNITY MODAL =====
+    window.openCommunityModal = function() {
+        communityModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        loadChatMessages();
+    };
+
+    function closeCommunityModalFn() {
+        communityModal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    communityNavBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openCommunityModal();
+    });
+    closeCommunityBtn.addEventListener('click', closeCommunityModalFn);
+    communityModal.addEventListener('click', (e) => {
+        if (e.target === communityModal) closeCommunityModalFn();
+    });
+
+    // ===== CHAT =====
+    function loadChatMessages() {
+        const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
+        onSnapshot(q, (snapshot) => {
+            chatBoxModal.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const isMyMsg = currentUser && data.uid === currentUser.uid;
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message ${isMyMsg ? 'my-message' : 'other-message'}`;
+                const usernameDiv = document.createElement('div');
+                usernameDiv.className = 'username';
+                usernameDiv.textContent = data.username || 'Mgeni';
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = 'bubble';
+                bubbleDiv.textContent = data.text || '';
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'time';
+                if (data.timestamp) {
+                    const d = data.timestamp.toDate ? data.timestamp.toDate() : new Date();
+                    timeDiv.textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+                msgDiv.appendChild(usernameDiv);
+                msgDiv.appendChild(bubbleDiv);
+                msgDiv.appendChild(timeDiv);
+                chatBoxModal.appendChild(msgDiv);
+            });
+            chatBoxModal.scrollTop = chatBoxModal.scrollHeight;
+        });
+    }
+
+    async function sendMessage() {
+        const text = chatInputModal.value.trim();
+        if (!text || !currentUser) {
+            if (!currentUser) alert('Tafadhali ingia kwenye account yako.');
+            return;
+        }
+        try {
+            await addDoc(collection(db, "messages"), {
+                text: text,
+                username: currentUser.displayName || currentUser.email || 'Mgeni',
+                timestamp: serverTimestamp(),
+                uid: currentUser.uid
+            });
+            chatInputModal.value = '';
+        } catch (e) {
+            console.error(e);
+            alert('Hitilafu: ' + e.message);
+        }
+    }
+
+    sendBtnModal.addEventListener('click', sendMessage);
+    chatInputModal.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    // ===== AUTH =====
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        if (user) {
+            document.getElementById('profile-display-name').textContent = user.displayName || user.email || 'User';
+            document.getElementById('profile-email').textContent = user.email;
+            authWarningModal.style.display = 'none';
+            chatContainerModal.style.display = 'flex';
+            loadChatMessages();
+        } else {
+            document.getElementById('profile-display-name').textContent = 'Mgeni';
+            document.getElementById('profile-email').textContent = '-';
+            authWarningModal.style.display = 'block';
+            chatContainerModal.style.display = 'none';
+        }
+    });
+
+    // ===== LOGOUT =====
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            alert('Umefanikiwa kutoka!');
+            window.location.href = 'login.html';
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    });
+
+    // ===== GAMES =====
+    async function loadGames() {
+        try {
+            const q = query(collection(db, "games"));
+            const snapshot = await getDocs(q);
+            allGames = [];
+            snapshot.forEach(doc => allGames.push({ id: doc.id, ...doc.data() }));
+
+            // Preview cards (Get Started)
+            const previewContainer = document.getElementById('previewCards');
+            previewContainer.innerHTML = '';
+            const previewGames = allGames.slice(0, 3);
+            if (previewGames.length === 0) {
+                previewContainer.innerHTML = '<p style="color:#666; grid-column:1/-1;">No games available</p>';
+            } else {
+                previewGames.forEach(game => {
+                    previewContainer.innerHTML += `
+                        <div class="preview-card">
+                            <img src="${game.image || 'https://via.placeholder.com/200x120/1a1a2a/555?text=No+Image'}" alt="${game.name}">
+                            <h5>${game.name || 'Game'}</h5>
+                            <div class="preview-meta">
+                                <span>⭐ ${game.rating || '4.0'}</span>
+                                <span>${game.category || 'General'}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Home Featured
+            const featuredContainer = document.getElementById('home-featured');
+            featuredContainer.innerHTML = '';
+            const featured = allGames.slice(0, 4);
+            featured.forEach(game => {
+                featuredContainer.innerHTML += createGameCard(game);
+            });
+
+            // Home Trending
+            const trendingContainer = document.getElementById('home-trending');
+            trendingContainer.innerHTML = '';
+            const trending = allGames.slice(4, 6);
+            trending.forEach(game => {
+                trendingContainer.innerHTML += createGameCard(game);
+            });
+
+            // All Games
+            renderAllGames(allGames);
+
+            // VIP
+            const vipContainer = document.getElementById('vip-games-container');
+            vipContainer.innerHTML = '';
+            const vipGames = allGames.filter(g => g.vip === true);
+            if (vipGames.length === 0) {
+                vipContainer.innerHTML = '<p style="color:#888; grid-column:1/-1;">No VIP games yet.</p>';
+            } else {
+                vipGames.forEach(game => {
+                    vipContainer.innerHTML += createGameCard(game);
+                });
+            }
+
+        } catch (e) {
+            console.error("Error loading games:", e);
+        }
+    }
+
+    function createGameCard(game) {
+        const badge = game.vip ? '<span class="badge-vip">VIP</span>' : (game.free ? '<span class="badge-free">FREE</span>' : '');
+        return `
+            <div class="game-card">
+                <img src="${game.image || 'https://via.placeholder.com/200x120/1a1a2a/555?text=No+Image'}" alt="${game.name}">
+                <h3>${game.name || 'Game'}</h3>
+                <div class="meta">
+                    <span>${game.category || 'General'}</span>
+                    <span>⭐ ${game.rating || '4.0'}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                    ${badge}
+                    <button style="background:#ffb347; border:none; border-radius:40px; padding:4px 14px; font-weight:600; color:#0b0b0b; cursor:pointer; font-size:0.75rem;">View</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderAllGames(games) {
+        const container = document.getElementById('games-container');
+        container.innerHTML = '';
+        if (games.length === 0) {
+            container.innerHTML = '<p style="color:#888; grid-column:1/-1;">No games found.</p>';
+            return;
+        }
+        games.forEach(game => {
+            container.innerHTML += createGameCard(game);
+        });
+    }
+
+    // ===== SEARCH =====
+    document.getElementById('game-search-input').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('#games-container .game-card');
+        cards.forEach(card => {
+            const name = card.querySelector('h3')?.textContent?.toLowerCase() || '';
+            card.style.display = name.includes(query) ? 'block' : 'none';
+        });
+    });
+
+    // ===== CATEGORIES =====
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const cat = this.dataset.cat;
+            const cards = document.querySelectorAll('#games-container .game-card');
+            if (cat === 'All') {
+                cards.forEach(card => card.style.display = 'block');
+                return;
+            }
+            cards.forEach(card => {
+                const cardCat = card.querySelector('.meta span:first-child')?.textContent || '';
+                card.style.display = cardCat === cat ? 'block' : 'none';
+            });
+        });
+    });
+
+    // ===== INIT =====
+    loadGames();
+    console.log('DVARY GAMES - Clean Premium Design');
+</script>
+</body>
+  </html>
