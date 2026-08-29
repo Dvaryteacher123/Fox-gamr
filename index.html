@@ -4,60 +4,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GameZone</title>
+    <title>GameZone - Home</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <div class="logo">GameZone</div>
-            <ul class="nav-links">
-                <li><a href="index.html" class="active">Nyumbani</a></li>
-                <li><a href="login.html">Ingia</a></li>
-            </ul>
-            <div class="notification-container">
-                <span id="notification-bell">🔔</span>
-                <span id="notification-badge" class="badge">0</span>
-            </div>
-        </nav>
-    </header>
+    <!-- Top Navbar -->
+    <nav class="navbar">
+        <div class="logo">GameZone</div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">🏠 Home</a></li>
+            <li><a href="#games">🎮 Games</a></li>
+            <li><a href="#community" id="nav-community">👥 Community</a></li>
+            <li><a href="#vip">⭐ VIP</a></li>
+            <li><a href="#notifications">🔔 Notifications <span id="notification-badge" class="badge">0</span></a></li>
+            <li><a href="#profile" id="auth-link">👤 Profile</a></li>
+        </ul>
+    </nav>
 
-    <main class="container">
-        <section class="games-section">
+    <div class="container">
+        <!-- Sehemu ya Magame -->
+        <section id="games" class="games-section">
             <h2>Magame Yanayopatikana</h2>
             <div id="games-container" class="grid-cards">
-                <!-- Kadi za download zitaingizwa hapa na JavaScript -->
+                <!-- Magame yatajazwa na JavaScript -->
             </div>
         </section>
 
-        <section class="chat-section">
-            <h2>Jumuiya ya Chat</h2>
-            <div id="chat-box" class="chat-box"></div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Andika ujumbe wako...">
-                <button id="send-btn">Tuma</button>
+        <!-- Sehemu ya Community Chat -->
+        <section id="community" class="chat-section">
+            <h2>👥 DVARY Community</h2>
+            
+            <!-- Ujumbe kama user hajalogin -->
+            <div id="auth-warning" style="display: none; background: #1f1f1f; padding: 1.5rem; border-radius: 8px; text-align: center; border: 1px solid #333;">
+                <p style="margin-bottom: 1rem; color: #ccc;">Tafadhali ingia kwenye account yako ili kujiunga na Community.</p>
+                <a href="login.html" class="download-btn" style="display: inline-block; width: auto; padding: 0.5rem 1.5rem; margin-right: 0.5rem;">Login</a>
+                <a href="signup.html" class="download-btn" style="display: inline-block; width: auto; padding: 0.5rem 1.5rem; background-color: #ff4757;">Register</a>
+            </div>
+
+            <!-- Sehemu kuu ya Chat (Itaonekana kama amelogin) -->
+            <div id="chat-main-container">
+                <p style="font-size: 0.85rem; color: #2ed573; margin-bottom: 0.5rem;">🟢 Online Status: Active</p>
+                <div id="chat-box" class="chat-box">
+                    <!-- Ujumbe utaingizwa hapa hapa -->
+                </div>
+                
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Andika ujumbe...">
+                    <button id="send-btn">➤</button>
+                </div>
             </div>
         </section>
-    </main>
+    </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-        
-        const firebaseConfig = {
-          apiKey: "AIzaSyCmwASW4XXQ3O0AvsCM_r1WLlrUmGjYVxI",
-          authDomain: "dvary-9a7d0.firebaseapp.com",
-          projectId: "dvary-9a7d0",
-          storageBucket: "dvary-9a7d0.firebasestorage.app",
-          messagingSenderId: "107370806066",
-          appId: "1:107370806066:web:4c2ce1e6f7b6c32909f52b",
-          measurementId: "G-07361LFJEP"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-    </script>
     <script src="assets/js/chat.js" type="module"></script>
 </body>
 </html>
-
