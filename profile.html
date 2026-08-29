@@ -1,0 +1,112 @@
+<!-- profile.html -->
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Profaili Yangu</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Top Navbar -->
+    <nav class="navbar">
+        <div class="logo">DVARY GAMES</div>
+        <ul class="nav-links">
+            <li><a href="index.html">🏠 Home</a></li>
+            <li><a href="index.html#games">🎮 Games</a></li>
+            <li><a href="index.html#community">👥 Community</a></li>
+            <li><a href="index.html#vip">⭐ VIP</a></li>
+            <li><a href="profile.html" class="active">👤 Profile</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <section class="games-section" style="max-width: 600px; margin: 3rem auto; background: #1f1f1f; padding: 2rem; border-radius: 12px; border: 1px solid #333;">
+            <h2 style="margin-bottom: 1.5rem;">👤 Taarifa za Profaili Yako</h2>
+            
+            <!-- Kama hajalogin -->
+            <div id="profile-auth-warning" style="display: none; text-align: center; padding: 2rem;">
+                <p style="color: #ccc; margin-bottom: 1rem;">Tafadhali ingia kwenye account yako ili uone taarifa zako.</p>
+                <a href="login.html" class="download-btn" style="display: inline-block; width: auto; padding: 0.5rem 1.5rem;">Login Hapa</a>
+            </div>
+
+            <!-- Taarifa za User zikishuka -->
+            <div id="profile-details" style="display: none;">
+                <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div id="profile-avatar" style="width: 70px; height: 70px; background-color: #ff4757; color: white; font-size: 2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                        D
+                    </div>
+                    <div>
+                        <h3 id="user-display-name" style="font-size: 1.2rem; color: #fff; margin-bottom: 0.3rem;">Jina la Mchezaji</h3>
+                        <p id="user-email" style="color: #888; font-size: 0.9rem;">email@example.com</p>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid #333; padding-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <p style="color: #ccc;"><strong>Hali ya Akaunti:</strong> <span style="color: #2ed573;">🟢 Imeshirikiwa na Firebase Auth</span></p>
+                    <p style="color: #ccc;"><strong>Kitambulisho (UID):</strong> <span id="user-uid" style="color: #888; font-size: 0.85rem;">-</span></p>
+                </div>
+
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <button id="logout-btn" style="background-color: #ff4757; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%;">Toka (Logout)</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Script ya kuleta taarifa za user aliyelogin -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCmwASW4XXQ3O0AvsCM_r1WLlrUmGjYVxI",
+          authDomain: "dvary-9a7d0.firebaseapp.com",
+          projectId: "dvary-9a7d0",
+          storageBucket: "dvary-9a7d0.firebasestorage.app",
+          messagingSenderId: "107370806066",
+          appId: "1:107370806066:web:4c2ce1e6f7b6c32909f52b",
+          measurementId: "G-07361LFJEP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const profileAuthWarning = document.getElementById('profile-auth-warning');
+        const profileDetails = document.getElementById('profile-details');
+        const userDisplayName = document.getElementById('user-display-name');
+        const userEmail = document.getElementById('user-email');
+        const userUid = document.getElementById('user-uid');
+        const profileAvatar = document.getElementById('profile-avatar');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                profileAuthWarning.style.display = 'none';
+                profileDetails.style.display = 'block';
+
+                let name = user.displayName || user.email.split('@')[0];
+                userDisplayName.textContent = name;
+                userEmail.textContent = user.email;
+                userUid.textContent = user.uid;
+                profileAvatar.textContent = name.charAt(0).toUpperCase();
+            } else {
+                profileAuthWarning.style.display = 'block';
+                profileDetails.style.display = 'none';
+            }
+        });
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    alert('Imeshindikana kutoka: ' + error.message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
