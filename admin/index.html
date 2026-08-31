@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Admin Dashboard</title>
+    <!-- FontAwesome kwa ajili ya icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- CSS maalum ya ukurasa huu -->
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+    <!-- SIDEBAR MENU -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <h2>DVARY <span>ADMIN</span></h2>
+        </div>
+        <ul class="sidebar-links">
+            <li><a href="../public/index.html"><i class="fas fa-home"></i> <span>Home</span></a></li>
+            <li><a href="../pages/games/games.html"><i class="fas fa-gamepad"></i> <span>Games</span></a></li>
+            <li><a href="../pages/ai/ai.html"><i class="fas fa-robot"></i> <span>AI Chat</span></a></li>
+            <li><a href="index.html" class="active"><i class="fas fa-crown"></i> <span>Admin Panel</span></a></li>
+        </ul>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header class="top-bar">
+            <h1>Usimamizi wa Michezo (Admin)</h1>
+            <p>Ongeza au futa michezo inayopotea kwenye mfumo</p>
+        </header>
+
+        <section class="admin-form-section">
+            <div class="form-card">
+                <h3>Weka Game Jipya</h3>
+                <form id="addGameForm">
+                    <div class="input-group">
+                        <label for="gameTitle">Jina la Mchezo</label>
+                        <input type="text" id="gameTitle" placeholder="Mf. Action Hero" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="gameDesc">Maelezo Fupi</label>
+                        <textarea id="gameDesc" placeholder="Eleza kuhusu mchezo huu..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-plus"></i> Hifadhi Game</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- FIREBASE SDK & ADMIN SCRIPT -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyCmwASW4XXQ3O0AvsCM_r1WLlrUmGjYVxI",
+          authDomain: "dvary-9a7d0.firebaseapp.com",
+          projectId: "dvary-9a7d0",
+          storageBucket: "dvary-9a7d0.firebasestorage.app",
+          messagingSenderId: "107370806066",
+          appId: "1:107370806066:web:4c2ce1e6f7b6c32909f52b",
+          measurementId: "G-07361LFJEP"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        console.log("Firebase initialized successfully on admin/index.html");
+
+        // Kitendo cha kutuma game kwenda Firestore
+        const form = document.getElementById('addGameForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('gameTitle').value;
+            const description = document.getElementById('gameDesc').value;
+
+            try {
+                await addDoc(collection(db, "games"), {
+                    title: title,
+                    description: description,
+                    createdAt: new Date()
+                });
+                alert("✅ Mchezo umehifadhiwa mafanikio kwenye Firebase!");
+                form.reset();
+            } catch (error) {
+                console.error("Hitilafu wakati wa kuhifadhi:", error);
+                alert("❌ Imeshindikana kuhifadhi mchezo.");
+            }
+        });
+    </script>
+</body>
+</html>
+
