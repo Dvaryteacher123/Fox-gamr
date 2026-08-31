@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Details - DVARY GAMES</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e94560;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e94560;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #fff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #e94560;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .nav-links a.active {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #c73652;
+            transform: scale(1.05);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 2px solid #e94560;
+        }
+
+        .btn-outline:hover {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .btn-large {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            border-radius: 12px;
+        }
+
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-menu .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e94560;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .user-menu .user-avatar:hover {
+            border-color: #fff;
+        }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: #1a1a2e;
+            border-radius: 12px;
+            min-width: 180px;
+            border: 1px solid #2a2a4e;
+            padding: 0.5rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 0.7rem 1.5rem;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .user-dropdown a:hover {
+            background: #e94560;
+        }
+
+        .user-dropdown .divider {
+            height: 1px;
+            background: #2a2a4e;
+            margin: 0.3rem 0;
+        }
+
+        .game-details {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .game-details .back-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .game-details .back-link:hover {
+            color: #e94560;
+        }
+
+        .game-details .back-link i {
+            margin-right: 0.5rem;
+        }
+
+        .game-details-card {
+            background: #1a1a2e;
+            border-radius: 20px;
+            border: 1px solid #2a2a4e;
+            overflow: hidden;
+        }
+
+        .game-details-card .game-image {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #2a2a4e, #3a3a6e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6rem;
+            color: #e94560;
+        }
+
+        .game-details-card .game-info {
+            padding: 2rem;
+        }
+
+        .game-details-card .game-info h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .game-details-card .game-info .game-meta {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .game-details-card .game-info .game-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .game-details-card .game-info .game-meta i {
+            color: #e94560;
+        }
+
+        .game-details-card .game-info .description {
+            color: #aaa;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .game-details-card .game-info .play-section {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .game-details-card .game-info .play-section .play-btn {
+            background: #e94560;
+            color: #fff;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .game-details-card .game-info .play-section .play-btn:hover {
+            background: #c73652;
+            transform: scale(1.03);
+        }
+
+        .game-details-card .game-info .play-section .play-btn i {
+            font-size: 1.4rem;
+        }
+
+        .game-details-card .game-info .play-section .game-id {
+            color: #444;
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: #666;
+        }
+
+        .loading i {
+            font-size: 2.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+
+        .error-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #e94560;
+        }
+
+        .error-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #aaa;
+        }
+
+        .footer {
+            background: #0a0a0f;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid #1a1a2e;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+        }
+
+        .footer a {
+            color: #e94560;
+            text-decoration: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border-left: 4px solid #e94560;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 9999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: #2ecc71;
+        }
+
+        .toast.error {
+            border-left-color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+
+            .auth-buttons {
+                justify-content: center;
+            }
+
+            .game-details {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .game-details-card .game-image {
+                height: 200px;
+                font-size: 4rem;
+            }
+
+            .game-details-card .game-info {
+                padding: 1.5rem;
+            }
+
+            .game-details-card .game-info h1 {
+                font-size: 1.6rem;
+            }
+
+            .game-details-card .game-info .play-section .play-btn {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                gap: 0.5rem;
+            }
+
+            .nav-links a {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="logo">DVARY <span>GAMES</span></a>
+
+        <ul class="nav-links">
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/pages/games/games.html" class="active"><i class="fas fa-gamepad"></i> Games</a></li>
+            <li><a href="/pages/ai/ai.html"><i class="fas fa-robot"></i> AI Chat</a></li>
+            <li><a href="/pages/community/community.html"><i class="fas fa-users"></i> Community</a></li>
+        </ul>
+
+        <div class="auth-buttons" id="authButtons">
+            <a href="/pages/auth/login.html" class="btn btn-outline">Login</a>
+            <a href="/pages/auth/register.html" class="btn btn-primary">Register</a>
+        </div>
+
+        <div class="user-menu" id="userMenu" style="display:none;">
+            <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">
+                <span id="avatarText">U</span>
+            </div>
+            <div class="user-dropdown" id="userDropdown">
+                <a href="/pages/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/admin/index.html" id="adminLink"><i class="fas fa-crown"></i> Admin</a>
+                <div class="divider"></div>
+                <a href="#" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="game-details">
+        <a href="/pages/games/games.html" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Games
+        </a>
+
+        <div id="gameDetailsContainer">
+            <div class="loading"><i class="fas fa-spinner"></i> Loading game details...</div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 <a href="/">DVARY GAMES</a>. All rights reserved.</p>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+        import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+        import { getFirestore, doc, getDoc } from "firebase/firestore";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCmwASW4XXQ3O0AvsCM_r1WLlrUmGjYVxI",
+            authDomain: "dvary-9a7d0.firebaseapp.com",
+            projectId: "dvary-9a7d0",
+            storageBucket: "dvary-9a7d0.firebasestorage.app",
+            messagingSenderId: "107370806066",
+            appId: "1:107370806066:web:4c2ce1e6f7b6c32909f52b",
+            measurementId: "G-07361LFJEP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const container = document.getElementById('gameDetailsContainer');
+        const toast = document.getElementById('toast');
+
+        function showToast(message, type = 'info') {
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        window.toggleDropdown = function() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        };
+
+        window.logoutUser = function() {
+            signOut(auth).then(() => {
+                showToast('Logged out', 'success');
+                document.getElementById('userDropdown').classList.remove('show');
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+            });
+        };
+
+        document.addEventListener('click', function(event) {
+            const menu = document.querySelector('.user-menu');
+            if (menu && !menu.contains(event.target)) {
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        });
+
+        // Auth state
+        onAuthStateChanged(auth, (user) => {
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+            const avatarText = document.getElementById('avatarText');
+
+            if (user) {
+                authButtons.style.display = 'none';
+                userMenu.style.display = 'block';
+                avatarText.textContent = user.email ? user.email.charAt(0).toUpperCase() : 'U';
+
+                const adminLink = document.getElementById('adminLink');
+                if (user.email === 'admin@dvary.com') {
+                    adminLink.style.display = 'block';
+                } else {
+                    adminLink.style.display = 'none';
+                }
+            } else {
+                authButtons.style.display = 'flex';
+                userMenu.style.display = 'none';
+            }
+        });
+
+        async function loadGameDetails() {
+            const params = new URLSearchParams(window.location.search);
+            const gameId = params.get('id');
+
+            if (!gameId) {
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>No Game Selected</h3>
+                        <p>Please go back and select a game.</p>
+                        <a href="/pages/games/games.html" class="btn btn-primary" style="margin-top:1rem;">
+                            <i class="fas fa-arrow-left"></i> Back to Games
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const docRef = doc(db, 'games', gameId);
+                const docSnap = await getDoc(docRef);
+
+                if (!docSnap.exists()) {
+                    container.innerHTML = `
+                        <div class="error-state">
+                            <i class="fas fa-gamepad" style="color:#666;"></i>
+                            <h3>Game Not Found</h3>
+                            <p>The game you're looking for doesn't exist or was removed.</p>
+                            <a href="/pages/games/games.html" class="btn btn-primary" style="margin-top:1rem;">
+                                <i class="fas fa-arrow-left"></i> Back to Games
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const game = docSnap.data();
+
+                container.innerHTML = `
+                    <div class="game-details-card">
+                        <div class="game-image">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="game-info">
+                            <h1>${game.name || 'Untitled Game'}</h1>
+                            <div class="game-meta">
+                                <span><i class="fas fa-calendar-alt"></i> Added: ${game.createdAt ? new Date(game.createdAt.toDate()).toLocaleDateString() : 'Unknown'}</span>
+                                <span><i class="fas fa-tag"></i> ${game.category || 'General'}</span>
+                                <span><i class="fas fa-user"></i> ${game.addedBy || 'Admin'}</span>
+                            </div>
+                            <div class="description">
+                                ${game.description || 'No description available for this game.'}
+                            </div>
+                            <div class="play-section">
+                                <button class="play-btn" onclick="playGame('${gameId}')">
+                                    <i class="fas fa-play"></i> Play Now
+                                </button>
+                                <span class="game-id">ID: ${gameId.substring(0, 8)}...</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error loading game:', error);
+                container.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle" style="color:#e94560;"></i>
+                        <h3>Error Loading Game</h3>
+                        <p>${error.message}</p>
+                        <a href="/pages/games/games.html" class="btn btn-primary" style="margin-top:1rem;">
+                            <i class="fas fa-arrow-left"></i> Back to Games
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        window.playGame = function(gameId) {
+            showToast('🎮 Loading game...', 'success');
+            // Redirect to game iframe or game page
+            window.location.href = `/games/${gameId}/index.html`;
+        };
+
+        loadGameDetails();
+    </script>
+
+</body>
+  </html>
