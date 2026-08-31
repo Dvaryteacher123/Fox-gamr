@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Home</title>
+    <!-- FontAwesome kwa ajili ya icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- CSS maalum ya faili hili -->
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <!-- SIDEBAR MENU -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <h2>DVARY <span>GAMES</span></h2>
+        </div>
+        <ul class="sidebar-links">
+            <li><a href="index.html" class="active"><i class="fas fa-home"></i> <span>Home</span></a></li>
+            <li><a href="../pages/games/games.html"><i class="fas fa-gamepad"></i> <span>Games</span></a></li>
+            <li><a href="../pages/ai/ai.html"><i class="fas fa-robot"></i> <span>AI Chat</span></a></li>
+            <li><a href="../admin/index.html"><i class="fas fa-crown"></i> <span>Admin</span></a></li>
+        </ul>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header class="top-bar">
+            <h1>Karibu DVARY GAMES</h1>
+            <p>Jukwaa lako la Michezo na AI</p>
+        </header>
+
+        <section class="games-section">
+            <h2>Featured Games</h2>
+            <div class="games-grid" id="gamesGrid">
+                <!-- Magame yatapakiwa hapa moja kwa moja kutoka Firebase -->
+            </div>
+        </section>
+    </main>
+
+    <!-- FLOATING AI BUTTON -->
+    <a href="../pages/ai/ai.html" class="floating-ai" title="Chat with AI">
+        <i class="fas fa-robot"></i>
+    </a>
+
+    <!-- FIREBASE SDK & CONFIGURATION -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyCmwASW4XXQ3O0AvsCM_r1WLlrUmGjYVxI",
+          authDomain: "dvary-9a7d0.firebaseapp.com",
+          projectId: "dvary-9a7d0",
+          storageBucket: "dvary-9a7d0.firebasestorage.app",
+          messagingSenderId: "107370806066",
+          appId: "1:107370806066:web:4c2ce1e6f7b6c32909f52b",
+          measurementId: "G-07361LFJEP"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        console.log("Firebase initialized successfully on index.html");
+    </script>
+</body>
+</html>
+
