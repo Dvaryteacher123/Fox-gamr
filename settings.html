@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Settings</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1a1a2e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --border: #2d2d44;
+            --shadow: rgba(99, 102, 241, 0.2);
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --border: #cbd5e1;
+            --shadow: rgba(99, 102, 241, 0.3);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            padding: 30px 20px;
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            transition: background 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar h1 {
+            color: var(--accent);
+            font-size: 28px;
+            margin-bottom: 40px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar h1 span {
+            color: var(--text-primary);
+        }
+        
+        .nav-links {
+            list-style: none;
+            flex: 1;
+        }
+        
+        .nav-links li {
+            margin-bottom: 12px;
+        }
+        
+        .nav-links a {
+            display: block;
+            padding: 12px 18px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--accent);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar-ai-mini {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .sidebar-ai-mini .ai-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sidebar-ai-mini .ai-label .dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .sidebar-ai-mini input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .sidebar-ai-mini input:focus {
+            border-color: var(--accent);
+        }
+        
+        .sidebar-ai-mini input::placeholder {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        
+        .sidebar-ai-mini .mini-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .sidebar-ai-mini .mini-actions button {
+            flex: 1;
+            padding: 8px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-ai-mini .mini-actions button:hover {
+            background: var(--accent-hover);
+            transform: scale(1.02);
+        }
+        
+        .sidebar-ai-mini .mini-actions button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .sidebar-ai-mini .mini-response {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: none;
+            max-height: 100px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+        
+        .sidebar-ai-mini .mini-response.active {
+            display: block;
+        }
+        
+        .sidebar-ai-mini .mini-response .loading-text {
+            color: var(--accent);
+            font-style: italic;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+        }
+        
+        .settings-header {
+            margin-bottom: 30px;
+        }
+        
+        .settings-header h2 {
+            font-size: 32px;
+            color: var(--accent);
+        }
+        
+        .settings-header p {
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        .settings-section {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+        
+        .settings-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .settings-section h3 .icon {
+            margin-right: 10px;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-item .info .title {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .setting-item .info .description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 3px;
+        }
+        
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: var(--border);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .toggle-switch.active {
+            background: var(--accent);
+        }
+        
+        .toggle-switch .slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-switch.active .slider {
+            transform: translateX(24px);
+        }
+        
+        .theme-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .theme-option {
+            padding: 12px 25px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .theme-option:hover {
+            border-color: var(--accent);
+        }
+        
+        .theme-option.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+        
+        .color-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.active {
+            border-color: white;
+            box-shadow: 0 0 15px var(--shadow);
+        }
+        
+        .save-btn {
+            padding: 12px 30px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        .save-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.02);
+        }
+        
+        .save-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.5s ease;
+            max-width: 400px;
+        }
+        
+        .notification.success {
+            background: var(--success);
+        }
+        
+        .notification.error {
+            background: var(--danger);
+        }
+        
+        .notification.info {
+            background: var(--accent);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .notification .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 15px;
+            opacity: 0.7;
+        }
+        
+        .notification .close-btn:hover {
+            opacity: 1;
+        }
+        
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+        }
+        
+        .user-badge .email {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .user-badge .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .user-badge .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        .user-badge .profile-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .user-badge .profile-link:hover {
+            text-decoration: underline;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            color: var(--text-primary);
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+        }
+        
+        .not-logged-in {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        
+        .not-logged-in h2 {
+            color: var(--text-primary);
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        .not-logged-in p {
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+        
+        .not-logged-in .login-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .not-logged-in .login-btn:hover {
+            background: var(--accent-hover);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                padding: 20px 15px;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .settings-section {
+                padding: 20px;
+            }
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .nav-links li {
+                margin-bottom: 0;
+            }
+            .nav-links a {
+                padding: 8px 14px;
+                font-size: 14px;
+            }
+            .sidebar-ai-mini {
+                margin-top: 15px;
+            }
+            .theme-options {
+                flex-direction: column;
+                width: 100%;
+            }
+            .theme-option {
+                text-align: center;
+            }
+            .theme-toggle {
+                bottom: 80px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        <ul class="nav-links">
+            <li><a href="/">🏠 Home</a></li>
+            <li><a href="/games">🎮 Games</a></li>
+            <li><a href="/ai">🤖 AI Chat</a></li>
+            <li><a href="/login">🔑 Login</a></li>
+            <li><a href="/signup">📝 Sign Up</a></li>
+            <li><a href="/admin">⚙️ Admin</a></li>
+            <li><a href="/profile">👤 Profile</a></li>
+            <li><a href="/settings" class="active">⚙️ Settings</a></li>
+        </ul>
+        
+        <!-- AI Mini Chat - Chini ya Sidebar -->
+        <div class="sidebar-ai-mini">
+            <div class="ai-label">
+                <span class="dot"></span>
+                AI Assistant
+            </div>
+            <input type="text" id="sidebarMiniInput" placeholder="Ask me about games..." />
+            <div class="mini-actions">
+                <button id="sidebarMiniSend">Send</button>
+            </div>
+            <div class="mini-response" id="sidebarMiniResponse">
+                <span class="loading-text">🤖 Thinking...</span>
+            </div>
+        </div>
+        
+        <div class="user-badge" id="userBadge" style="display: none;">
+            <span class="email" id="userEmail"></span>
+            <a href="/profile" class="profile-link">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="settings-header">
+            <h2>⚙️ Settings</h2>
+            <p>Customize your DVARY GAMES experience</p>
+        </div>
+        
+        <!-- Not Logged In -->
+        <div id="notLoggedIn" class="not-logged-in" style="display: none;">
+            <h2>🔒 Please Login</h2>
+            <p>You need to be logged in to access settings.</p>
+            <a href="/login" class="login-btn">Login</a>
+        </div>
+        
+        <!-- Settings Content -->
+        <div id="settingsContent" style="display: none;">
+            <!-- Theme Settings -->
+            <div class="settings-section">
+                <h3><span class="icon">🎨</span> Appearance</h3>
+                
+                <div class="setting-item">
+                    <div class="info">
+                        <div class="title">Dark Mode</div>
+                        <div class="description">Switch between dark and light theme</div>
+                    </div>
+                    <div class="toggle-switch" id="darkModeToggle" onclick="toggleDarkMode()">
+                        <div class="slider"></div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="info">
+                        <div class="title">Theme Color</div>
+                        <div class="description">Choose your accent color</div>
+                    </div>
+                    <div class="color-options" id="colorOptions">
+                        <div class="color-option active" style="background: #6366f1;" data-color="#6366f1" onclick="selectColor('#6366f1')"></div>
+                        <div class="color-option" style="background: #8b5cf6;" data-color="#8b5cf6" onclick="selectColor('#8b5cf6')"></div>
+                        <div class="color-option" style="background: #ec4899;" data-color="#ec4899" onclick="selectColor('#ec4899')"></div>
+                        <div class="color-option" style="background: #f59e0b;" data-color="#f59e0b" onclick="selectColor('#f59e0b')"></div>
+                        <div class="color-option" style="background: #10b981;" data-color="#10b981" onclick="selectColor('#10b981')"></div>
+                        <div class="color-option" style="background: #3b82f6;" data-color="#3b82f6" onclick="selectColor('#3b82f6')"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Settings -->
+            <div class="settings-section">
+                <h3><span class="icon">💬</span> Chat Settings</h3>
+                
+                <div class="setting-item">
+                    <div class="info">
+                        <div class="title">AI Chat Sound</div>
+                        <div class="description">Play sound when AI responds</div>
+                    </div>
+                    <div class="toggle-switch" id="soundToggle" onclick="toggleSound()">
+                        <div class="slider"></div>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="info">
+                        <div class="title">Save Chat History</div>
+                        <div class="description">Keep your chat messages saved</div>
+                    </div>
+                    <div class="toggle-switch active" id="historyToggle" onclick="toggleHistory()">
+                        <div class="slider"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Account Settings -->
+            <div class="settings-section">
+                <h3><span class="icon">👤</span> Account</h3>
+                
+                <div class="setting-item">
+                    <div class="info">
+                        <div class="title">Change Username</div>
+                        <div class="description">Update your display name</div>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="usernameInput" placeholder="New username" style="padding: 8px 14px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); outline: none;" />
+                        <button onclick="updateUsername()" class="save-btn" style="padding: 8px 20px; font-size: 14px; margin-top: 0;">Update</button>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="info">
+                        <div class="title">Reset Settings</div>
+                        <div class="description">Reset all settings to default</div>
+                    </div>
+                    <button onclick="resetSettings()" style="padding: 8px 20px; background: var(--danger); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.3s ease;">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+    
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</button>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        // ============ THEME MANAGEMENT ============
+        function getTheme() {
+            return localStorage.getItem('dvary-theme') || 'dark';
+        }
+        
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('dvary-theme', theme);
+            const btn = document.getElementById('themeToggle');
+            btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+            
+            // Update toggle switch
+            const toggle = document.getElementById('darkModeToggle');
+            if (theme === 'dark') {
+                toggle.classList.add('active');
+            } else {
+                toggle.classList.remove('active');
+            }
+        }
+        
+        // Load saved theme
+        setTheme(getTheme());
+        
+        // Theme toggle button (floating)
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const current = getTheme();
+            setTheme(current === 'dark' ? 'light' : 'dark');
+            showNotification('info', `Theme changed to ${current === 'dark' ? 'light' : 'dark'} mode`);
+        });
+        
+        // Dark mode toggle
+        function toggleDarkMode() {
+            const current = getTheme();
+            setTheme(current === 'dark' ? 'light' : 'dark');
+            showNotification('info', `Theme changed to ${current === 'dark' ? 'light' : 'dark'} mode`);
+        }
+        
+        // ============ COLOR MANAGEMENT ============
+        function getAccentColor() {
+            return localStorage.getItem('dvary-accent') || '#6366f1';
+        }
+        
+        function setAccentColor(color) {
+            localStorage.setItem('dvary-accent', color);
+            document.documentElement.style.setProperty('--accent', color);
+            document.documentElement.style.setProperty('--accent-hover', color + 'cc');
+            
+            // Update color options
+            document.querySelectorAll('.color-option').forEach(el => {
+                el.classList.toggle('active', el.dataset.color === color);
+            });
+            
+            showNotification('success', 'Accent color updated!');
+        }
+        
+        // Load saved color
+        setAccentColor(getAccentColor());
+        
+        function selectColor(color) {
+            setAccentColor(color);
+        }
+        
+        // ============ OTHER SETTINGS ============
+        function getSetting(key, defaultValue) {
+            return localStorage.getItem(`dvary-${key}`) !== null ? 
+                localStorage.getItem(`dvary-${key}`) === 'true' : 
+                defaultValue;
+        }
+        
+        function setSetting(key, value) {
+            localStorage.setItem(`dvary-${key}`, value.toString());
+        }
+        
+        // Sound toggle
+        function toggleSound() {
+            const toggle = document.getElementById('soundToggle');
+            const current = getSetting('sound', true);
+            const newValue = !current;
+            toggle.classList.toggle('active');
+            setSetting('sound', newValue);
+            showNotification('info', `Sound ${newValue ? 'enabled' : 'disabled'}`);
+        }
+        
+        // History toggle
+        function toggleHistory() {
+            const toggle = document.getElementById('historyToggle');
+            const current = getSetting('history', true);
+            const newValue = !current;
+            toggle.classList.toggle('active');
+            setSetting('history', newValue);
+            showNotification('info', `Chat history ${newValue ? 'enabled' : 'disabled'}`);
+        }
+        
+        // Load toggle states
+        document.getElementById('soundToggle').classList.toggle('active', getSetting('sound', true));
+        document.getElementById('historyToggle').classList.toggle('active', getSetting('history', true));
+        
+        // ============ AUTH STATE ============
+        auth.onAuthStateChanged((user) => {
+            const badge = document.getElementById('userBadge');
+            const email = document.getElementById('userEmail');
+            
+            if (user) {
+                badge.style.display = 'flex';
+                email.textContent = user.email;
+                document.getElementById('settingsContent').style.display = 'block';
+                document.getElementById('notLoggedIn').style.display = 'none';
+                loadUserData(user);
+            } else {
+                badge.style.display = 'none';
+                document.getElementById('settingsContent').style.display = 'none';
+                document.getElementById('notLoggedIn').style.display = 'block';
+            }
+        });
+        
+        // ============ LOGOUT ============
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.reload();
+            }).catch((error) => {
+                console.error('Logout error:', error);
+                showNotification('error', 'Failed to logout');
+            });
+        }
+        
+        // ============ LOAD USER DATA ============
+        async function loadUserData(user) {
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    document.getElementById('usernameInput').value = data.username || data.displayName || '';
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+        
+        // ============ UPDATE USERNAME ============
+        async function updateUsername() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (!username) {
+                showNotification('error', 'Please enter a username');
+                return;
+            }
+            
+            if (username.length < 3) {
+                showNotification('error', 'Username must be at least 3 characters');
+                return;
+            }
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    showNotification('error', 'Please login first');
+                    return;
+                }
+                
+                // Update Firestore
+                await db.collection('users').doc(user.uid).update({
+                    username: username,
+                    displayName: username
+                });
+                
+                // Update Auth profile
+                await user.updateProfile({
+                    displayName: username
+                });
+                
+                showNotification('success', 'Username updated successfully!');
+                
+            } catch (error) {
+                console.error('Error updating username:', error);
+                showNotification('error', 'Failed to update username: ' + error.message);
+            }
+        }
+        
+        // ============ RESET SETTINGS ============
+        function resetSettings() {
+            if (!confirm('Are you sure you want to reset all settings to default?')) {
+                return;
+            }
+            
+            localStorage.removeItem('dvary-theme');
+            localStorage.removeItem('dvary-accent');
+            localStorage.removeItem('dvary-sound');
+            localStorage.removeItem('dvary-history');
+            
+            setTheme('dark');
+            setAccentColor('#6366f1');
+            document.getElementById('soundToggle').classList.add('active');
+            document.getElementById('historyToggle').classList.add('active');
+            
+            showNotification('success', 'Settings reset to default!');
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+        
+        // ============ NOTIFICATION ============
+        function showNotification(type, message) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+            
+            notification.innerHTML = `
+                ${icons[type] || 'ℹ️'} ${message}
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 4000);
+        }
+        
+        // ============ SIDEBAR AI MINI CHAT ============
+        const miniInput = document.getElementById('sidebarMiniInput');
+        const miniSend = document.getElementById('sidebarMiniSend');
+        const miniResponse = document.getElementById('sidebarMiniResponse');
+        
+        async function sendMiniMessage() {
+            const message = miniInput.value.trim();
+            if (!message) return;
+            
+            miniSend.disabled = true;
+            miniResponse.className = 'mini-response active';
+            miniResponse.innerHTML = '<span class="loading-text">🤖 Thinking...</span>';
+            
+            try {
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    miniResponse.innerHTML = data.response;
+                } else {
+                    miniResponse.innerHTML = `❌ ${data.error || 'Something went wrong'}`;
+                }
+            } catch (error) {
+                miniResponse.innerHTML = '❌ Server not running. Please start the server.';
+                console.error('Error:', error);
+            } finally {
+                miniSend.disabled = false;
+                miniInput.value = '';
+                miniInput.focus();
+            }
+        }
+        
+        miniSend.addEventListener('click', sendMiniMessage);
+        miniInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMiniMessage();
+            }
+        });
+    </script>
+</body>
+</html>
