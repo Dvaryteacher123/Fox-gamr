@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Admin Panel</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1a1a2e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --border: #2d2d44;
+            --shadow: rgba(99, 102, 241, 0.2);
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --border: #cbd5e1;
+            --shadow: rgba(99, 102, 241, 0.3);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            padding: 30px 20px;
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            transition: background 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar h1 {
+            color: var(--accent);
+            font-size: 28px;
+            margin-bottom: 40px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar h1 span {
+            color: var(--text-primary);
+        }
+        
+        .nav-links {
+            list-style: none;
+            flex: 1;
+        }
+        
+        .nav-links li {
+            margin-bottom: 12px;
+        }
+        
+        .nav-links a {
+            display: block;
+            padding: 12px 18px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--accent);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .admin-header h2 {
+            font-size: 32px;
+            color: var(--accent);
+        }
+        
+        .admin-header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+        
+        .admin-header .user-info .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .admin-header .user-info .name {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .admin-header .user-info .email {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        .admin-badge {
+            background: var(--accent);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .access-denied {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        
+        .access-denied h2 {
+            color: var(--danger);
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        
+        .access-denied p {
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+        
+        .access-denied .login-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .access-denied .login-btn:hover {
+            background: var(--accent-hover);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .tabs button {
+            padding: 10px 25px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        
+        .tabs button:hover {
+            color: var(--text-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .tabs button.active {
+            color: var(--accent);
+            background: rgba(99, 102, 241, 0.15);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group label .required {
+            color: var(--danger);
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-group select option {
+            background: var(--bg-secondary);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        /* ============ GAME IMAGE UPLOAD ============ */
+        .game-image-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .game-image-wrapper {
+            width: 200px;
+            height: 150px;
+            border-radius: 12px;
+            border: 2px dashed var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-primary);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .game-image-wrapper:hover {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .game-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .game-image-wrapper .placeholder {
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .game-image-wrapper .placeholder .icon {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .game-image-wrapper .remove-img {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: var(--danger);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .game-image-wrapper .remove-img.show {
+            display: flex;
+        }
+        
+        .game-image-wrapper .remove-img:hover {
+            transform: scale(1.1);
+        }
+        
+        .game-image-upload .upload-hint {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        
+        #gameImageInput {
+            display: none;
+        }
+        
+        .upload-progress {
+            display: none;
+            width: 100%;
+            max-width: 200px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .upload-progress.active {
+            display: block;
+        }
+        
+        .upload-progress .bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .submit-btn {
+            padding: 14px 30px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.02);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .games-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .game-item {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .game-item:hover {
+            border-color: var(--accent);
+        }
+        
+        .game-item .game-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .game-item .game-info .thumb {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        
+        .game-item .game-info .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .game-item .game-info h4 {
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        
+        .game-item .game-info .meta {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 2px;
+        }
+        
+        .game-item .game-info .meta span {
+            color: var(--accent);
+        }
+        
+        .game-item .game-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .game-item .game-actions button {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+        
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+        
+        .btn-edit {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.5s ease;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .notification.success {
+            background: var(--success);
+        }
+        
+        .notification.error {
+            background: var(--danger);
+        }
+        
+        .notification.info {
+            background: var(--accent);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .notification .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 15px;
+            opacity: 0.7;
+        }
+        
+        .notification .close-btn:hover {
+            opacity: 1;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .loading-spinner .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state h3 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+        
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+        }
+        
+        .user-badge .email {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .user-badge .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .user-badge .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        
+        .stat-card .label {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            color: var(--text-primary);
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                padding: 20px 15px;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .game-item {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            .game-item .game-actions {
+                justify-content: flex-end;
+            }
+            .game-item .game-info {
+                flex-wrap: wrap;
+            }
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .nav-links li {
+                margin-bottom: 0;
+            }
+            .nav-links a {
+                padding: 8px 14px;
+                font-size: 14px;
+            }
+            .admin-header .user-info {
+                flex-wrap: wrap;
+                width: 100%;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .game-image-wrapper {
+                width: 100%;
+                max-width: 200px;
+            }
+            .tabs button {
+                flex: 1;
+                min-width: 80px;
+                text-align: center;
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+            .notification {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+            .theme-toggle {
+                bottom: 70px;
+                right: 15px;
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        <ul class="nav-links">
+            <li><a href="/">🏠 Home</a></li>
+            <li><a href="/games">🎮 Games</a></li>
+            <li><a href="/ai">🤖 AI Chat</a></li>
+            <li><a href="/login">🔑 Login</a></li>
+            <li><a href="/signup">📝 Sign Up</a></li>
+            <li><a href="/admin" class="active">⚙️ Admin</a></li>
+            <li><a href="/profile">👤 Profile</a></li>
+            <li><a href="/settings">⚙️ Settings</a></li>
+        </ul>
+        
+        <div class="user-badge" id="userBadge" style="display: none;">
+            <span class="email" id="userEmail"></span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div id="adminContent">
+            <!-- Access Denied / Not Logged In -->
+            <div id="accessDenied" class="access-denied" style="display: none;">
+                <h2>🔒 Please Login</h2>
+                <p>You need to be logged in to access the admin panel.</p>
+                <a href="/login" class="login-btn">Login</a>
+            </div>
+            
+            <!-- Admin Panel -->
+            <div id="adminPanel" style="display: none;">
+                <div class="admin-header">
+                    <h2>⚙️ Admin Panel</h2>
+                    <div class="user-info">
+                        <div class="avatar" id="adminAvatar">U</div>
+                        <div>
+                            <div class="name" id="adminName">User</div>
+                            <div class="email" id="adminEmail">user@example.com</div>
+                        </div>
+                        <span class="admin-badge">👑 Admin</span>
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="number" id="totalGames">0</div>
+                        <div class="label">Total Games</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="totalUsers">0</div>
+                        <div class="label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="totalGenres">0</div>
+                        <div class="label">Genres</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="yourGames">0</div>
+                        <div class="label">Your Games</div>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="active" onclick="switchTab('add')">➕ Add Game</button>
+                    <button onclick="switchTab('manage')">📋 Manage Games</button>
+                </div>
+                
+                <!-- Add Game Tab -->
+                <div id="tab-add" class="tab-content active">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Add New Game</h3>
+                    <form id="addGameForm">
+                        <div class="form-group">
+                            <label>Game Name <span class="required">*</span></label>
+                            <input type="text" id="gameName" placeholder="e.g., Cyberpunk 2077" required />
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Genre <span class="required">*</span></label>
+                                <input type="text" id="gameGenre" placeholder="e.g., Action, RPG" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Platform</label>
+                                <input type="text" id="gamePlatform" placeholder="e.g., PC, PS5, Xbox" />
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Description <span class="required">*</span></label>
+                            <textarea id="gameDescription" placeholder="Describe the game..." required></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Rating (1-5)</label>
+                                <input type="number" id="gameRating" min="1" max="5" step="0.5" placeholder="e.g., 4.5" />
+                            </div>
+                            <div class="form-group">
+                                <label>Release Date</label>
+                                <input type="date" id="gameReleased" />
+                            </div>
+                        </div>
+                        
+                        <!-- Game Image Upload -->
+                        <div class="form-group">
+                            <label>Game Image</label>
+                            <div class="game-image-upload">
+                                <div class="game-image-wrapper" id="gameImageWrapper" onclick="document.getElementById('gameImageInput').click()">
+                                    <img id="gameImagePreview" style="display: none;" alt="Game Image" />
+                                    <div class="placeholder" id="gameImagePlaceholder">
+                                        <span class="icon">🖼️</span>
+                                        Click to upload
+                                    </div>
+                                    <button class="remove-img" id="removeGameImage" onclick="event.stopPropagation(); removeGameImage()">✕</button>
+                                </div>
+                                <span class="upload-hint">Recommended: 400x300px, Max 2MB</span>
+                                <div class="upload-progress" id="gameUploadProgress">
+                                    <div class="bar" id="gameUploadBar"></div>
+                                </div>
+                                <input type="file" id="gameImageInput" accept="image/*" />
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn" id="addGameBtn">➕ Add Game</button>
+                    </form>
+                </div>
+                
+                <!-- Manage Games Tab -->
+                <div id="tab-manage" class="tab-content">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Manage Games</h3>
+                    <div id="gamesListContainer">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p>Loading games...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+    
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</button>
+    
+    <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        
+        // ============================================================
+        // THEME
+        // ============================================================
+        function getTheme() {
+            return localStorage.getItem('dvary-theme') || 'dark';
+        }
+        
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('dvary-theme', theme);
+            document.getElementById('themeToggle').textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+        
+        setTheme(getTheme());
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const current = getTheme();
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+        
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let allGames = [];
+        let gameImageFile = null;
+        let gameImageUrl = null;
+        
+        // ============================================================
+        // AUTH STATE
+        // ============================================================
+        auth.onAuthStateChanged((user) => {
+            const badge = document.getElementById('userBadge');
+            const email = document.getElementById('userEmail');
+            const adminPanel = document.getElementById('adminPanel');
+            const accessDenied = document.getElementById('accessDenied');
+            
+            if (user) {
+                currentUser = user;
+                badge.style.display = 'flex';
+                email.textContent = user.email;
+                adminPanel.style.display = 'block';
+                accessDenied.style.display = 'none';
+                
+                // Load user info
+                loadUserInfo(user);
+                loadStats(user);
+                loadGamesList(user);
+            } else {
+                currentUser = null;
+                badge.style.display = 'none';
+                adminPanel.style.display = 'none';
+                accessDenied.style.display = 'block';
+                accessDenied.innerHTML = `
+                    <h2>🔒 Please Login</h2>
+                    <p>You need to be logged in to access the admin panel.</p>
+                    <a href="/login" class="login-btn">Login</a>
+                `;
+            }
+        });
+        
+        // ============================================================
+        // LOGOUT
+        // ============================================================
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.reload();
+            }).catch((error) => {
+                console.error('Logout error:', error);
+                showNotification('error', 'Failed to logout: ' + error.message);
+            });
+        }
+        
+        // ============================================================
+        // LOAD USER INFO
+        // ============================================================
+        async function loadUserInfo(user) {
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    const name = data.username || data.displayName || 'User';
+                    const initial = name.charAt(0).toUpperCase();
+                    
+                    document.getElementById('adminName').textContent = name;
+                    document.getElementById('adminEmail').textContent = user.email;
+                    document.getElementById('adminAvatar').textContent = initial;
+                } else {
+                    document.getElementById('adminName').textContent = 'User';
+                    document.getElementById('adminEmail').textContent = user.email;
+                    document.getElementById('adminAvatar').textContent = 'U';
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+        
+        // ============================================================
+        // LOAD STATS
+        // ============================================================
+        async function loadStats(user) {
+            try {
+                // Total games
+                const gamesSnapshot = await db.collection('games').get();
+                document.getElementById('totalGames').textContent = gamesSnapshot.size;
+                
+                // Total users
+                const usersSnapshot = await db.collection('users').get();
+                document.getElementById('totalUsers').textContent = usersSnapshot.size;
+                
+                // Unique genres
+                const genres = new Set();
+                gamesSnapshot.forEach(doc => {
+                    const game = doc.data();
+                    if (game.genre) genres.add(game.genre);
+                });
+                document.getElementById('totalGenres').textContent = genres.size;
+                
+                // User's games
+                const userGames = await db.collection('games')
+                    .where('createdBy', '==', user.uid)
+                    .get();
+                document.getElementById('yourGames').textContent = userGames.size;
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        // ============================================================
+        // LOAD GAMES LIST
+        // ============================================================
+        async function loadGamesList(user) {
+            const container = document.getElementById('gamesListContainer');
+            
+            try {
+                const snapshot = await db.collection('games')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>🎮 No games found</h3>
+                            <p>Add your first game using the "Add Game" tab.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                allGames = [];
+                let html = '<div class="games-list">';
+                snapshot.forEach((doc) => {
+                    const game = doc.data();
+                    game.id = doc.id;
+                    allGames.push(game);
+                    
+                    const isOwner = game.createdBy === user.uid;
+                    const icon = getGameIcon(game.name || '');
+                    
+                    html += `
+                        <div class="game-item" id="game-${doc.id}">
+                            <div class="game-info">
+                                <div class="thumb">
+                                    ${game.imageUrl ? `<img src="${game.imageUrl}" alt="${game.name}" />` : icon}
+                                </div>
+                                <div>
+                                    <h4>${game.name || 'Unnamed Game'}</h4>
+                                    <div class="meta">
+                                        Genre: <span>${game.genre || 'General'}</span>
+                                        ${game.platform ? `| Platform: <span>${game.platform}</span>` : ''}
+                                        ${game.rating ? `| ⭐ ${game.rating}/5` : ''}
+                                        ${isOwner ? '| 👑 <span>You</span>' : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="game-actions">
+                                ${isOwner ? `<button class="btn-delete" onclick="deleteGame('${doc.id}')">🗑️ Delete</button>` : '<span style="color: var(--text-secondary); font-size: 13px;">Read Only</span>'}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading games:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>❌ Error loading games</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                showNotification('error', 'Failed to load games: ' + error.message);
+            }
+        }
+        
+        // ============================================================
+        // GET GAME ICON
+        // ============================================================
+        function getGameIcon(name) {
+            const icons = ['🎮', '⚔️', '🏎️', '🧙', '🚀', '🏆', '🎯', '👾', '🤖', '👽'];
+            const index = name.length % icons.length;
+            return icons[index] || '🎮';
+        }
+        
+        // ============================================================
+        // GAME IMAGE UPLOAD
+        // ============================================================
+        document.getElementById('gameImageInput').addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (!file) return;
+            
+            if (file.size > 2 * 1024 * 1024) {
+                showNotification('error', 'Image too large. Maximum size is 2MB.');
+                this.value = '';
+                return;
+            }
+            
+            if (!file.type.startsWith('image/')) {
+                showNotification('error', 'Please select an image file.');
+                this.value = '';
+                return;
+            }
+            
+            gameImageFile = file;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('gameImagePreview').src = e.target.result;
+                document.getElementById('gameImagePreview').style.display = 'block';
+                document.getElementById('gameImagePlaceholder').style.display = 'none';
+                document.getElementById('removeGameImage').classList.add('show');
+                document.getElementById('gameUploadProgress').classList.remove('active');
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        function removeGameImage() {
+            gameImageFile = null;
+            gameImageUrl = null;
+            document.getElementById('gameImagePreview').style.display = 'none';
+            document.getElementById('gameImagePlaceholder').style.display = 'block';
+            document.getElementById('removeGameImage').classList.remove('show');
+            document.getElementById('gameImageInput').value = '';
+            document.getElementById('gameUploadProgress').classList.remove('active');
+        }
+        
+        async function uploadGameImage(gameId) {
+            if (!gameImageFile) return null;
+            
+            const progressBar = document.getElementById('gameUploadBar');
+            const progressContainer = document.getElementById('gameUploadProgress');
+            progressContainer.classList.add('active');
+            
+            return new Promise((resolve, reject) => {
+                const storageRef = storage.ref(`game_images/${gameId}`);
+                const uploadTask = storageRef.put(gameImageFile);
+                
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        progressBar.style.width = progress + '%';
+                    },
+                    (error) => {
+                        progressContainer.classList.remove('active');
+                        reject(error);
+                    },
+                    async () => {
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        progressContainer.classList.remove('active');
+                        progressBar.style.width = '0%';
+                        resolve(downloadURL);
+                    }
+                );
+            });
+        }
+        
+        // ============================================================
+        // DELETE GAME
+        // ============================================================
+        async function deleteGame(gameId) {
+            if (!confirm('Are you sure you want to delete this game? This action cannot be undone!')) {
+                return;
+            }
+            
+            try {
+                // Check if user is the owner
+                const gameDoc = await db.collection('games').doc(gameId).get();
+                if (!gameDoc.exists) {
+                    showNotification('error', 'Game not found');
+                    return;
+                }
+                
+                const gameData = gameDoc.data();
+                if (gameData.createdBy !== auth.currentUser?.uid) {
+                    showNotification('error', 'You can only delete games you created!');
+                    return;
+                }
+                
+                // Delete game image from storage if exists
+                if (gameData.imageUrl) {
+                    try {
+                        const storageRef = storage.refFromURL(gameData.imageUrl);
+                        await storageRef.delete();
+                    } catch (e) {
+                        console.log('Image not found or already deleted');
+                    }
+                }
+                
+                // Delete from Firestore
+                await db.collection('games').doc(gameId).delete();
+                showNotification('success', '✅ Game deleted successfully!');
+                
+                // Remove from UI
+                const gameElement = document.getElementById(`game-${gameId}`);
+                if (gameElement) {
+                    gameElement.style.opacity = '0';
+                    gameElement.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        gameElement.remove();
+                    }, 300);
+                }
+                
+                // Update stats
+                if (auth.currentUser) {
+                    loadStats(auth.currentUser);
+                }
+                
+            } catch (error) {
+                console.error('Error deleting game:', error);
+                showNotification('error', '❌ Failed to delete game: ' + error.message);
+            }
+        }
+        
+        // ============================================================
+        // SWITCH TABS
+        // ============================================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+        
+        // ============================================================
+        // SHOW NOTIFICATION
+        // ============================================================
+        function showNotification(type, message) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+            
+            notification.innerHTML = `
+                ${icons[type] || 'ℹ️'} ${message}
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // ============================================================
+        // ADD GAME FORM
+        // ============================================================
+        document.getElementById('addGameForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!auth.currentUser) {
+                showNotification('error', 'Please login first');
+                return;
+            }
+            
+            const name = document.getElementById('gameName').value.trim();
+            const genre = document.getElementById('gameGenre').value.trim();
+            const platform = document.getElementById('gamePlatform').value.trim();
+            const description = document.getElementById('gameDescription').value.trim();
+            const rating = document.getElementById('gameRating').value;
+            const released = document.getElementById('gameReleased').value;
+            
+            if (!name || !genre || !description) {
+                showNotification('error', 'Please fill in all required fields (Name, Genre, Description)');
+                return;
+            }
+            
+            const addBtn = document.getElementById('addGameBtn');
+            addBtn.disabled = true;
+            addBtn.textContent = 'Adding game...';
+            
+            try {
+                // Create game document first to get ID
+                const gameData = {
+                    name: name,
+                    genre: genre,
+                    platform: platform || 'Multi-platform',
+                    description: description,
+                    rating: rating ? parseFloat(rating) : null,
+                    released: released || null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: auth.currentUser.uid,
+                    createdByEmail: auth.currentUser.email,
+                    createdByName: auth.currentUser.displayName || 'User'
+                };
+                
+                const docRef = await db.collection('games').add(gameData);
+                
+                // Upload image if exists
+                let imageUrl = null;
+                if (gameImageFile) {
+                    imageUrl = await uploadGameImage(docRef.id);
+                    if (imageUrl) {
+                        await db.collection('games').doc(docRef.id).update({ imageUrl });
+                    }
+                }
+                
+                showNotification('success', '✅ Game added successfully!');
+                
+                // Reset form
+                document.getElementById('addGameForm').reset();
+                removeGameImage();
+                
+                // Reload stats and games list
+                if (auth.currentUser) {
+                    loadStats(auth.currentUser);
+                    loadGamesList(auth.currentUser);
+                }
+                
+            } catch (error) {
+                console.error('Error adding game:', error);
+                showNotification('error', '❌ Failed to add game: ' + error.message);
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = '➕ Add Game';
+            }
+        });
+    </script>
+</body>
+                                                        </html>
