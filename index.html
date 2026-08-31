@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Home</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #1a1a2e;
+            padding: 30px 20px;
+            border-right: 1px solid #2d2d44;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+        }
+        
+        .sidebar h1 {
+            color: #6366f1;
+            font-size: 28px;
+            margin-bottom: 40px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar h1 span {
+            color: #e2e8f0;
+        }
+        
+        .nav-links {
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-bottom: 12px;
+        }
+        
+        .nav-links a {
+            display: block;
+            padding: 12px 18px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #6366f1;
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            padding: 60px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .hero h2 {
+            font-size: 48px;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .feature-card {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #2d2d44;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+        
+        .feature-card h3 {
+            color: #6366f1;
+            margin-bottom: 12px;
+            font-size: 22px;
+        }
+        
+        .feature-card p {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .stat-box {
+            background: #1a1a2e;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #2d2d44;
+            text-align: center;
+        }
+        
+        .stat-box .number {
+            font-size: 36px;
+            font-weight: 800;
+            color: #6366f1;
+        }
+        
+        .stat-box .label {
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+        
+        .ai-chat-mini {
+            background: #1a1a2e;
+            border-radius: 15px;
+            border: 1px solid #2d2d44;
+            margin-top: 30px;
+            padding: 20px;
+        }
+        
+        .ai-chat-mini .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .ai-chat-mini .header h3 {
+            color: #6366f1;
+            font-size: 18px;
+        }
+        
+        .ai-chat-mini .header a {
+            color: #6366f1;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .ai-chat-mini .header a:hover {
+            text-decoration: underline;
+        }
+        
+        .chat-mini-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-mini-container input {
+            flex: 1;
+            padding: 10px 15px;
+            background: #0a0a0f;
+            border: 1px solid #2d2d44;
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .chat-mini-container input:focus {
+            border-color: #6366f1;
+        }
+        
+        .chat-mini-container button {
+            padding: 10px 20px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-mini-container button:hover {
+            background: #8b5cf6;
+        }
+        
+        .chat-mini-container button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .mini-response {
+            margin-top: 15px;
+            padding: 15px;
+            background: #0a0a0f;
+            border-radius: 10px;
+            min-height: 60px;
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.6;
+            display: none;
+        }
+        
+        .mini-response.active {
+            display: block;
+        }
+        
+        .mini-response .loading-text {
+            color: #6366f1;
+            font-style: italic;
+        }
+        
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #0a0a0f;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+        
+        .user-badge .email {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .user-badge .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .user-badge .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                padding: 20px 15px;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .hero {
+                padding: 30px;
+            }
+            .hero h2 {
+                font-size: 32px;
+            }
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid #2d2d44;
+            }
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .nav-links li {
+                margin-bottom: 0;
+            }
+            .nav-links a {
+                padding: 8px 14px;
+                font-size: 14px;
+            }
+            .features {
+                grid-template-columns: 1fr;
+            }
+            .chat-mini-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        <ul class="nav-links">
+            <li><a href="/" class="active">🏠 Home</a></li>
+            <li><a href="/games">🎮 Games</a></li>
+            <li><a href="/ai">🤖 AI Chat</a></li>
+            <li><a href="/login">🔑 Login</a></li>
+            <li><a href="/signup">📝 Sign Up</a></li>
+            <li><a href="/admin">⚙️ Admin</a></li>
+        </ul>
+        
+        <div class="user-badge" id="userBadge" style="display: none;">
+            <span class="email" id="userEmail"></span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="hero">
+            <h2>Welcome to DVARY GAMES</h2>
+            <p>Your ultimate gaming platform where you can discover, play, and connect with the best games around.</p>
+        </div>
+        
+        <div class="stats" id="statsContainer">
+            <div class="stat-box">
+                <div class="number" id="gameCount">0</div>
+                <div class="label">Total Games</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="userCount">0</div>
+                <div class="label">Active Users</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="genreCount">0</div>
+                <div class="label">Genres</div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3>🎮 Game Library</h3>
+                <p>Browse through our extensive collection of games from various genres.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🤖 AI Assistant</h3>
+                <p>Get personalized game recommendations and tips from our AI chatbot.</p>
+            </div>
+            <div class="feature-card">
+                <h3>👥 Community</h3>
+                <p>Connect with other gamers, share reviews, and build your gaming network.</p>
+            </div>
+        </div>
+        
+        <!-- AI Chat Mini -->
+        <div class="ai-chat-mini">
+            <div class="header">
+                <h3>🤖 Quick AI Assistant</h3>
+                <a href="/ai">Open Full Chat →</a>
+            </div>
+            <div class="chat-mini-container">
+                <input type="text" id="miniChatInput" placeholder="Ask me about games..." />
+                <button id="miniChatSend">Send</button>
+            </div>
+            <div class="mini-response" id="miniResponse">
+                <span class="loading-text">🤖 Thinking...</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        // Check auth state
+        auth.onAuthStateChanged((user) => {
+            const badge = document.getElementById('userBadge');
+            const email = document.getElementById('userEmail');
+            if (user) {
+                badge.style.display = 'flex';
+                email.textContent = user.email;
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+        
+        // Logout function
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.reload();
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        }
+        
+        // Load stats from Firestore
+        function loadStats() {
+            // Count games
+            db.collection('games').get().then((snapshot) => {
+                document.getElementById('gameCount').textContent = snapshot.size;
+            }).catch((error) => {
+                console.error('Error loading games count:', error);
+                document.getElementById('gameCount').textContent = '0';
+            });
+            
+            // Count users
+            db.collection('users').get().then((snapshot) => {
+                document.getElementById('userCount').textContent = snapshot.size;
+            }).catch((error) => {
+                console.error('Error loading users count:', error);
+                document.getElementById('userCount').textContent = '0';
+            });
+            
+            // Count unique genres
+            db.collection('games').get().then((snapshot) => {
+                const genres = new Set();
+                snapshot.forEach((doc) => {
+                    const game = doc.data();
+                    if (game.genre) {
+                        genres.add(game.genre);
+                    }
+                });
+                document.getElementById('genreCount').textContent = genres.size;
+            }).catch((error) => {
+                console.error('Error loading genres:', error);
+                document.getElementById('genreCount').textContent = '0';
+            });
+        }
+        
+        // Load stats on page load
+        loadStats();
+        
+        // Mini AI Chat
+        const miniInput = document.getElementById('miniChatInput');
+        const miniSend = document.getElementById('miniChatSend');
+        const miniResponse = document.getElementById('miniResponse');
+        
+        async function sendMiniMessage() {
+            const message = miniInput.value.trim();
+            if (!message) return;
+            
+            miniSend.disabled = true;
+            miniResponse.className = 'mini-response active';
+            miniResponse.innerHTML = '<span class="loading-text">🤖 Thinking...</span>';
+            
+            try {
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    miniResponse.innerHTML = data.response;
+                } else {
+                    miniResponse.innerHTML = `Error: ${data.error || 'Something went wrong'}`;
+                }
+            } catch (error) {
+                miniResponse.innerHTML = 'Error: Could not connect to server. Please make sure the server is running.';
+                console.error('Error:', error);
+            } finally {
+                miniSend.disabled = false;
+                miniInput.value = '';
+                miniInput.focus();
+            }
+        }
+        
+        miniSend.addEventListener('click', sendMiniMessage);
+        miniInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMiniMessage();
+            }
+        });
+    </script>
+</body>
+</html>
