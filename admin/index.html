@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - DVARY GAMES</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e94560;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e94560;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #fff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #e94560;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .nav-links a.active {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #c73652;
+            transform: scale(1.05);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 2px solid #e94560;
+        }
+
+        .btn-outline:hover {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: #fff;
+        }
+
+        .btn-warning:hover {
+            background: #d68910;
+            transform: scale(1.05);
+        }
+
+        .btn-small {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+        }
+
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-menu .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e94560;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .user-menu .user-avatar:hover {
+            border-color: #fff;
+        }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: #1a1a2e;
+            border-radius: 12px;
+            min-width: 180px;
+            border: 1px solid #2a2a4e;
+            padding: 0.5rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 0.7rem 1.5rem;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .user-dropdown a:hover {
+            background: #e94560;
+        }
+
+        .user-dropdown .divider {
+            height: 1px;
+            background: #2a2a4e;
+            margin: 0.3rem 0;
+        }
+
+        .admin-container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .admin-header h1 {
+            font-size: 2.2rem;
+            color: #e94560;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .admin-header .admin-badge {
+            background: #f39c12;
+            color: #fff;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4e;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 2rem;
+            color: #e94560;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-card .stat-label {
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #2a2a4e;
+            padding-bottom: 0.5rem;
+        }
+
+        .admin-tabs button {
+            background: transparent;
+            border: none;
+            color: #666;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .admin-tabs button:hover {
+            color: #fff;
+            background: #1a1a2e;
+        }
+
+        .admin-tabs button.active {
+            color: #fff;
+            background: #e94560;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .admin-form {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4e;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-form h2 {
+            margin-bottom: 1.5rem;
+            color: #e94560;
+            font-size: 1.4rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #2a2a4e;
+            border-radius: 10px;
+            background: #0f0f1a;
+            color: #fff;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #e94560;
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group .file-input-wrapper {
+            position: relative;
+        }
+
+        .form-group .file-input-wrapper input[type="file"] {
+            padding: 0.8rem;
+            cursor: pointer;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .games-table {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4e;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .games-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .games-table th {
+            background: #0f0f1a;
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .games-table td {
+            padding: 1rem;
+            border-top: 1px solid #2a2a4e;
+            font-size: 0.9rem;
+        }
+
+        .games-table td .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .games-table .empty-row td {
+            text-align: center;
+            color: #666;
+            padding: 3rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border-left: 4px solid #e94560;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 9999;
+            max-width: 400px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: #2ecc71;
+        }
+
+        .toast.error {
+            border-left-color: #e74c3c;
+        }
+
+        .toast.warning {
+            border-left-color: #f39c12;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+        }
+
+        .access-denied {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .access-denied i {
+            font-size: 5rem;
+            color: #e94560;
+            margin-bottom: 1rem;
+        }
+
+        .access-denied h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .access-denied p {
+            color: #888;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer {
+            background: #0a0a0f;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid #1a1a2e;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+        }
+
+        .footer a {
+            color: #e94560;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+
+            .auth-buttons {
+                justify-content: center;
+            }
+
+            .admin-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .admin-header h1 {
+                font-size: 1.6rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .games-table {
+                overflow-x: auto;
+            }
+
+            .games-table table {
+                font-size: 0.8rem;
+            }
+
+            .games-table th,
+            .games-table td {
+                padding: 0.5rem;
+            }
+
+            .admin-tabs button {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                gap: 0.5rem;
+            }
+
+            .nav-links a {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.8rem;
+            }
+
+            .admin-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-form {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="logo">DVARY <span>GAMES</span></a>
+
+        <ul class="nav-links">
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/pages/games/games.html"><i class="fas fa-gamepad"></i> Games</a></li>
+            <li><a href="/pages/ai/ai.html"><i class="fas fa-robot"></i> AI Chat</a></li>
+            <li><a href="/pages/community/community.html"><i class="fas fa-users"></i> Community</a></li>
+        </ul>
+
+        <div class="auth-buttons" id="authButtons">
+            <a href="/pages/auth/login.html" class="btn btn-outline">Login</a>
+            <a href="/pages/auth/register.html" class="btn btn-primary">Register</a>
+        </div>
+
+        <div class="user-menu" id="userMenu" style="display:none;">
+            <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">
+                <span id="avatarText">U</span>
+            </div>
+            <div class="user-dropdown" id="userDropdown">
+                <a href="/pages/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/admin/index.html" class="active"><i class="fas fa-crown"></i> Admin</a>
+                <div class="divider"></div>
+                <a href="#" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-container" id="adminContainer">
+        <!-- Access Denied -->
+        <div id="accessDenied" class="access-denied" style="display:none;">
+            <i class="fas fa-lock"></i>
+            <h2>Access Denied</h2>
+            <p>You need admin privileges to access this page.</p>
+            <a href="/" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Back to Home</a>
+        </div>
+
+        <!-- Admin Content -->
+        <div id="adminContent" style="display:none;">
+            <div class="admin-header">
+                <h1><i class="fas fa-crown"></i> Admin Panel</h1>
+                <span class="admin-badge"><i class="fas fa-shield-alt"></i> Administrator</span>
+            </div>
+
+            <!-- Stats -->
+            <div class="admin-stats" id="statsContainer">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-gamepad"></i></div>
+                    <div class="stat-number" id="totalGames">0</div>
+                    <div class="stat-label">Total Games</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-comments"></i></div>
+                    <div class="stat-number" id="totalMessages">0</div>
+                    <div class="stat-label">Community Messages</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-robot"></i></div>
+                    <div class="stat-number" id="totalAI">0</div>
+                    <div class="stat-label">AI Chats</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="active" data-tab="games"><i class="fas fa-gamepad"></i> Games</button>
+                <button data-tab="add"><i class="fas fa-plus"></i> Add Game</button>
+                <button data-tab="users"><i class="fas fa-users"></i> Users</button>
+                <button data-tab="settings"><i class="fas fa-cog"></i> Settings</button>
+            </div>
+
+            <!-- Tab: Games -->
+            <div class="tab-content active" id="tab-games">
+                <div class="games-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Game Name</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gamesTableBody">
+                            <tr class="empty-row">
+                                <td colspan="5">
+                                    <div class="loading"><i class="fas fa-spinner"></i> Loading games...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Add Game -->
+            <div class="tab-content" id="tab-add">
+                <div class="admin-form">
+                    <h2><i class="fas fa-plus-circle"></i> Add New Game</h2>
+                    <form id="addGameForm">
+                        <div class="form-group">
+                            <label for="gameName">Game Name *</label>
+                            <input type="text" id="gameName" placeholder="Enter game name" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gameDescription">Description *</label>
+                            <textarea id="gameDescription" placeholder="Describe the game..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gameCategory">Category</label>
+                            <select id="gameCategory">
+                                <option value="General">General</option>
+                                <option value="Action">Action</option>
+                                <option value="Adventure">Adventure</option>
+                                <option value="Puzzle">Puzzle</option>
+                                <option value="Strategy">Strategy</option>
+                                <option value="Racing">Racing</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Shooting">Shooting</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gameFile">Game File (HTML/JS) *</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="gameFile" accept=".html,.zip" required />
+                            </div>
+                            <small style="color:#555;">Upload HTML file or ZIP containing the game</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gameImage">Game Image (optional)</label>
+                            <input type="file" id="gameImage" accept="image/*" />
+                        </div>
+
+                        <button type="submit" class="btn btn-success" id="addGameBtn">
+                            <i class="fas fa-upload"></i> Add Game
+                            <span class="spinner" id="addSpinner" style="display:none;"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab: Users -->
+            <div class="tab-content" id="tab-users">
+                <div class="admin-form">
+                    <h2><i class="fas fa-users"></i> Registered Users</h2>
+                    <div class="games-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr class="empty-row">
+                                    <td colspan="5">
+                                        <div class="loading"><i class="fas fa-spinner"></i> Loading users...</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Settings -->
+            <div class="tab-content" id="tab-settings">
+                <div class="admin-form">
+                    <h2><i class="fas fa-cog"></i> Settings</h2>
+
+                    <div class="form-group">
+                        <label for="siteName">Site Name</label>
+                        <input type="text" id="siteName" value="DVARY GAMES" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="aiModel">AI Model</label>
+                        <select id="aiModel">
+                            <option value="mistralai/mistral-7b-instruct:free">Mistral 7B (Free)</option>
+                            <option value="meta-llama/llama-3-8b-instruct:free">Llama 3 8B (Free)</option>
+                            <option value="google/gemini-pro">Gemini Pro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="aiSystemPrompt">AI System Prompt</label>
+                        <textarea id="aiSystemPrompt" rows="3">You are a helpful gaming assistant for DVARY GAMES. Keep responses short and friendly.</textarea>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 <a href="/">DVARY GAMES</a>. All rights reserved.</p>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js",
+                "firebase/storage": "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+        import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            addDoc,
+            deleteDoc,
+            doc,
+            query,
+            orderBy,
+            serverTimestamp,
+            getCountFromServer,
+            where
+        } from "firebase/firestore";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCmwASW4XXQ3O0AvsCM_r1WLlrUmGjYVxI",
+            authDomain: "dvary-9a7d0.firebaseapp.com",
+            projectId: "dvary-9a7d0",
+            storageBucket: "dvary-9a7d0.firebasestorage.app",
+            messagingSenderId: "107370806066",
+            appId: "1:107370806066:web:4c2ce1e6f7b6c32909f52b",
+            measurementId: "G-07361LFJEP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const toast = document.getElementById('toast');
+
+        function showToast(message, type = 'info') {
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+
+        window.toggleDropdown = function() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        };
+
+        window.logoutUser = function() {
+            signOut(auth).then(() => {
+                showToast('Logged out', 'success');
+                document.getElementById('userDropdown').classList.remove('show');
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+            });
+        };
+
+        document.addEventListener('click', function(event) {
+            const menu = document.querySelector('.user-menu');
+            if (menu && !menu.contains(event.target)) {
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        });
+
+        // Tab switching
+        document.querySelectorAll('.admin-tabs button').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.admin-tabs button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const tabId = this.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.getElementById('tab-' + tabId).classList.add('active');
+            });
+        });
+
+        // Load games
+        async function loadGames() {
+            const tbody = document.getElementById('gamesTableBody');
+            try {
+                const q = query(collection(db, 'games'), orderBy('createdAt', 'desc'));
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    tbody.innerHTML = `
+                        <tr class="empty-row">
+                            <td colspan="5">
+                                <i class="fas fa-gamepad" style="font-size:2rem;color:#2a2a4e;display:block;margin-bottom:0.5rem;"></i>
+                                No games added yet. Add your first game!
+                            </td>
+                        </tr>
+                    `;
+                    document.getElementById('totalGames').textContent = '0';
+                    return;
+                }
+
+                let html = '';
+                let count = 0;
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    count++;
+                    const date = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleDateString() : 'Unknown';
+                    html += `
+                        <tr>
+                            <td>${count}</td>
+                            <td><strong>${data.name || 'Untitled'}</strong></td>
+                            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${data.description || '-'}</td>
+                            <td>${date}</td>
+                            <td>
+                                <div class="actions">
+                                    <button class="btn btn-danger btn-small" onclick="deleteGame('${doc.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+                document.getElementById('totalGames').textContent = count;
+
+            } catch (error) {
+                console.error('Error loading games:', error);
+                tbody.innerHTML = `
+                    <tr class="empty-row">
+                        <td colspan="5">Error loading games: ${error.message}</td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Delete game
+        window.deleteGame = async function(gameId) {
+            if (!confirm('Are you sure you want to delete this game?')) return;
+
+            try {
+                await deleteDoc(doc(db, 'games', gameId));
+                showToast('Game deleted successfully!', 'success');
+                loadGames();
+                loadStats();
+            } catch (error) {
+                console.error('Error deleting game:', error);
+                showToast('Error deleting game: ' + error.message, 'error');
+            }
+        };
+
+        // Load users
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            try {
+                const snapshot = await getDocs(collection(db, 'users'));
+
+                if (snapshot.empty) {
+                    tbody.innerHTML = `
+                        <tr class="empty-row">
+                            <td colspan="5">No users registered yet.</td>
+                        </tr>
+                    `;
+                    document.getElementById('totalUsers').textContent = '0';
+                    return;
+                }
+
+                let html = '';
+                let count = 0;
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    count++;
+                    const joined = data.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'Unknown';
+                    const role = data.role || 'user';
+                    html += `
+                        <tr>
+                            <td>${count}</td>
+                            <td><strong>${data.username || 'Unknown'}</strong></td>
+                            <td>${data.email || '-'}</td>
+                            <td><span class="btn btn-small ${role === 'admin' ? 'btn-primary' : 'btn-outline'}">${role}</span></td>
+                            <td>${joined}</td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+                document.getElementById('totalUsers').textContent = count;
+
+            } catch (error) {
+                console.error('Error loading users:', error);
+                tbody.innerHTML = `
+                    <tr class="empty-row">
+                        <td colspan="5">Error loading users: ${error.message}</td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Load stats
+        async function loadStats() {
+            try {
+                // Total games
+                const gamesSnap = await getDocs(collection(db, 'games'));
+                document.getElementById('totalGames').textContent = gamesSnap.size;
+
+                // Total users
+                const usersSnap = await getDocs(collection(db, 'users'));
+                document.getElementById('totalUsers').textContent = usersSnap.size;
+
+                // Total community messages
+                const msgSnap = await getDocs(collection(db, 'community_messages'));
+                document.getElementById('totalMessages').textContent = msgSnap.size;
+
+                // Total AI chats (from a collection if you track them)
+                // For now, show placeholder
+                document.getElementById('totalAI').textContent = '0';
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Add game
+        document.getElementById('addGameForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('gameName').value.trim();
+            const description = document.getElementById('gameDescription').value.trim();
+            const category = document.getElementById('gameCategory').value;
+            const fileInput = document.getElementById('gameFile');
+            const imageInput = document.getElementById('gameImage');
+
+            if (!name || !description || !fileInput.files.length) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('addGameBtn');
+            const spinner = document.getElementById('addSpinner');
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+
+            try {
+                // Upload game file
+                const file = fileInput.files[0];
+                const fileRef = ref(storage, `games/${Date.now()}_${file.name}`);
+                await uploadBytes(fileRef, file);
+                const fileUrl = await getDownloadURL(fileRef);
+
+                // Upload image if provided
+                let imageUrl = null;
+                if (imageInput.files.length > 0) {
+                    const imgFile = imageInput.files[0];
+                    const imgRef = ref(storage, `game_images/${Date.now()}_${imgFile.name}`);
+                    await uploadBytes(imgRef, imgFile);
+                    imageUrl = await getDownloadURL(imgRef);
+                }
+
+                // Add to Firestore
+                await addDoc(collection(db, 'games'), {
+                    name: name,
+                    description: description,
+                    category: category,
+                    fileUrl: fileUrl,
+                    imageUrl: imageUrl,
+                    createdAt: serverTimestamp(),
+                    addedBy: auth.currentUser?.email || 'admin'
+                });
+
+                showToast('Game added successfully!', 'success');
+                document.getElementById('addGameForm').reset();
+                loadGames();
+                loadStats();
+
+            } catch (error) {
+                console.error('Error adding game:', error);
+                showToast('Error adding game: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        });
+
+        // Save settings
+        window.saveSettings = function() {
+            const siteName = document.getElementById('siteName').value;
+            const aiModel = document.getElementById('aiModel').value;
+            const aiPrompt = document.getElementById('aiSystemPrompt').value;
+
+            // In a real app, save these to Firestore or localStorage
+            localStorage.setItem('dvary_settings', JSON.stringify({
+                siteName,
+                aiModel,
+                aiPrompt
+            }));
+
+            showToast('Settings saved! (stored locally)', 'success');
+        };
+
+        // Load settings from localStorage
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem('dvary_settings');
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    if (settings.siteName) document.getElementById('siteName').value = settings.siteName;
+                    if (settings.aiModel) document.getElementById('aiModel').value = settings.aiModel;
+                    if (settings.aiPrompt) document.getElementById('aiSystemPrompt').value = settings.aiPrompt;
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        // Auth state - Check if user is admin
+        onAuthStateChanged(auth, (user) => {
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+            const avatarText = document.getElementById('avatarText');
+            const accessDenied = document.getElementById('accessDenied');
+            const adminContent = document.getElementById('adminContent');
+
+            if (user) {
+                authButtons.style.display = 'none';
+                userMenu.style.display = 'block';
+                avatarText.textContent = user.email ? user.email.charAt(0).toUpperCase() : 'U';
+
+                // Check if admin
+                if (user.email === 'admin@dvary.com') {
+                    accessDenied.style.display = 'none';
+                    adminContent.style.display = 'block';
+                    loadGames();
+                    loadUsers();
+                    loadStats();
+                    loadSettings();
+                } else {
+                    accessDenied.style.display = 'block';
+                    adminContent.style.display = 'none';
+                }
+
+                const adminLink = document.querySelector('.user-dropdown a[href="/admin/index.html"]');
+                if (adminLink) {
+                    if (user.email === 'admin@dvary.com') {
+                        adminLink.style.display = 'block';
+                    } else {
+                        adminLink.style.display = 'none';
+                    }
+                }
+
+            } else {
+                authButtons.style.display = 'flex';
+                userMenu.style.display = 'none';
+                accessDenied.style.display = 'block';
+                adminContent.style.display = 'none';
+            }
+        });
+
+        // Fix for admin link in dropdown
+        document.querySelectorAll('.user-dropdown a').forEach(link => {
+            if (link.getAttribute('href') === '/admin/index.html') {
+                link.style.display = 'none';
+            }
+        });
+    </script>
+
+</body>
+  </html>
