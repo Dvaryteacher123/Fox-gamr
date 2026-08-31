@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Home</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1a1a2e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --border: #2d2d44;
+            --shadow: rgba(99, 102, 241, 0.2);
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --border: #cbd5e1;
+            --shadow: rgba(99, 102, 241, 0.3);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        
+        /* ============ SIDEBAR ============ */
+        .sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            padding: 30px 20px;
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            transition: background 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        
+        .sidebar h1 {
+            color: var(--accent);
+            font-size: 28px;
+            margin-bottom: 30px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar h1 span {
+            color: var(--text-primary);
+        }
+        
+        .nav-links {
+            list-style: none;
+            flex: 1;
+        }
+        
+        .nav-links li {
+            margin-bottom: 4px;
+        }
+        
+        .nav-links a {
+            display: block;
+            padding: 10px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--accent);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        /* ============ AI MINI CHAT - CHINI YA SIDEBAR ============ */
+        .sidebar-ai-mini {
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .sidebar-ai-mini .ai-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .sidebar-ai-mini .ai-label .dot {
+            width: 7px;
+            height: 7px;
+            background: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .sidebar-ai-mini input {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .sidebar-ai-mini input:focus {
+            border-color: var(--accent);
+        }
+        
+        .sidebar-ai-mini input::placeholder {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        
+        .sidebar-ai-mini .mini-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        
+        .sidebar-ai-mini .mini-actions button {
+            flex: 1;
+            padding: 6px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-ai-mini .mini-actions button:hover {
+            background: var(--accent-hover);
+            transform: scale(1.02);
+        }
+        
+        .sidebar-ai-mini .mini-actions button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .sidebar-ai-mini .mini-response {
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: none;
+            max-height: 80px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+        
+        .sidebar-ai-mini .mini-response.active {
+            display: block;
+        }
+        
+        .sidebar-ai-mini .mini-response .loading-text {
+            color: var(--accent);
+            font-style: italic;
+        }
+        
+        /* ============ USER BADGE ============ */
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .user-badge .email {
+            color: var(--text-secondary);
+            font-size: 12px;
+            flex: 1;
+            min-width: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .user-badge .profile-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .user-badge .profile-link:hover {
+            text-decoration: underline;
+        }
+        
+        .user-badge .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .user-badge .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        /* ============ MAIN CONTENT ============ */
+        .main-content {
+            flex: 1;
+            padding: 40px 50px;
+            overflow-y: auto;
+        }
+        
+        /* ============ HERO ============ */
+        .hero {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            padding: 50px;
+            border-radius: 20px;
+            margin-bottom: 35px;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero h2 {
+            font-size: 44px;
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* ============ STATS ============ */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 35px;
+        }
+        
+        .stat-box {
+            background: var(--bg-card);
+            padding: 22px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-box:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        .stat-box .number {
+            font-size: 34px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        
+        .stat-box .label {
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-size: 14px;
+        }
+        
+        /* ============ FEATURES ============ */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 22px;
+            margin-top: 10px;
+        }
+        
+        .feature-card {
+            background: var(--bg-card);
+            padding: 28px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+        
+        .feature-card h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 15px;
+        }
+        
+        /* ============ THEME TOGGLE FLOATING ============ */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            color: var(--text-primary);
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+        }
+        
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 30px 35px;
+            }
+            .hero h2 {
+                font-size: 36px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                padding: 20px 15px;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .hero {
+                padding: 30px;
+            }
+            .hero h2 {
+                font-size: 28px;
+            }
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 15px;
+                max-height: 300px;
+            }
+            .sidebar h1 {
+                font-size: 22px;
+                margin-bottom: 15px;
+            }
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .nav-links li {
+                margin-bottom: 0;
+            }
+            .nav-links a {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            .sidebar-ai-mini {
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            .sidebar-ai-mini input {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+            .sidebar-ai-mini .mini-actions button {
+                font-size: 11px;
+                padding: 5px;
+            }
+            .user-badge {
+                margin-top: 8px;
+                padding: 4px 10px;
+            }
+            .user-badge .email {
+                font-size: 11px;
+            }
+            .main-content {
+                padding: 15px;
+            }
+            .hero {
+                padding: 25px;
+            }
+            .hero h2 {
+                font-size: 24px;
+            }
+            .hero p {
+                font-size: 15px;
+            }
+            .stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .stat-box {
+                padding: 15px;
+            }
+            .stat-box .number {
+                font-size: 26px;
+            }
+            .features {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .feature-card {
+                padding: 20px;
+            }
+            .theme-toggle {
+                bottom: 70px;
+                right: 15px;
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ============ SIDEBAR ============ -->
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        
+        <ul class="nav-links">
+            <li><a href="/" class="active">🏠 Home</a></li>
+            <li><a href="/games">🎮 Games</a></li>
+            <li><a href="/ai">🤖 AI Chat</a></li>
+            <li><a href="/login">🔑 Login</a></li>
+            <li><a href="/signup">📝 Sign Up</a></li>
+            <li><a href="/admin">⚙️ Admin</a></li>
+            <li><a href="/profile">👤 Profile</a></li>
+            <li><a href="/settings">⚙️ Settings</a></li>
+        </ul>
+        
+        <!-- AI Mini Chat - Chini ya Sidebar -->
+        <div class="sidebar-ai-mini">
+            <div class="ai-label">
+                <span class="dot"></span>
+                AI Assistant
+            </div>
+            <input type="text" id="sidebarMiniInput" placeholder="Ask me about games..." />
+            <div class="mini-actions">
+                <button id="sidebarMiniSend">Send</button>
+            </div>
+            <div class="mini-response" id="sidebarMiniResponse">
+                <span class="loading-text">🤖 Thinking...</span>
+            </div>
+        </div>
+        
+        <!-- User Badge -->
+        <div class="user-badge" id="userBadge" style="display: none;">
+            <span class="email" id="userEmail"></span>
+            <a href="/profile" class="profile-link">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <!-- ============ MAIN CONTENT ============ -->
+    <div class="main-content">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h2>Welcome to DVARY GAMES</h2>
+            <p>Your ultimate gaming platform where you can discover, play, and connect with the best games around.</p>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats" id="statsContainer">
+            <div class="stat-box">
+                <div class="number" id="gameCount">0</div>
+                <div class="label">Total Games</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="userCount">0</div>
+                <div class="label">Active Users</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="genreCount">0</div>
+                <div class="label">Genres</div>
+            </div>
+        </div>
+        
+        <!-- Features -->
+        <div class="features">
+            <div class="feature-card">
+                <h3>🎮 Game Library</h3>
+                <p>Browse through our extensive collection of games from various genres.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🤖 AI Assistant</h3>
+                <p>Get personalized game recommendations and tips from our AI chatbot.</p>
+            </div>
+            <div class="feature-card">
+                <h3>👥 Community</h3>
+                <p>Connect with other gamers, share reviews, and build your gaming network.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</button>
+    
+    <!-- ============ JAVASCRIPT ============ -->
+    <script>
+        // ============================================================
+        // FIREBASE CONFIGURATION
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        // ============================================================
+        // THEME MANAGEMENT
+        // ============================================================
+        function getTheme() {
+            return localStorage.getItem('dvary-theme') || 'dark';
+        }
+        
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('dvary-theme', theme);
+            const btn = document.getElementById('themeToggle');
+            btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+        
+        // Load saved theme
+        setTheme(getTheme());
+        
+        // Theme toggle
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const current = getTheme();
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+        
+        // ============================================================
+        // AUTH STATE
+        // ============================================================
+        auth.onAuthStateChanged((user) => {
+            const badge = document.getElementById('userBadge');
+            const email = document.getElementById('userEmail');
+            
+            if (user) {
+                badge.style.display = 'flex';
+                email.textContent = user.email;
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+        
+        // ============================================================
+        // LOGOUT
+        // ============================================================
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.reload();
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        }
+        
+        // ============================================================
+        // LOAD STATS FROM FIRESTORE
+        // ============================================================
+        function loadStats() {
+            // Count games
+            db.collection('games').get().then((snapshot) => {
+                document.getElementById('gameCount').textContent = snapshot.size;
+            }).catch((error) => {
+                console.error('Error loading games count:', error);
+                document.getElementById('gameCount').textContent = '0';
+            });
+            
+            // Count users
+            db.collection('users').get().then((snapshot) => {
+                document.getElementById('userCount').textContent = snapshot.size;
+            }).catch((error) => {
+                console.error('Error loading users count:', error);
+                document.getElementById('userCount').textContent = '0';
+            });
+            
+            // Count unique genres
+            db.collection('games').get().then((snapshot) => {
+                const genres = new Set();
+                snapshot.forEach((doc) => {
+                    const game = doc.data();
+                    if (game.genre) {
+                        genres.add(game.genre);
+                    }
+                });
+                document.getElementById('genreCount').textContent = genres.size;
+            }).catch((error) => {
+                console.error('Error loading genres:', error);
+                document.getElementById('genreCount').textContent = '0';
+            });
+        }
+        
+        // Load stats on page load
+        loadStats();
+        
+        // ============================================================
+        // SIDEBAR AI MINI CHAT
+        // ============================================================
+        const miniInput = document.getElementById('sidebarMiniInput');
+        const miniSend = document.getElementById('sidebarMiniSend');
+        const miniResponse = document.getElementById('sidebarMiniResponse');
+        
+        async function sendMiniMessage() {
+            const message = miniInput.value.trim();
+            if (!message) return;
+            
+            miniSend.disabled = true;
+            miniResponse.className = 'mini-response active';
+            miniResponse.innerHTML = '<span class="loading-text">🤖 Thinking...</span>';
+            
+            try {
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    miniResponse.innerHTML = data.response;
+                } else {
+                    miniResponse.innerHTML = `❌ ${data.error || 'Something went wrong'}`;
+                }
+            } catch (error) {
+                miniResponse.innerHTML = '❌ Server not running. Please start the server.';
+                console.error('Error:', error);
+            } finally {
+                miniSend.disabled = false;
+                miniInput.value = '';
+                miniInput.focus();
+            }
+        }
+        
+        // Event listeners
+        miniSend.addEventListener('click', sendMiniMessage);
+        miniInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMiniMessage();
+            }
+        });
+    </script>
+</body>
+</html>
