@@ -6,21 +6,18 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Kusoma mafaili ya mbele (Frontend) kutoka kwenye folda zake sahihi
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/pages', express.static(path.join(__dirname, 'pages')));
-app.use('/admin', express.static(path.join(__dirname, 'admin')));
+// Kusoma mafaili ukiwa ndani ya folda ya backend (kutumia ../ kutoka backend/)
+app.use(express.static(path.join(__dirname, '../public')));
+app.use('/pages', express.static(path.join(__dirname, '../pages')));
+app.use('/admin', express.static(path.join(__dirname, '../admin')));
 
-// Njia kuu (Home Route)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Mfano wa API route ya AI Chat kupitia OpenRouter
 app.post('/api/ai-chat', async (req, res) => {
     try {
         const { message } = req.body;
@@ -37,7 +34,6 @@ app.post('/api/ai-chat', async (req, res) => {
     }
 });
 
-// Anzisha Seva
 app.listen(PORT, () => {
     console.log(`🚀 Seva inaendelea kwenye port ${PORT}`);
 });
