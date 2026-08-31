@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Sign Up</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #1a1a2e;
+            padding: 30px 20px;
+            border-right: 1px solid #2d2d44;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+        }
+        
+        .sidebar h1 {
+            color: #6366f1;
+            font-size: 28px;
+            margin-bottom: 40px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar h1 span {
+            color: #e2e8f0;
+        }
+        
+        .nav-links {
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-bottom: 12px;
+        }
+        
+        .nav-links a {
+            display: block;
+            padding: 12px 18px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #6366f1;
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+        
+        .signup-container {
+            background: #1a1a2e;
+            padding: 50px;
+            border-radius: 20px;
+            border: 1px solid #2d2d44;
+            width: 100%;
+            max-width: 420px;
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .signup-container .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .signup-container .logo h2 {
+            font-size: 32px;
+            color: #6366f1;
+        }
+        
+        .signup-container .logo p {
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0a0a0f;
+            border: 1px solid #2d2d44;
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            border-color: #6366f1;
+        }
+        
+        .form-group input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .password-requirements {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        
+        .password-requirements .valid {
+            color: #22c55e;
+        }
+        
+        .password-requirements .invalid {
+            color: #ef4444;
+        }
+        
+        .signup-btn {
+            width: 100%;
+            padding: 14px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .signup-btn:hover {
+            background: #8b5cf6;
+            transform: scale(1.02);
+        }
+        
+        .signup-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .login-link a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+            padding: 10px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .success-message {
+            color: #22c55e;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+            padding: 10px;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #0a0a0f;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+        
+        .user-badge .email {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .user-badge .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .user-badge .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        .already-logged {
+            text-align: center;
+            padding: 20px;
+            background: #0a0a0f;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .already-logged p {
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+        
+        .already-logged .email-display {
+            color: #6366f1;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                padding: 20px 15px;
+            }
+            .signup-container {
+                padding: 30px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid #2d2d44;
+            }
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .nav-links li {
+                margin-bottom: 0;
+            }
+            .nav-links a {
+                padding: 8px 14px;
+                font-size: 14px;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .signup-container {
+                padding: 25px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        <ul class="nav-links">
+            <li><a href="/">🏠 Home</a></li>
+            <li><a href="/games">🎮 Games</a></li>
+            <li><a href="/ai">🤖 AI Chat</a></li>
+            <li><a href="/login">🔑 Login</a></li>
+            <li><a href="/signup" class="active">📝 Sign Up</a></li>
+            <li><a href="/admin">⚙️ Admin</a></li>
+        </ul>
+        
+        <div class="user-badge" id="userBadge" style="display: none;">
+            <span class="email" id="userEmail"></span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="signup-container">
+            <div class="logo">
+                <h2>📝 Create Account</h2>
+                <p>Join DVARY GAMES today!</p>
+            </div>
+            
+            <!-- Sign Up Form -->
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Choose a username" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="you@example.com" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Min 6 characters" required />
+                    <div class="password-requirements" id="passwordReq">
+                        <span id="lengthReq">❌ At least 6 characters</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Re-enter password" required />
+                </div>
+                
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+                
+                <button type="submit" class="signup-btn" id="signupBtn">Create Account</button>
+            </form>
+            
+            <div class="login-link">
+                Already have an account? <a href="/login">Sign in</a>
+            </div>
+            
+            <!-- Already logged in -->
+            <div id="alreadyLogged" style="display: none;" class="already-logged">
+                <p>You are already signed in as</p>
+                <p class="email-display" id="loggedEmail"></p>
+                <button onclick="logout()" class="signup-btn" style="margin-top: 15px; background: #ef4444;">
+                    Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        const signupForm = document.getElementById('signupForm');
+        const usernameInput = document.getElementById('username');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirmPassword');
+        const signupBtn = document.getElementById('signupBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const alreadyLogged = document.getElementById('alreadyLogged');
+        const loggedEmail = document.getElementById('loggedEmail');
+        const userBadge = document.getElementById('userBadge');
+        const userEmail = document.getElementById('userEmail');
+        const lengthReq = document.getElementById('lengthReq');
+        
+        // Check auth state
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is logged in
+                signupForm.style.display = 'none';
+                alreadyLogged.style.display = 'block';
+                loggedEmail.textContent = user.email;
+                userBadge.style.display = 'flex';
+                userEmail.textContent = user.email;
+            } else {
+                signupForm.style.display = 'block';
+                alreadyLogged.style.display = 'none';
+                userBadge.style.display = 'none';
+            }
+        });
+        
+        // Logout function
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.reload();
+            }).catch((error) => {
+                console.error('Logout error:', error);
+                showError('Failed to logout: ' + error.message);
+            });
+        }
+        
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.className = 'error-message show';
+            successMessage.className = 'success-message';
+        }
+        
+        // Show success message
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.className = 'success-message show';
+            errorMessage.className = 'error-message';
+        }
+        
+        // Password validation
+        passwordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+            if (password.length >= 6) {
+                lengthReq.innerHTML = '✅ At least 6 characters';
+                lengthReq.className = 'valid';
+            } else {
+                lengthReq.innerHTML = '❌ At least 6 characters';
+                lengthReq.className = 'invalid';
+            }
+        });
+        
+        // Sign up form submit
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const confirm = confirmInput.value;
+            
+            // Validation
+            if (!username || !email || !password || !confirm) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            if (username.length < 3) {
+                showError('Username must be at least 3 characters');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+            
+            if (password !== confirm) {
+                showError('Passwords do not match');
+                return;
+            }
+            
+            // Disable button and show loading
+            signupBtn.disabled = true;
+            signupBtn.textContent = 'Creating account...';
+            showError('');
+            showSuccess('');
+            
+            try {
+                // Create user with Firebase Auth
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Update user profile with username
+                await user.updateProfile({
+                    displayName: username
+                });
+                
+                // Save user data to Firestore
+                await db.collection('users').doc(user.uid).set({
+                    uid: user.uid,
+                    username: username,
+                    email: user.email,
+                    displayName: username,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                    role: 'user'
+                });
+                
+                showSuccess('✅ Account created successfully! Redirecting...');
+                
+                // Redirect to home after 1.5 seconds
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Signup error:', error);
+                
+                // Handle specific Firebase errors
+                let errorMsg = 'Signup failed. Please try again.';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg = 'This email is already registered. Please login instead.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'Invalid email address format.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg = 'Password is too weak. Use at least 6 characters.';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMsg = 'Email/password accounts are not enabled. Please contact support.';
+                }
+                
+                showError('❌ ' + errorMsg);
+            } finally {
+                signupBtn.disabled = false;
+                signupBtn.textContent = 'Create Account';
+            }
+        });
+        
+        // Enter key to submit
+        confirmInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                signupForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
