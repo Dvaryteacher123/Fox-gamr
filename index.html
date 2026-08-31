@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DVARY GAMES</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: #1a1a2e;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e94560;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e94560;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #fff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #e94560;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .btn-primary {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #c73652;
+            transform: scale(1.05);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 2px solid #e94560;
+        }
+
+        .btn-outline:hover {
+            background: #e94560;
+        }
+
+        /* HERO */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #0a0a0f, #1a1a2e);
+            border-bottom: 1px solid #e94560;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: #aaa;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 1rem auto 2rem;
+        }
+
+        /* GAMES */
+        .games-section {
+            padding: 3rem 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: #e94560;
+            margin-bottom: 2rem;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .game-card {
+            background: #1a1a2e;
+            border-radius: 16px;
+            border: 1px solid #2a2a4e;
+            overflow: hidden;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: #e94560;
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.2);
+        }
+
+        .game-card-image {
+            height: 180px;
+            background: linear-gradient(135deg, #2a2a4e, #3a3a6e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #e94560;
+        }
+
+        .game-card-body {
+            padding: 1.5rem;
+        }
+
+        .game-card-body h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-card-body p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .game-card-body .game-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        /* FEATURES */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            padding: 3rem 2rem;
+            background: #0f0f1a;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 2rem;
+            background: #1a1a2e;
+            border-radius: 16px;
+            border: 1px solid #2a2a4e;
+            transition: 0.3s;
+        }
+
+        .feature-item:hover {
+            border-color: #e94560;
+        }
+
+        .feature-item i {
+            font-size: 3rem;
+            color: #e94560;
+            margin-bottom: 1rem;
+        }
+
+        .feature-item h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-item p {
+            color: #888;
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid #1a1a2e;
+            color: #666;
+        }
+
+        .footer a {
+            color: #e94560;
+            text-decoration: none;
+        }
+
+        /* FLOATING AI */
+        .floating-ai {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 65px;
+            height: 65px;
+            background: #e94560;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #fff;
+            text-decoration: none;
+            box-shadow: 0 4px 25px rgba(233, 69, 96, 0.5);
+            z-index: 9999;
+            transition: 0.3s;
+        }
+
+        .floating-ai:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 35px rgba(233, 69, 96, 0.7);
+        }
+
+        .floating-ai .pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(233, 69, 96, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+
+            .auth-buttons {
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .floating-ai {
+                width: 55px;
+                height: 55px;
+                font-size: 24px;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                gap: 0.5rem;
+            }
+
+            .nav-links a {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.8rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .floating-ai {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+                bottom: 15px;
+                right: 15px;
+            }
+        }
+
+        /* USER DROPDOWN */
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e94560;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .user-avatar:hover {
+            border-color: #fff;
+        }
+
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: #1a1a2e;
+            border-radius: 12px;
+            min-width: 180px;
+            border: 1px solid #2a2a4e;
+            padding: 0.5rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 0.7rem 1.5rem;
+            color: #fff;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .user-dropdown a:hover {
+            background: #e94560;
+        }
+
+        .user-dropdown .divider {
+            height: 1px;
+            background: #2a2a4e;
+            margin: 0.3rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">DVARY <span>GAMES</span></a>
+
+        <ul class="nav-links">
+            <li><a href="index.html" class="active"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="pages/games/games.html"><i class="fas fa-gamepad"></i> Games</a></li>
+            <li><a href="pages/ai/ai.html"><i class="fas fa-robot"></i> AI Chat</a></li>
+            <li><a href="pages/community/community.html"><i class="fas fa-users"></i> Community</a></li>
+        </ul>
+
+        <div class="auth-buttons" id="authButtons">
+            <a href="pages/auth/login.html" class="btn btn-outline">Login</a>
+            <a href="pages/auth/register.html" class="btn btn-primary">Register</a>
+        </div>
+
+        <div class="user-menu" id="userMenu" style="display:none;">
+            <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">
+                <span id="avatarText">U</span>
+            </div>
+            <div class="user-dropdown" id="userDropdown">
+                <a href="pages/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="admin/index.html"><i class="fas fa-crown"></i> Admin</a>
+                <div class="divider"></div>
+                <a href="#" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <h1>Welcome to DVARY GAMES</h1>
+        <p>Play games, chat with AI, and connect with the community. All in one place.</p>
+        <a href="pages/games/games.html" class="btn btn-primary" style="font-size:1.2rem; padding:0.8rem 2.5rem;">
+            <i class="fas fa-play"></i> Start Playing
+        </a>
+    </section>
+
+    <!-- GAMES -->
+    <section class="games-section">
+        <div class="section-title">
+            <i class="fas fa-gamepad"></i> Featured Games
+        </div>
+        <div class="games-grid">
+            <div class="game-card" onclick="alert('Game coming soon! Admin will add games.')">
+                <div class="game-card-image"><i class="fas fa-gamepad"></i></div>
+                <div class="game-card-body">
+                    <h3>Sample Game</h3>
+                    <p>This is a placeholder. Admin will add real games.</p>
+                    <div class="game-meta">
+                        <span><i class="far fa-calendar-alt"></i> Coming Soon</span>
+                        <span><i class="fas fa-play"></i> Play</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card" onclick="alert('Game coming soon! Admin will add games.')">
+                <div class="game-card-image"><i class="fas fa-gamepad"></i></div>
+                <div class="game-card-body">
+                    <h3>Sample Game 2</h3>
+                    <p>This is a placeholder. Admin will add real games.</p>
+                    <div class="game-meta">
+                        <span><i class="far fa-calendar-alt"></i> Coming Soon</span>
+                        <span><i class="fas fa-play"></i> Play</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card" onclick="alert('Game coming soon! Admin will add games.')">
+                <div class="game-card-image"><i class="fas fa-gamepad"></i></div>
+                <div class="game-card-body">
+                    <h3>Sample Game 3</h3>
+                    <p>This is a placeholder. Admin will add real games.</p>
+                    <div class="game-meta">
+                        <span><i class="far fa-calendar-alt"></i> Coming Soon</span>
+                        <span><i class="fas fa-play"></i> Play</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features">
+        <div class="feature-item">
+            <i class="fas fa-robot"></i>
+            <h3>AI Chat</h3>
+            <p>Chat with our AI assistant</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-users"></i>
+            <h3>Community</h3>
+            <p>Connect with other gamers</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-crown"></i>
+            <h3>Admin Control</h3>
+            <p>Add and manage games</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-fire"></i>
+            <h3>Free to Play</h3>
+            <p>All games are free</p>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>&copy; 2026 <a href="index.html">DVARY GAMES</a>. All rights reserved.</p>
+        <p style="margin-top:0.5rem; font-size:0.8rem; color:#444;">
+            Built with <i class="fas fa-heart" style="color:#e94560;"></i> by DVARY
+        </p>
+    </footer>
+
+    <!-- FLOATING AI BUTTON -->
+    <a href="pages/ai/ai.html" class="floating-ai" title="Chat with AI">
+        <span class="pulse"></span>
+        <i class="fas fa-robot"></i>
+    </a>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // Toggle dropdown
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Logout
+        function logoutUser() {
+            if (confirm('Are you sure you want to logout?')) {
+                document.getElementById('userMenu').style.display = 'none';
+                document.getElementById('authButtons').style.display = 'flex';
+                document.getElementById('userDropdown').classList.remove('show');
+                alert('✅ Logged out successfully!');
+            }
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', function(event) {
+            const menu = document.querySelector('.user-menu');
+            if (menu && !menu.contains(event.target)) {
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        });
+
+        // Demo: Check if URL has ?login=success
+        if (window.location.search.includes('login=success')) {
+            document.getElementById('authButtons').style.display = 'none';
+            document.getElementById('userMenu').style.display = 'block';
+            document.getElementById('avatarText').textContent = 'U';
+            alert('✅ You are now logged in as User!');
+            window.history.replaceState({}, document.title, 'index.html');
+        }
+
+        console.log('✅ DVARY GAMES loaded successfully!');
+    </script>
+
+</body>
+</html>
+
