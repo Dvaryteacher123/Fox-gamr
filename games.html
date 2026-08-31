@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Games</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #1a1a2e;
+            padding: 30px 20px;
+            border-right: 1px solid #2d2d44;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+        }
+        
+        .sidebar h1 {
+            color: #6366f1;
+            font-size: 28px;
+            margin-bottom: 40px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar h1 span {
+            color: #e2e8f0;
+        }
+        
+        .nav-links {
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-bottom: 12px;
+        }
+        
+        .nav-links a {
+            display: block;
+            padding: 12px 18px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #6366f1;
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header h2 {
+            font-size: 32px;
+            color: #6366f1;
+        }
+        
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filter-section select,
+        .filter-section input {
+            padding: 10px 15px;
+            background: #1a1a2e;
+            border: 1px solid #2d2d44;
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .filter-section select:focus,
+        .filter-section input:focus {
+            border-color: #6366f1;
+        }
+        
+        .filter-section select option {
+            background: #1a1a2e;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+            font-size: 18px;
+        }
+        
+        .loading .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #2d2d44;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .game-card {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #2d2d44;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .game-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: #6366f1;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+        }
+        
+        .game-card h3 {
+            color: #e2e8f0;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        
+        .game-card .genre {
+            color: #6366f1;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 3px 12px;
+            border-radius: 15px;
+        }
+        
+        .game-card .description {
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .game-card .rating {
+            color: #fbbf24;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .game-card .released {
+            color: #64748b;
+            font-size: 13px;
+        }
+        
+        .game-card .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #2d2d44;
+        }
+        
+        .game-card .platform {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+        
+        .game-card .platform span {
+            color: #6366f1;
+        }
+        
+        .no-games {
+            text-align: center;
+            padding: 60px;
+            color: #94a3b8;
+        }
+        
+        .no-games h3 {
+            color: #e2e8f0;
+            margin-bottom: 10px;
+        }
+        
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #0a0a0f;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+        
+        .user-badge .email {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .user-badge .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .user-badge .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                padding: 20px 15px;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-section {
+                flex-wrap: wrap;
+            }
+            .filter-section select,
+            .filter-section input {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid #2d2d44;
+            }
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .nav-links li {
+                margin-bottom: 0;
+            }
+            .nav-links a {
+                padding: 8px 14px;
+                font-size: 14px;
+            }
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            .filter-section {
+                flex-direction: column;
+            }
+            .filter-section select,
+            .filter-section input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        <ul class="nav-links">
+            <li><a href="/">🏠 Home</a></li>
+            <li><a href="/games" class="active">🎮 Games</a></li>
+            <li><a href="/ai">🤖 AI Chat</a></li>
+            <li><a href="/login">🔑 Login</a></li>
+            <li><a href="/signup">📝 Sign Up</a></li>
+            <li><a href="/admin">⚙️ Admin</a></li>
+        </ul>
+        
+        <div class="user-badge" id="userBadge" style="display: none;">
+            <span class="email" id="userEmail"></span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h2>🎮 Game Library</h2>
+            <div class="filter-section">
+                <input type="text" id="searchInput" placeholder="🔍 Search games..." />
+                <select id="genreFilter">
+                    <option value="all">All Genres</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="games-container">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading games from Firestore...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        let allGames = [];
+        let allGenres = new Set();
+        
+        // Check auth state
+        auth.onAuthStateChanged((user) => {
+            const badge = document.getElementById('userBadge');
+            const email = document.getElementById('userEmail');
+            if (user) {
+                badge.style.display = 'flex';
+                email.textContent = user.email;
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+        
+        // Logout function
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.reload();
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        }
+        
+        // Load games from Firestore
+        function loadGames() {
+            const container = document.getElementById('games-container');
+            
+            db.collection('games')
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    if (querySnapshot.empty) {
+                        container.innerHTML = `
+                            <div class="no-games">
+                                <h3>🎮 No games available yet</h3>
+                                <p>Check back soon for new games!</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    allGames = [];
+                    querySnapshot.forEach((doc) => {
+                        const game = doc.data();
+                        game.id = doc.id;
+                        allGames.push(game);
+                        
+                        if (game.genre) {
+                            allGenres.add(game.genre);
+                        }
+                    });
+                    
+                    // Populate genre filter
+                    populateGenreFilter();
+                    
+                    // Display games
+                    displayGames(allGames);
+                })
+                .catch((error) => {
+                    console.error('Error loading games:', error);
+                    container.innerHTML = `
+                        <div class="no-games">
+                            <h3>❌ Error loading games</h3>
+                            <p>Please check your Firebase configuration</p>
+                            <p style="font-size: 12px; color: #ef4444; margin-top: 10px;">${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+        
+        // Populate genre filter
+        function populateGenreFilter() {
+            const filter = document.getElementById('genreFilter');
+            allGenres.forEach(genre => {
+                const option = document.createElement('option');
+                option.value = genre;
+                option.textContent = genre;
+                filter.appendChild(option);
+            });
+        }
+        
+        // Display games with optional filter
+        function displayGames(games) {
+            const container = document.getElementById('games-container');
+            
+            if (games.length === 0) {
+                container.innerHTML = `
+                    <div class="no-games">
+                        <h3>🔍 No games found</h3>
+                        <p>Try adjusting your search or filter</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="games-grid">';
+            games.forEach((game) => {
+                html += `
+                    <div class="game-card">
+                        <h3>${game.name || 'Unnamed Game'}</h3>
+                        <div class="genre">${game.genre || 'General'}</div>
+                        <div class="description">${game.description || 'No description available'}</div>
+                        <div class="card-footer">
+                            <div>
+                                ${game.rating ? `<div class="rating">⭐ ${game.rating}/5</div>` : ''}
+                                ${game.released ? `<div class="released">📅 ${game.released}</div>` : ''}
+                            </div>
+                            ${game.platform ? `<div class="platform">🖥️ <span>${game.platform}</span></div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // Filter games
+        function filterGames() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const genreFilter = document.getElementById('genreFilter').value;
+            
+            let filtered = allGames.filter(game => {
+                const matchesSearch = game.name?.toLowerCase().includes(searchTerm) || 
+                                     game.description?.toLowerCase().includes(searchTerm);
+                const matchesGenre = genreFilter === 'all' || game.genre === genreFilter;
+                return matchesSearch && matchesGenre;
+            });
+            
+            displayGames(filtered);
+        }
+        
+        // Event listeners for filters
+        document.getElementById('searchInput').addEventListener('input', filterGames);
+        document.getElementById('genreFilter').addEventListener('change', filterGames);
+        
+        // Load games on page load
+        loadGames();
+    </script>
+</body>
+</html>
