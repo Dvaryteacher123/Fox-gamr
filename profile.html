@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Profile</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1a1a2e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --border: #2d2d44;
+            --shadow: rgba(99, 102, 241, 0.2);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --border: #cbd5e1;
+            --shadow: rgba(99, 102, 241, 0.3);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            padding: 30px 20px;
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            transition: background 0.3s ease, border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar h1 {
+            color: var(--accent);
+            font-size: 28px;
+            margin-bottom: 40px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar h1 span {
+            color: var(--text-primary);
+        }
+        
+        .nav-links {
+            list-style: none;
+            flex: 1;
+        }
+        
+        .nav-links li {
+            margin-bottom: 12px;
+        }
+        
+        .nav-links a {
+            display: block;
+            padding: 12px 18px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--accent);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .sidebar-ai-mini {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .sidebar-ai-mini .ai-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sidebar-ai-mini .ai-label .dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .sidebar-ai-mini input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .sidebar-ai-mini input:focus {
+            border-color: var(--accent);
+        }
+        
+        .sidebar-ai-mini input::placeholder {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        
+        .sidebar-ai-mini .mini-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .sidebar-ai-mini .mini-actions button {
+            flex: 1;
+            padding: 8px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-ai-mini .mini-actions button:hover {
+            background: var(--accent-hover);
+            transform: scale(1.02);
+        }
+        
+        .sidebar-ai-mini .mini-actions button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .sidebar-ai-mini .mini-response {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: none;
+            max-height: 100px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+        
+        .sidebar-ai-mini .mini-response.active {
+            display: block;
+        }
+        
+        .sidebar-ai-mini .mini-response .loading-text {
+            color: var(--accent);
+            font-style: italic;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .profile-info h2 {
+            font-size: 28px;
+            color: var(--text-primary);
+        }
+        
+        .profile-info .email {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        
+        .profile-info .member-since {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .profile-info .role-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        
+        .stat-card .label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .profile-details {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+        
+        .profile-details h3 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-row .label {
+            color: var(--text-secondary);
+        }
+        
+        .detail-row .value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+        }
+        
+        .user-badge .email {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .user-badge .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .user-badge .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        .user-badge .profile-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .user-badge .profile-link:hover {
+            text-decoration: underline;
+        }
+        
+        .not-logged-in {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        
+        .not-logged-in h2 {
+            color: var(--text-primary);
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        .not-logged-in p {
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+        
+        .not-logged-in .login-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .not-logged-in .login-btn:hover {
+            background: var(--accent-hover);
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 60px;
+        }
+        
+        .loading-spinner .spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            color: var(--text-primary);
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                padding: 20px 15px;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .profile-header {
+                padding: 20px;
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .nav-links li {
+                margin-bottom: 0;
+            }
+            .nav-links a {
+                padding: 8px 14px;
+                font-size: 14px;
+            }
+            .sidebar-ai-mini {
+                margin-top: 15px;
+            }
+            .profile-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            .theme-toggle {
+                bottom: 80px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        <ul class="nav-links">
+            <li><a href="/">🏠 Home</a></li>
+            <li><a href="/games">🎮 Games</a></li>
+            <li><a href="/ai">🤖 AI Chat</a></li>
+            <li><a href="/login">🔑 Login</a></li>
+            <li><a href="/signup">📝 Sign Up</a></li>
+            <li><a href="/admin">⚙️ Admin</a></li>
+            <li><a href="/profile" class="active">👤 Profile</a></li>
+            <li><a href="/settings">⚙️ Settings</a></li>
+        </ul>
+        
+        <!-- AI Mini Chat - Chini ya Sidebar -->
+        <div class="sidebar-ai-mini">
+            <div class="ai-label">
+                <span class="dot"></span>
+                AI Assistant
+            </div>
+            <input type="text" id="sidebarMiniInput" placeholder="Ask me about games..." />
+            <div class="mini-actions">
+                <button id="sidebarMiniSend">Send</button>
+            </div>
+            <div class="mini-response" id="sidebarMiniResponse">
+                <span class="loading-text">🤖 Thinking...</span>
+            </div>
+        </div>
+        
+        <div class="user-badge" id="userBadge" style="display: none;">
+            <span class="email" id="userEmail"></span>
+            <a href="/profile" class="profile-link">Profile</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div id="profileContent">
+            <!-- Loading -->
+            <div id="loadingState" class="loading-spinner">
+                <div class="spinner"></div>
+                <p style="color: var(--text-secondary); margin-top: 15px;">Loading profile...</p>
+            </div>
+            
+            <!-- Not Logged In -->
+            <div id="notLoggedIn" class="not-logged-in" style="display: none;">
+                <h2>🔒 Please Login</h2>
+                <p>You need to be logged in to view your profile.</p>
+                <a href="/login" class="login-btn">Login</a>
+            </div>
+            
+            <!-- Profile Content -->
+            <div id="profileData" style="display: none;">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar">👤</div>
+                    <div class="profile-info">
+                        <h2 id="profileUsername">Username</h2>
+                        <div class="email" id="profileEmail">email@example.com</div>
+                        <div class="member-since" id="profileMemberSince">Member since: Loading...</div>
+                        <span class="role-badge" id="profileRole">User</span>
+                    </div>
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <div class="number" id="profileGamesAdded">0</div>
+                        <div class="label">Games Added</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="profileTotalGames">0</div>
+                        <div class="label">Total Games</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="profileMemberDays">0</div>
+                        <div class="label">Days Active</div>
+                    </div>
+                </div>
+                
+                <div class="profile-details">
+                    <h3>📋 Account Details</h3>
+                    <div class="detail-row">
+                        <span class="label">User ID</span>
+                        <span class="value" id="profileUID">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Email Address</span>
+                        <span class="value" id="profileEmailDetail">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Username</span>
+                        <span class="value" id="profileUsernameDetail">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Account Created</span>
+                        <span class="value" id="profileCreatedAt">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Last Login</span>
+                        <span class="value" id="profileLastLogin">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Role</span>
+                        <span class="value" id="profileRoleDetail">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</button>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        // ============ THEME MANAGEMENT ============
+        function getTheme() {
+            return localStorage.getItem('dvary-theme') || 'dark';
+        }
+        
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('dvary-theme', theme);
+            const btn = document.getElementById('themeToggle');
+            btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+        
+        setTheme(getTheme());
+        
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const current = getTheme();
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+        
+        // ============ AUTH STATE ============
+        auth.onAuthStateChanged((user) => {
+            const badge = document.getElementById('userBadge');
+            const email = document.getElementById('userEmail');
+            
+            if (user) {
+                badge.style.display = 'flex';
+                email.textContent = user.email;
+                loadProfile(user);
+            } else {
+                badge.style.display = 'none';
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('notLoggedIn').style.display = 'block';
+                document.getElementById('profileData').style.display = 'none';
+            }
+        });
+        
+        // ============ LOGOUT ============
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.reload();
+            }).catch((error) => {
+                console.error('Logout error:', error);
+            });
+        }
+        
+        // ============ LOAD PROFILE ============
+        async function loadProfile(user) {
+            try {
+                // Get user data from Firestore
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (!userDoc.exists) {
+                    // Create user document if it doesn't exist
+                    await db.collection('users').doc(user.uid).set({
+                        uid: user.uid,
+                        username: user.displayName || 'User',
+                        email: user.email,
+                        displayName: user.displayName || 'User',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                        role: 'user'
+                    });
+                    
+                    // Reload to get the data
+                    loadProfile(user);
+                    return;
+                }
+                
+                const userData = userDoc.data();
+                
+                // Get total games count
+                const gamesSnapshot = await db.collection('games').get();
+                const totalGames = gamesSnapshot.size;
+                
+                // Get games added by this user
+                const userGamesSnapshot = await db.collection('games')
+                    .where('createdBy', '==', user.uid)
+                    .get();
+                const userGamesCount = userGamesSnapshot.size;
+                
+                // Calculate member days
+                const createdAt = userData.createdAt?.toDate() || new Date();
+                const now = new Date();
+                const daysActive = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
+                
+                // Format dates
+                const formatDate = (date) => {
+                    if (!date) return 'N/A';
+                    const d = date.toDate ? date.toDate() : new Date(date);
+                    return d.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                };
+                
+                // Update UI
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('profileData').style.display = 'block';
+                
+                document.getElementById('profileUsername').textContent = userData.username || userData.displayName || 'User';
+                document.getElementById('profileEmail').textContent = userData.email || user.email;
+                document.getElementById('profileMemberSince').textContent = `Member since: ${formatDate(createdAt)}`;
+                document.getElementById('profileRole').textContent = userData.role || 'User';
+                document.getElementById('profileRole').style.background = (userData.role === 'admin') ? 'var(--accent)' : '#64748b';
+                
+                // Stats
+                document.getElementById('profileGamesAdded').textContent = userGamesCount;
+                document.getElementById('profileTotalGames').textContent = totalGames;
+                document.getElementById('profileMemberDays').textContent = daysActive;
+                
+                // Details
+                document.getElementById('profileUID').textContent = user.uid;
+                document.getElementById('profileEmailDetail').textContent = userData.email || user.email;
+                document.getElementById('profileUsernameDetail').textContent = userData.username || userData.displayName || 'User';
+                document.getElementById('profileCreatedAt').textContent = formatDate(createdAt);
+                document.getElementById('profileLastLogin').textContent = userData.lastLogin ? formatDate(userData.lastLogin) : 'N/A';
+                document.getElementById('profileRoleDetail').textContent = userData.role || 'User';
+                
+                // Avatar
+                const avatar = document.getElementById('profileAvatar');
+                const initial = (userData.username || userData.displayName || 'U')[0].toUpperCase();
+                avatar.textContent = initial;
+                avatar.style.background = userData.role === 'admin' ? 'var(--accent)' : '#64748b';
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('notLoggedIn').style.display = 'block';
+                document.getElementById('notLoggedIn').innerHTML = `
+                    <h2>❌ Error Loading Profile</h2>
+                    <p>${error.message}</p>
+                    <a href="/" class="login-btn">Go Home</a>
+                `;
+            }
+        }
+        
+        // ============ SIDEBAR AI MINI CHAT ============
+        const miniInput = document.getElementById('sidebarMiniInput');
+        const miniSend = document.getElementById('sidebarMiniSend');
+        const miniResponse = document.getElementById('sidebarMiniResponse');
+        
+        async function sendMiniMessage() {
+            const message = miniInput.value.trim();
+            if (!message) return;
+            
+            miniSend.disabled = true;
+            miniResponse.className = 'mini-response active';
+            miniResponse.innerHTML = '<span class="loading-text">🤖 Thinking...</span>';
+            
+            try {
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message }),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    miniResponse.innerHTML = data.response;
+                } else {
+                    miniResponse.innerHTML = `❌ ${data.error || 'Something went wrong'}`;
+                }
+            } catch (error) {
+                miniResponse.innerHTML = '❌ Server not running. Please start the server.';
+                console.error('Error:', error);
+            } finally {
+                miniSend.disabled = false;
+                miniInput.value = '';
+                miniInput.focus();
+            }
+        }
+        
+        miniSend.addEventListener('click', sendMiniMessage);
+        miniInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMiniMessage();
+            }
+        });
+    </script>
+</body>
+</html>
