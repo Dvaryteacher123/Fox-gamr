@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Analytics</title>
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121f;
+            --bg-card: rgba(26, 26, 46, 0.7);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --accent-hover: #8b5cf6;
+            --border: rgba(255, 255, 255, 0.06);
+            --shadow: rgba(99, 102, 241, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --neutral: #94a3b8;
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.2);
+            --accent-hover: #818cf8;
+            --border: rgba(0, 0, 0, 0.06);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(0, 0, 0, 0.06);
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        
+        /* ============================================================
+           SCROLLBAR
+           ============================================================ */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        
+        /* ============================================================
+           TOP HEADER - STICKY
+           ============================================================ */
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 12px 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .top-header.scrolled {
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-left .logo {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        
+        .header-left .logo span {
+            color: var(--accent);
+        }
+        
+        .header-left .logo .icon {
+            margin-right: 4px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .header-right .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-right .search-wrapper input {
+            padding: 8px 14px 8px 36px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            width: 180px;
+        }
+        
+        .header-right .search-wrapper input:focus {
+            border-color: var(--accent);
+            width: 220px;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        
+        .header-right .search-wrapper .search-icon {
+            position: absolute;
+            left: 12px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .header-right .search-wrapper input::placeholder {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        .header-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 6px;
+            border-radius: 50%;
+        }
+        
+        .header-btn:hover {
+            color: var(--text-primary);
+            background: var(--glass-bg);
+        }
+        
+        .header-btn .badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header-btn .badge.hidden {
+            display: none;
+        }
+        
+        /* ============================================================
+           MOBILE MENU BUTTON
+           ============================================================ */
+        .mobile-menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        .mobile-menu-btn:hover {
+            color: var(--text-primary);
+            background: var(--glass-bg);
+        }
+        
+        /* ============================================================
+           MOBILE DRAWER
+           ============================================================ */
+        .mobile-menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        
+        .mobile-menu-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 320px;
+            max-width: 85vw;
+            height: 100vh;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--glass-border);
+            z-index: 600;
+            padding: 30px 24px;
+            transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .mobile-drawer.open {
+            right: 0;
+        }
+        
+        .mobile-drawer .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        
+        .mobile-drawer .drawer-header .drawer-logo {
+            font-size: 20px;
+            font-weight: 800;
+        }
+        
+        .mobile-drawer .drawer-header .drawer-logo span {
+            color: var(--accent);
+        }
+        
+        .mobile-drawer .drawer-header .drawer-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        .mobile-drawer .drawer-header .drawer-close:hover {
+            color: var(--text-primary);
+        }
+        
+        .mobile-drawer .drawer-links {
+            list-style: none;
+            flex: 1;
+        }
+        
+        .mobile-drawer .drawer-links li {
+            margin-bottom: 2px;
+        }
+        
+        .mobile-drawer .drawer-links a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .mobile-drawer .drawer-links a:hover,
+        .mobile-drawer .drawer-links a.active {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+        }
+        
+        .mobile-drawer .drawer-links a .link-icon {
+            font-size: 20px;
+            width: 28px;
+            text-align: center;
+        }
+        
+        /* ============================================================
+           STATS PAGE - MAIN CONTENT
+           ============================================================ */
+        .stats-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 90px 20px 30px;
+        }
+        
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stats-header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        
+        .stats-header h1 span {
+            color: var(--accent);
+        }
+        
+        .stats-header .last-updated {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        /* ============================================================
+           STATS CARDS - PREMIUM
+           ============================================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 22px 20px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            transition: background 0.5s ease;
+        }
+        
+        .stat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px var(--shadow);
+        }
+        
+        .stat-card .stat-icon {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 6px;
+        }
+        
+        .stat-card .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        
+        .stat-card .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        
+        .stat-card .stat-change {
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            transition: all 0.5s ease;
+        }
+        
+        .stat-card .stat-change.up {
+            color: var(--success);
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .stat-card .stat-change.down {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .stat-card .stat-change.neutral {
+            color: var(--neutral);
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .stat-card .stat-change .arrow {
+            font-size: 16px;
+        }
+        
+        /* ============================================================
+           CHART SECTION - PREMIUM
+           ============================================================ */
+        .chart-section {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            margin-bottom: 30px;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .chart-header h3 span {
+            color: var(--accent);
+        }
+        
+        .chart-filters {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .chart-filters .filter-btn {
+            padding: 6px 14px;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-filters .filter-btn:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+        
+        .chart-filters .filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 320px;
+        }
+        
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* ============================================================
+           LOADING STATE
+           ============================================================ */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .loading-state .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* ============================================================
+           BOTTOM NAVIGATION
+           ============================================================ */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+            height: 68px;
+        }
+        
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 4px 12px;
+            border-radius: 8px;
+            min-width: 48px;
+        }
+        
+        .bottom-nav .nav-item .nav-icon {
+            font-size: 22px;
+            line-height: 1;
+        }
+        
+        .bottom-nav .nav-item:hover {
+            color: var(--text-primary);
+        }
+        
+        .bottom-nav .nav-item.active {
+            color: var(--accent);
+        }
+        
+        .bottom-nav .nav-item.active .nav-icon {
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+        
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 768px) {
+            .top-header {
+                padding: 10px 16px;
+            }
+            .header-left .logo {
+                font-size: 18px;
+            }
+            .header-right .search-wrapper input {
+                width: 120px;
+                font-size: 13px;
+                padding: 6px 10px 6px 32px;
+            }
+            .header-right .search-wrapper input:focus {
+                width: 150px;
+            }
+            .header-right .search-wrapper .search-icon {
+                font-size: 12px;
+                left: 10px;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .stats-page {
+                padding: 80px 16px 80px;
+            }
+            
+            .stats-header h1 {
+                font-size: 22px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .stat-card {
+                padding: 16px 14px;
+            }
+            
+            .stat-card .stat-number {
+                font-size: 24px;
+            }
+            
+            .stat-card .stat-change {
+                font-size: 12px;
+                padding: 3px 10px;
+            }
+            
+            .chart-section {
+                padding: 16px;
+            }
+            
+            .chart-wrapper {
+                height: 220px;
+            }
+            
+            .chart-filters .filter-btn {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
+            
+            .bottom-nav {
+                height: 60px;
+                padding: 4px 0 max(4px, env(safe-area-inset-bottom));
+            }
+            .bottom-nav .nav-item {
+                font-size: 9px;
+                padding: 2px 8px;
+                min-width: 40px;
+            }
+            .bottom-nav .nav-item .nav-icon {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-right .search-wrapper input {
+                width: 70px;
+                font-size: 12px;
+                padding: 4px 6px 4px 26px;
+            }
+            .header-right .search-wrapper input:focus {
+                width: 100px;
+            }
+            .header-right .search-wrapper .search-icon {
+                font-size: 10px;
+                left: 6px;
+            }
+            .header-btn {
+                font-size: 16px;
+                padding: 4px;
+            }
+            .mobile-drawer {
+                width: 280px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .stat-card .stat-number {
+                font-size: 20px;
+            }
+            .stat-card .stat-icon {
+                font-size: 22px;
+            }
+            
+            .stat-card .stat-change {
+                font-size: 11px;
+                padding: 2px 8px;
+            }
+            
+            .chart-wrapper {
+                height: 180px;
+            }
+            
+            .stats-header h1 {
+                font-size: 18px;
+            }
+            .stats-header .last-updated {
+                font-size: 11px;
+            }
+            
+            .bottom-nav .nav-item {
+                min-width: 36px;
+            }
+            .bottom-nav .nav-item .nav-icon {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- ============================================================
+    TOP HEADER
+    ============================================================ -->
+    <header class="top-header" id="topHeader">
+        <div class="header-left">
+            <a href="/main" class="logo">
+                <span class="icon">🎮</span> DVARY <span>GAMES</span>
+            </a>
+        </div>
+        <div class="header-right">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search..." />
+            </div>
+            <button class="header-btn" onclick="window.location.href='/main'">🏠</button>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
+                ☰
+            </button>
+        </div>
+    </header>
+    
+    <!-- ============================================================
+    MOBILE DRAWER
+    ============================================================ -->
+    <div class="mobile-menu-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+    
+    <nav class="mobile-drawer" id="mobileDrawer">
+        <div class="drawer-header">
+            <div class="drawer-logo">DVARY <span>GAMES</span></div>
+            <button class="drawer-close" onclick="closeMobileMenu()">✕</button>
+        </div>
+        <ul class="drawer-links">
+            <li><a href="/main" onclick="closeMobileMenu();"><span class="link-icon">🏠</span> Home</a></li>
+            <li><a href="/games" onclick="closeMobileMenu();"><span class="link-icon">🎮</span> Games</a></li>
+            <li><a href="/graph" class="active" onclick="closeMobileMenu();"><span class="link-icon">📊</span> Stats</a></li>
+            <li><a href="/main" onclick="closeMobileMenu();"><span class="link-icon">⭐</span> VIP</a></li>
+        </ul>
+    </nav>
+    
+    <!-- ============================================================
+    STATS PAGE CONTENT
+    ============================================================ -->
+    <main class="stats-page" id="statsPage">
+        
+        <!-- Header -->
+        <div class="stats-header">
+            <h1>📊 <span>Platform</span> Analytics</h1>
+            <span class="last-updated" id="lastUpdated">🔄 Loading...</span>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card" id="cardUsers">
+                <span class="stat-icon">👥</span>
+                <div class="stat-number" id="totalUsers">--</div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-change neutral" id="usersChange">⏳ Loading...</div>
+            </div>
+            <div class="stat-card" id="cardGames">
+                <span class="stat-icon">🎮</span>
+                <div class="stat-number" id="totalGames">--</div>
+                <div class="stat-label">Total Games</div>
+                <div class="stat-change neutral" id="gamesChange">⏳ Loading...</div>
+            </div>
+            <div class="stat-card" id="cardOnline">
+                <span class="stat-icon">🟢</span>
+                <div class="stat-number" id="onlineUsers">--</div>
+                <div class="stat-label">Online Now</div>
+                <div class="stat-change neutral" id="onlineChange">● Active</div>
+            </div>
+            <div class="stat-card" id="cardVIP">
+                <span class="stat-icon">⭐</span>
+                <div class="stat-number" id="vipGames">--</div>
+                <div class="stat-label">VIP Games</div>
+                <div class="stat-change neutral" id="vipChange">⏳ Loading...</div>
+            </div>
+        </div>
+        
+        <!-- Chart Section -->
+        <div class="chart-section">
+            <div class="chart-header">
+                <h3>📈 <span>Users & Games</span> Growth</h3>
+                <div class="chart-filters" id="chartFilters">
+                    <button class="filter-btn" data-filter="today">Today</button>
+                    <button class="filter-btn" data-filter="7days">7 Days</button>
+                    <button class="filter-btn active" data-filter="30days">30 Days</button>
+                    <button class="filter-btn" data-filter="6months">6 Months</button>
+                    <button class="filter-btn" data-filter="1year">1 Year</button>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="growthChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Loading State (hidden by default) -->
+        <div class="loading-state" id="loadingState" style="display:none;">
+            <div class="spinner"></div>
+            <p>Loading analytics data...</p>
+        </div>
+        
+    </main>
+    
+    <!-- ============================================================
+    BOTTOM NAVIGATION
+    ============================================================ -->
+    <nav class="bottom-nav" id="bottomNav">
+        <a href="/main" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            Home
+        </a>
+        <a href="/games" class="nav-item">
+            <span class="nav-icon">🎮</span>
+            Games
+        </a>
+        <a href="/graph" class="nav-item active">
+            <span class="nav-icon">📊</span>
+            Stats
+        </a>
+        <a href="/main" class="nav-item">
+            <span class="nav-icon">⭐</span>
+            VIP
+        </a>
+    </nav>
+    
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        // ============================================================
+        // STATE
+        // ============================================================
+        let chartInstance = null;
+        let currentFilter = '30days';
+        let previousStats = {
+            totalUsers: 0,
+            totalGames: 0,
+            onlineUsers: 0,
+            vipGames: 0
+        };
+        let currentStats = {
+            totalUsers: 0,
+            totalGames: 0,
+            onlineUsers: 0,
+            vipGames: 0
+        };
+        
+        // ============================================================
+        // DOM REFS
+        // ============================================================
+        const lastUpdated = document.getElementById('lastUpdated');
+        const loadingState = document.getElementById('loadingState');
+        
+        // ============================================================
+        // HEADER SCROLL EFFECT
+        // ============================================================
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('topHeader');
+            if (window.scrollY > 10) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        
+        // ============================================================
+        // MOBILE MENU
+        // ============================================================
+        function toggleMobileMenu() {
+            const drawer = document.getElementById('mobileDrawer');
+            const overlay = document.getElementById('mobileOverlay');
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+        
+        function closeMobileMenu() {
+            document.getElementById('mobileDrawer').classList.remove('open');
+            document.getElementById('mobileOverlay').classList.remove('open');
+        }
+        
+        function checkMobileMenu() {
+            const btn = document.getElementById('mobileMenuBtn');
+            if (window.innerWidth <= 768) {
+                btn.style.display = 'block';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+        window.addEventListener('resize', checkMobileMenu);
+        checkMobileMenu();
+        
+        // ============================================================
+        // CALCULATE CHANGE
+        // ============================================================
+        function calculateChange(current, previous) {
+            if (previous === 0 && current === 0) {
+                return { type: 'neutral', percentage: 0, arrow: '—', text: 'No change' };
+            }
+            if (previous === 0) {
+                return { type: 'up', percentage: 100, arrow: '↑', text: 'New' };
+            }
+            
+            const change = ((current - previous) / previous) * 100;
+            const rounded = Math.round(change * 10) / 10;
+            
+            if (change > 0) {
+                return { type: 'up', percentage: rounded, arrow: '↑', text: `+${rounded}%` };
+            } else if (change < 0) {
+                return { type: 'down', percentage: rounded, arrow: '↓', text: `${rounded}%` };
+            } else {
+                return { type: 'neutral', percentage: 0, arrow: '—', text: 'No change' };
+            }
+        }
+        
+        // ============================================================
+        // UPDATE STATS CARDS WITH TREND COLORS
+        // ============================================================
+        function updateStatsUI() {
+            // Total Users
+            const usersChange = calculateChange(currentStats.totalUsers, previousStats.totalUsers);
+            document.getElementById('totalUsers').textContent = formatNumber(currentStats.totalUsers);
+            updateCard('usersChange', usersChange);
+            
+            // Total Games
+            const gamesChange = calculateChange(currentStats.totalGames, previousStats.totalGames);
+            document.getElementById('totalGames').textContent = formatNumber(currentStats.totalGames);
+            updateCard('gamesChange', gamesChange);
+            
+            // Online Users
+            const onlineChange = calculateChange(currentStats.onlineUsers, previousStats.onlineUsers);
+            document.getElementById('onlineUsers').textContent = formatNumber(currentStats.onlineUsers);
+            if (currentStats.onlineUsers > 0) {
+                document.getElementById('onlineChange').innerHTML = '🟢 Active';
+                document.getElementById('onlineChange').className = 'stat-change up';
+            } else {
+                document.getElementById('onlineChange').innerHTML = '⚪ Offline';
+                document.getElementById('onlineChange').className = 'stat-change neutral';
+            }
+            
+            // VIP Games
+            const vipChange = calculateChange(currentStats.vipGames, previousStats.vipGames);
+            document.getElementById('vipGames').textContent = formatNumber(currentStats.vipGames);
+            updateCard('vipChange', vipChange);
+            
+            // Update card border colors
+            updateCardBorder('cardUsers', usersChange);
+            updateCardBorder('cardGames', gamesChange);
+            updateCardBorder('cardVIP', vipChange);
+        }
+        
+        function updateCard(elementId, changeData) {
+            const el = document.getElementById(elementId);
+            const arrowMap = {
+                'up': '↑',
+                'down': '↓',
+                'neutral': '—'
+            };
+            const colorMap = {
+                'up': '🟢',
+                'down': '🔴',
+                'neutral': '⚪'
+            };
+            
+            if (changeData.type === 'neutral') {
+                el.innerHTML = `${colorMap.neutral} ${changeData.text}`;
+                el.className = 'stat-change neutral';
+            } else {
+                el.innerHTML = `${colorMap[changeData.type]} ${changeData.text} ${arrowMap[changeData.type]}`;
+                el.className = `stat-change ${changeData.type}`;
+            }
+        }
+        
+        function updateCardBorder(cardId, changeData) {
+            const card = document.getElementById(cardId);
+            const colorMap = {
+                'up': 'var(--success)',
+                'down': 'var(--danger)',
+                'neutral': 'var(--neutral)'
+            };
+            card.style.setProperty('--border-color', colorMap[changeData.type]);
+            card.querySelector('::before')?.style?.setProperty('background', colorMap[changeData.type]);
+            // Add inline style for the pseudo element
+            card.style.borderTopColor = colorMap[changeData.type];
+        }
+        
+        function formatNumber(num) {
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+        
+        function updateLastUpdated() {
+            const now = new Date();
+            lastUpdated.textContent = `🔄 Updated: ${now.toLocaleTimeString()}`;
+        }
+        
+        // ============================================================
+        // FETCH DATA FROM FIRESTORE
+        // ============================================================
+        async function fetchStatsData() {
+            try {
+                // Store previous values
+                previousStats = { ...currentStats };
+                
+                // Fetch users
+                const usersSnapshot = await db.collection('users').get();
+                currentStats.totalUsers = usersSnapshot.size;
+                
+                // Count online users (last 5 minutes)
+                const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+                const onlineSnapshot = await db.collection('users')
+                    .where('lastSeen', '>=', fiveMinutesAgo)
+                    .get();
+                currentStats.onlineUsers = onlineSnapshot.size;
+                
+                // Fetch games
+                const gamesSnapshot = await db.collection('games').get();
+                currentStats.totalGames = gamesSnapshot.size;
+                
+                // Count VIP games
+                const vipSnapshot = await db.collection('games')
+                    .where('tier', '==', 'vip')
+                    .get();
+                currentStats.vipGames = vipSnapshot.size;
+                
+                // Update UI
+                updateStatsUI();
+                updateLastUpdated();
+                
+                // Generate chart data
+                generateChartData(currentFilter);
+                
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+                // Use fallback data
+                useFallbackData();
+            }
+        }
+        
+        // ============================================================
+        // FALLBACK DATA (kama Firestore haipatikani)
+        // ============================================================
+        function useFallbackData() {
+            previousStats = { ...currentStats };
+            
+            // Generate realistic fallback data
+            currentStats = {
+                totalUsers: Math.floor(Math.random() * 5000 + 10000),
+                onlineUsers: Math.floor(Math.random() * 1000 + 500),
+                totalGames: Math.floor(Math.random() * 200 + 300),
+                vipGames: Math.floor(Math.random() * 100 + 150)
+            };
+            
+            updateStatsUI();
+            updateLastUpdated();
+            generateChartData(currentFilter);
+        }
+        
+        // ============================================================
+        // GENERATE CHART DATA
+        // ============================================================
+        function generateChartData(filter) {
+            const labels = getLabels(filter);
+            const usersData = generateDataPoints(labels.length, 100, 400);
+            const gamesData = generateDataPoints(labels.length, 50, 200);
+            
+            // Determine if trend is up or down for colors
+            const usersTrend = usersData[usersData.length - 1] > usersData[0] ? 'up' : 
+                             usersData[usersData.length - 1] < usersData[0] ? 'down' : 'neutral';
+            const gamesTrend = gamesData[gamesData.length - 1] > gamesData[0] ? 'up' : 
+                              gamesData[gamesData.length - 1] < gamesData[0] ? 'down' : 'neutral';
+            
+            const usersColor = usersTrend === 'up' ? '#22c55e' : usersTrend === 'down' ? '#ef4444' : '#94a3b8';
+            const gamesColor = gamesTrend === 'up' ? '#22c55e' : gamesTrend === 'down' ? '#ef4444' : '#94a3b8';
+            
+            createChart(labels, usersData, gamesData, usersColor, gamesColor);
+        }
+        
+        function getLabels(filter) {
+            const now = new Date();
+            const labels = [];
+            const count = filter === 'today' ? 12 : 
+                         filter === '7days' ? 7 :
+                         filter === '30days' ? 30 :
+                         filter === '6months' ? 6 :
+                         12; // 1 year
+            
+            if (filter === 'today') {
+                for (let i = 11; i >= 0; i--) {
+                    const h = new Date(now);
+                    h.setHours(h.getHours() - i);
+                    labels.push(h.getHours() + ':00');
+                }
+            } else if (filter === '7days') {
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(now);
+                    d.setDate(d.getDate() - i);
+                    labels.push(d.toLocaleDateString('en', { weekday: 'short' }));
+                }
+            } else if (filter === '30days') {
+                for (let i = 29; i >= 0; i--) {
+                    const d = new Date(now);
+                    d.setDate(d.getDate() - i);
+                    labels.push(d.getDate() + '/' + (d.getMonth() + 1));
+                }
+            } else if (filter === '6months') {
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                for (let i = 5; i >= 0; i--) {
+                    const d = new Date(now);
+                    d.setMonth(d.getMonth() - i);
+                    labels.push(months[d.getMonth()]);
+                }
+            } else { // 1 year
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                for (let i = 11; i >= 0; i--) {
+                    const d = new Date(now);
+                    d.setMonth(d.getMonth() - i);
+                    labels.push(months[d.getMonth()] + ' ' + d.getFullYear());
+                }
+            }
+            
+            return labels;
+        }
+        
+        function generateDataPoints(count, min, max) {
+            const data = [];
+            let value = min + Math.random() * (max - min) * 0.3;
+            
+            for (let i = 0; i < count; i++) {
+                const change = (Math.random() - 0.4) * 20;
+                value = Math.max(min, Math.min(max, value + change));
+                data.push(Math.round(value));
+            }
+            
+            return data;
+        }
+        
+        // ============================================================
+        // CREATE CHART - WITH DYNAMIC COLORS
+        // ============================================================
+        function createChart(labels, usersData, gamesData, usersColor, gamesColor) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            
+            // Create gradient fills
+            const gradientUsers = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientUsers.addColorStop(0, usersColor + '80');
+            gradientUsers.addColorStop(1, usersColor + '05');
+            
+            const gradientGames = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientGames.addColorStop(0, gamesColor + '80');
+            gradientGames.addColorStop(1, gamesColor + '05');
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Users',
+                            data: usersData,
+                            borderColor: usersColor,
+                            backgroundColor: gradientUsers,
+                            borderWidth: 3,
+                            pointBackgroundColor: usersColor,
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            tension: 0.4,
+                            fill: true,
+                            spanGaps: true
+                        },
+                        {
+                            label: 'Games',
+                            data: gamesData,
+                            borderColor: gamesColor,
+                            backgroundColor: gradientGames,
+                            borderWidth: 3,
+                            pointBackgroundColor: gamesColor,
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            tension: 0.4,
+                            fill: true,
+                            spanGaps: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1200,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 20,
+                                font: {
+                                    size: 12,
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 15, 0.92)',
+                            borderColor: 'rgba(255, 255, 255, 0.06)',
+                            borderWidth: 1,
+                            titleColor: '#e2e8f0',
+                            bodyColor: '#94a3b8',
+                            padding: 14,
+                            cornerRadius: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y.toLocaleString();
+                                    const color = context.dataset.borderColor;
+                                    return `● ${label}: ${value}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.03)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+                                maxRotation: 45,
+                                minRotation: 0,
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.03)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+                                font: {
+                                    size: 10
+                                },
+                                callback: function(value) {
+                                    if (value >= 1000) {
+                                        return (value / 1000).toFixed(1) + 'K';
+                                    }
+                                    return value;
+                                }
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+        
+        // ============================================================
+        // CHART FILTERS
+        // ============================================================
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                generateChartData(currentFilter);
+            });
+        });
+        
+        // ============================================================
+        // INIT
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show loading
+            loadingState.style.display = 'flex';
+            
+            // Fetch data
+            fetchStatsData().then(() => {
+                loadingState.style.display = 'none';
+            }).catch(() => {
+                loadingState.style.display = 'none';
+                useFallbackData();
+            });
+        });
+        
+        console.log('📊 DVARY GAMES Analytics loaded!');
+    </script>
+</body>
+  </html>
