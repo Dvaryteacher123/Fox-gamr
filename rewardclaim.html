@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVARY GAMES - Claim Reward</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Firebase v10 Modular SDK -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom styles to complement Tailwind */
+        body {
+            background: #0a0a0f;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Glassmorphism card */
+        .glass-card {
+            background: rgba(26, 26, 46, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .input-dark {
+            background: rgba(15, 15, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .input-dark:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            outline: none;
+        }
+
+        .input-dark::placeholder {
+            color: #6b7280;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 40px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Status message animations */
+        .status-message {
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Spinner animation */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Floating glow effect for the claim code input */
+        .claim-input-wrapper {
+            position: relative;
+        }
+
+        .claim-input-wrapper .input-glow {
+            position: absolute;
+            inset: -2px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.1));
+            filter: blur(8px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .claim-input-wrapper:focus-within .input-glow {
+            opacity: 1;
+        }
+
+        /* Claim card animation */
+        .claim-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .claim-card:hover {
+            transform: translateY(-4px);
+            border-color: #6366f1;
+        }
+
+        .claim-card .copy-btn {
+            transition: all 0.3s ease;
+        }
+
+        .claim-card .copy-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Support button */
+        .support-btn {
+            transition: all 0.3s ease;
+        }
+
+        .support-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 3px;
+        }
+
+        /* Pulse animation for notification badge */
+        @keyframes pulse-badge {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .badge-pulse {
+            animation: pulse-badge 2s infinite;
+        }
+
+        /* Claim code display */
+        .claim-code-display {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            text-align: center;
+            word-break: break-all;
+        }
+
+        .claim-code-display .code-text {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 16px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    TOP HEADER - Simple Navigation
+    ============================================================ -->
+    <header class="fixed top-0 left-0 right-0 z-50 px-6 py-4 glass-card border-b border-white/5">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <!-- Logo -->
+            <a href="/main" class="text-2xl font-extrabold text-white tracking-tight">
+                🎮 DVARY <span class="text-indigo-400">GAMES</span>
+            </a>
+
+            <!-- User info & logout -->
+            <div class="flex items-center gap-4" id="userSection">
+                <div class="hidden md:flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 text-sm font-bold" id="userAvatar">
+                        G
+                    </div>
+                    <div class="text-sm">
+                        <p class="text-white font-medium" id="userName">Guest</p>
+                        <p class="text-gray-400 text-xs" id="userEmail">Not logged in</p>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="text-gray-400 hover:text-white transition-colors text-sm flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="hidden sm:inline">Logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    MAIN CONTENT
+    ============================================================ -->
+    <main class="min-h-screen flex items-center justify-center px-4 pt-24 pb-12">
+        <div class="w-full max-w-2xl">
+
+            <!-- Logo / Branding -->
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-4">🎁</div>
+                <h1 class="text-3xl font-bold text-white">
+                    Claim Your <span class="text-indigo-400">Reward</span>
+                </h1>
+                <p class="text-gray-400 mt-2 text-sm">
+                    Enter the claim code provided by Admin to download your free VIP/Trend game.
+                </p>
+            </div>
+
+            <!-- ============================================================
+            CLAIM STATUS CARD - Shows if user has a claim
+            ============================================================ -->
+            <div id="claimStatusCard" class="glass-card rounded-2xl p-6 md:p-8 mb-6" style="display: none;">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center text-2xl">
+                        🎫
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-lg">Your Claim Code</h3>
+                        <p class="text-gray-400 text-sm">Copy this code and use it on the game page</p>
+                    </div>
+                </div>
+
+                <!-- Claim Code Display -->
+                <div class="claim-code-display mb-4" id="claimCodeDisplay">
+                    <span class="code-text" id="claimCodeText">DVARY-XXXXXX</span>
+                </div>
+
+                <!-- Copy Button -->
+                <button onclick="copyClaimCode()" class="btn-success w-full py-3 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-3">
+                    <i class="fas fa-copy"></i>
+                    <span>Copy Claim Code</span>
+                </button>
+
+                <div id="copyStatus" class="text-center mt-2 text-sm text-green-400" style="display: none;">
+                    ✅ Copied to clipboard!
+                </div>
+
+                <div class="mt-4 text-center text-gray-500 text-xs border-t border-white/5 pt-4">
+                    <i class="fas fa-info-circle text-indigo-400 mr-1"></i>
+                    This code is valid for one-time use only. Use it on the game page to unlock your download.
+                </div>
+            </div>
+
+            <!-- ============================================================
+            MAIN CLAIM FORM
+            ============================================================ -->
+            <div class="glass-card rounded-2xl p-6 md:p-8" id="claimFormCard">
+
+                <!-- User email display -->
+                <div class="flex items-center gap-3 mb-6 p-3 bg-white/5 rounded-xl border border-white/5">
+                    <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 text-sm font-bold flex-shrink-0" id="mobileAvatar">
+                        G
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-white font-medium text-sm truncate" id="mobileUserName">Guest</p>
+                        <p class="text-gray-400 text-xs truncate" id="mobileUserEmail">Not logged in</p>
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 flex-shrink-0">
+                        <i class="fas fa-check-circle text-[10px]"></i> Active
+                    </span>
+                </div>
+
+                <!-- Claim Input -->
+                <div class="claim-input-wrapper relative">
+                    <div class="input-glow"></div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-key text-indigo-400 text-sm"></i>
+                        </div>
+                        <input
+                        type="text"
+                        id="claimInput"
+                        placeholder="e.g. DVARY-ABCDEF"
+                        class="input-dark w-full pl-11 pr-4 py-4 rounded-xl text-white text-lg font-mono placeholder:text-gray-500 uppercase tracking-wider"
+                        maxlength="20"
+                        autocomplete="off"
+                        spellcheck="false"
+                        />
+                    </div>
+                </div>
+
+                <!-- Hint / Info -->
+                <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                    <i class="fas fa-info-circle text-indigo-400"></i>
+                    Enter the claim code exactly as provided (case insensitive)
+                </p>
+
+                <!-- Status Message -->
+                <div id="statusContainer" class="mt-4 min-h-[60px]">
+                    <!-- Dynamic status message will appear here -->
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                id="claimBtn"
+                onclick="handleClaim()"
+                class="btn-primary w-full py-4 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-3 mt-2"
+                >
+                <i class="fas fa-gift"></i>
+                <span>Thibitisha Claim & Download</span>
+            </button>
+
+            <!-- Footer note -->
+            <p class="text-center text-gray-500 text-xs mt-4">
+                <i class="fas fa-shield-alt text-indigo-400 mr-1"></i>
+                Secure &bull; One-time use only
+            </p>
+        </div>
+
+        <!-- ============================================================
+        SUPPORT SECTION
+        ============================================================ -->
+        <div class="mt-6 p-4 glass-card rounded-2xl border border-white/5">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-2xl flex-shrink-0">
+                    📞
+                </div>
+                <div class="flex-1">
+                    <p class="text-white font-semibold text-sm">Need help with your claim?</p>
+                    <p class="text-gray-400 text-xs">Contact our support team</p>
+                </div>
+                <a href="tel:+255725245910" class="support-btn bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 border border-yellow-500/20">
+                    <i class="fas fa-phone"></i>
+                    <span class="hidden sm:inline">Call Support</span>
+                </a>
+            </div>
+            <div class="mt-3 pt-3 border-t border-white/5 text-center">
+                <p class="text-gray-500 text-xs">
+                    <i class="fas fa-headset text-yellow-400 mr-1"></i>
+                    Support: <span class="text-yellow-400 font-mono">+255 725 245 910</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-6">
+            <a href="/main" class="text-gray-400 hover:text-white transition-colors text-sm flex items-center justify-center gap-2">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </a>
+        </div>
+    </div>
+</main>
+
+<!-- ============================================================
+JAVASCRIPT - Firebase v10 Modular SDK
+============================================================ -->
+<script type="module">
+    // -------- IMPORTS --------
+    import { initializeApp } from 'firebase/app';
+    import {
+        getAuth,
+        onAuthStateChanged,
+        signOut
+    } from 'firebase/auth';
+    import {
+        getFirestore,
+        collection,
+        query,
+        where,
+        getDocs,
+        updateDoc,
+        doc,
+        Timestamp
+    } from 'firebase/firestore';
+
+    // -------- FIREBASE CONFIG --------
+    const firebaseConfig = {
+        apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+        authDomain: "enjoy-game-6c05c.firebaseapp.com",
+        projectId: "enjoy-game-6c05c",
+        storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+        messagingSenderId: "512924203714",
+        appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+        measurementId: "G-Y2H8BYM4LP"
+    };
+
+    // -------- INIT FIREBASE --------
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // -------- DOM REFS --------
+    const claimInput = document.getElementById('claimInput');
+    const claimBtn = document.getElementById('claimBtn');
+    const statusContainer = document.getElementById('statusContainer');
+
+    // Claim status card
+    const claimStatusCard = document.getElementById('claimStatusCard');
+    const claimCodeText = document.getElementById('claimCodeText');
+
+    // User display elements
+    const userNameEl = document.getElementById('userName');
+    const userEmailEl = document.getElementById('userEmail');
+    const userAvatarEl = document.getElementById('userAvatar');
+    const mobileUserName = document.getElementById('mobileUserName');
+    const mobileUserEmail = document.getElementById('mobileUserEmail');
+    const mobileAvatar = document.getElementById('mobileAvatar');
+
+    // -------- STATE --------
+    let currentUser = null;
+    let isLoading = false;
+    let userClaimData = null; // Store user's claim data
+
+    // -------- HELPER: Show Status Message --------
+    function showStatus(message, type = 'info', details = '') {
+        const colors = {
+            success: 'text-green-400 border-green-500/20 bg-green-500/10',
+            error: 'text-red-400 border-red-500/20 bg-red-500/10',
+            info: 'text-blue-400 border-blue-500/20 bg-blue-500/10',
+            warning: 'text-yellow-400 border-yellow-500/20 bg-yellow-500/10'
+        };
+
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            info: 'fa-info-circle',
+            warning: 'fa-exclamation-triangle'
+        };
+
+        statusContainer.innerHTML = `
+            <div class="status-message flex items-start gap-3 p-4 rounded-xl border ${colors[type] || colors.info}">
+                <i class="fas ${icons[type] || icons.info} text-lg mt-0.5 flex-shrink-0"></i>
+                <div>
+                    <p class="font-medium">${message}</p>
+                    ${details ? `<p class="text-sm opacity-80 mt-0.5">${details}</p>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    // -------- HELPER: Clear Status --------
+    function clearStatus() {
+        statusContainer.innerHTML = '';
+    }
+
+    // -------- HELPER: Set Button Loading State --------
+    function setLoading(loading) {
+        isLoading = loading;
+        if (loading) {
+            claimBtn.disabled = true;
+            claimBtn.innerHTML = `
+                <span class="spinner"></span>
+                <span>Inathibitisha...</span>
+            `;
+        } else {
+            claimBtn.disabled = false;
+            claimBtn.innerHTML = `
+                <i class="fas fa-gift"></i>
+                <span>Thibitisha Claim & Download</span>
+            `;
+        }
+    }
+
+    // -------- UPDATE USER UI --------
+    function updateUserUI(user) {
+        const displayName = user?.displayName || 'User';
+        const email = user?.email || 'Not logged in';
+        const initial = displayName.charAt(0).toUpperCase();
+
+        // Desktop
+        userNameEl.textContent = displayName;
+        userEmailEl.textContent = email;
+        userAvatarEl.textContent = initial;
+
+        // Mobile
+        mobileUserName.textContent = displayName;
+        mobileUserEmail.textContent = email;
+        mobileAvatar.textContent = initial;
+    }
+
+    // -------- COPY CLAIM CODE --------
+    window.copyClaimCode = function() {
+        const code = claimCodeText.textContent;
+        if (!code || code === 'DVARY-XXXXXX') {
+            showStatus('No claim code available to copy.', 'warning');
+            return;
+        }
+
+        navigator.clipboard.writeText(code).then(() => {
+            const status = document.getElementById('copyStatus');
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+            showStatus('✅ Claim code copied to clipboard!', 'success');
+        }).catch(() => {
+            // Fallback
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            const status = document.getElementById('copyStatus');
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+            showStatus('✅ Claim code copied to clipboard!', 'success');
+        });
+    };
+
+    // -------- LOAD USER'S CLAIM --------
+    async function loadUserClaim() {
+        if (!currentUser) return;
+
+        try {
+            // Check if user has an unused claim
+            const claimsRef = collection(db, 'claims');
+            const q = query(
+                claimsRef,
+                where('assignedToEmail', '==', currentUser.email),
+                where('isUsed', '==', false)
+            );
+            const snapshot = await getDocs(q);
+
+            if (!snapshot.empty) {
+                // User has an active claim
+                const doc = snapshot.docs[0];
+                const data = doc.data();
+                userClaimData = {
+                    id: doc.id,
+                    ...data
+                };
+
+                // Show the claim status card
+                claimStatusCard.style.display = 'block';
+                claimCodeText.textContent = data.code;
+
+                // Pre-fill the input with the claim code
+                claimInput.value = data.code;
+
+                // Show success message
+                showStatus(
+                    '🎉 You have an active claim!',
+                    'success',
+                    `Your claim code: ${data.code}. Click "Copy" to copy it, or "Thibitisha" to use it now.`
+                );
+
+                // Update button text
+                claimBtn.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <span>Thibitisha Claim & Download</span>
+                `;
+
+            } else {
+                // No active claim - check if user has used claims
+                const usedQuery = query(
+                    claimsRef,
+                    where('assignedToEmail', '==', currentUser.email),
+                    where('isUsed', '==', true)
+                );
+                const usedSnapshot = await getDocs(usedQuery);
+
+                if (!usedSnapshot.empty) {
+                    // User has used their claim already
+                    const doc = usedSnapshot.docs[0];
+                    const data = doc.data();
+                    showStatus(
+                        '🔴 You have already used your claim.',
+                        'warning',
+                        `You used claim: ${data.code} on ${data.usedAt?.toDate?.()?.toLocaleDateString() || 'a previous date'}`
+                    );
+                    claimBtn.disabled = true;
+                    claimBtn.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        <span>Claim Already Used</span>
+                    `;
+                } else {
+                    // No claim found
+                    showStatus(
+                        'ℹ️ You don\'t have any active claims.',
+                        'info',
+                        'Contact Admin to get a claim code. Support: +255 725 245 910'
+                    );
+                }
+            }
+
+        } catch (error) {
+            console.error('Error loading user claim:', error);
+        }
+    }
+
+    // -------- HANDLE CLAIM --------
+    window.handleClaim = async function() {
+        // Guard: Not logged in
+        if (!currentUser) {
+            showStatus('Tafadhali login kwanza ili kuendelea.', 'warning', 'Unaelekezwa kwenye ukurasa wa login...');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+            return;
+        }
+
+        // Guard: Already loading
+        if (isLoading) return;
+
+        // If user already has a claim loaded, use it
+        let code = claimInput.value.trim().toUpperCase();
+
+        // If user has a claim in the system, use that instead
+        if (userClaimData && userClaimData.code) {
+            code = userClaimData.code;
+            claimInput.value = code;
+        }
+
+        // Guard: Empty input
+        if (!code) {
+            showStatus('Tafadhali weka namba ya claim.', 'warning');
+            claimInput.focus();
+            return;
+        }
+
+        // Guard: Too short
+        if (code.length < 4) {
+            showStatus('Namba ya claim inaonekana kuwa fupi sana.', 'warning', 'Hakikisha umeiandika kikamilifu.');
+            claimInput.focus();
+            return;
+        }
+
+        // Start loading
+        setLoading(true);
+        clearStatus();
+
+        try {
+            // -------- QUERY FIRESTORE --------
+            const claimsRef = collection(db, 'claims');
+            const q = query(claimsRef, where('code', '==', code));
+            const querySnapshot = await getDocs(q);
+
+            // -------- CASE: No matching document --------
+            if (querySnapshot.empty) {
+                showStatus('Namba ya claim haipo au si sahihi.', 'error', 'Tafadhali hakikisha umeiandika kwa usahihi.');
+                setLoading(false);
+                claimInput.focus();
+                claimInput.select();
+                return;
+            }
+
+            // -------- Get the first matching document --------
+            const docSnap = querySnapshot.docs[0];
+            const claimData = docSnap.data();
+            const docId = docSnap.id;
+
+            // -------- CASE: Already used --------
+            if (claimData.isUsed === true) {
+                const usedBy = claimData.usedByEmail || 'mtu mwingine';
+                const usedAt = claimData.usedAt?.toDate?.() || new Date();
+                const dateStr = usedAt.toLocaleDateString('sw', { day: 'numeric', month: 'short', year: 'numeric' });
+
+                showStatus(
+                    'Namba hii tayari imechakaa (imetumiwa).',
+                    'error',
+                    `Iliwekwa na ${usedBy} tarehe ${dateStr}.`
+                );
+                setLoading(false);
+                claimInput.focus();
+                claimInput.select();
+                return;
+            }
+
+            // -------- Check if claim belongs to this user --------
+            if (claimData.assignedToEmail && claimData.assignedToEmail !== currentUser.email) {
+                showStatus(
+                    '❌ Namba hii haikukabidhiwa kwako.',
+                    'error',
+                    `Ilipewa ${claimData.assignedToEmail}. Tafadhali wasiliana na Admin.`
+                );
+                setLoading(false);
+                claimInput.focus();
+                claimInput.select();
+                return;
+            }
+
+            // -------- SUCCESS: Valid and unused --------
+            // 1. Update Firestore document
+            const docRef = doc(db, 'claims', docId);
+            await updateDoc(docRef, {
+                isUsed: true,
+                usedByEmail: currentUser.email,
+                usedAt: Timestamp.now(),
+                usedByUid: currentUser.uid,
+            });
+
+            // 2. Get the game download link from the claim data
+            const downloadLink = claimData.downloadLink || claimData.gameLink || '/games';
+
+            // 3. Show success message
+            showStatus(
+                '✅ Claim imethibitishwa!',
+                'success',
+                `Unaelekezwa kwenye ukurasa wa kudownload...`
+            );
+
+            // 4. Disable input and button
+            claimInput.disabled = true;
+            claimBtn.disabled = true;
+
+            // 5. Update UI to show success
+            claimBtn.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>✅ Claim Thibitishwa!</span>
+            `;
+            claimBtn.className = 'btn-success w-full py-4 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-3 mt-2';
+
+            // 6. Hide the claim status card
+            claimStatusCard.style.display = 'none';
+
+            // 7. Redirect after 2 seconds
+            setTimeout(() => {
+                window.location.href = downloadLink;
+            }, 2000);
+
+        } catch (error) {
+            console.error('Claim error:', error);
+            showStatus('Hitilafu imetokea. Tafadhali jaribu tena.', 'error', error.message || '');
+            setLoading(false);
+        } finally {
+            // If we didn't succeed, make sure loading is off
+            if (!claimBtn.disabled) {
+                setLoading(false);
+            }
+        }
+    };
+
+    // -------- ENTER KEY SUPPORT --------
+    claimInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            window.handleClaim();
+        }
+    });
+
+    // -------- AUTO UPPERCASE --------
+    claimInput.addEventListener('input', () => {
+        claimInput.value = claimInput.value.toUpperCase();
+    });
+
+    // -------- HANDLE LOGOUT --------
+    window.handleLogout = async function() {
+        try {
+            await signOut(auth);
+            window.location.href = '/login';
+        } catch (error) {
+            console.error('Logout error:', error);
+            showStatus('Error logging out. Please try again.', 'error');
+        }
+    };
+
+    // -------- AUTH STATE OBSERVER --------
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+
+        if (user) {
+            // User is logged in
+            updateUserUI(user);
+            claimInput.disabled = false;
+            claimBtn.disabled = false;
+            clearStatus();
+
+            // Load user's claim
+            await loadUserClaim();
+
+            // Show welcome message if no claim found
+            if (!userClaimData) {
+                // Check if we already showed a message
+                const hasStatus = statusContainer.querySelector('.status-message');
+                if (!hasStatus) {
+                    showStatus(
+                        `👋 Karibu ${user.displayName || 'Mteja'}!`,
+                        'info',
+                        'Weka namba ya claim uliyopewa na Admin, au angalia claim yako hapo juu.'
+                    );
+                }
+            }
+
+        } else {
+            // User is NOT logged in - redirect to login
+            updateUserUI(null);
+            claimInput.disabled = true;
+            claimBtn.disabled = true;
+            claimStatusCard.style.display = 'none';
+
+            showStatus(
+                '🔒 Tafadhali login ili kuweka claim.',
+                'warning',
+                'Unaelekezwa kwenye ukurasa wa login...'
+            );
+
+            // Redirect to login after short delay
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1500);
+        }
+    });
+
+    console.log('🎮 DVARY GAMES - Reward Claim page loaded (Firebase v10 Modular)');
+    console.log('📦 Firestore collection: claims');
+    console.log('🔑 Looking for field: code (string), isUsed (boolean)');
+    console.log('📞 Support: +255 725 245 910');
+    console.log('💡 Users can see their active claim automatically when logged in');
+</script>
+
+</body>
+</html>
