@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔑 Omba API Key - DVARY GAMES</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js">
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121f;
+            --bg-card: rgba(26, 26, 46, 0.7);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .logo h1 span {
+            color: var(--accent);
+        }
+
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group .hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-copy {
+            padding: 8px 16px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copy:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            padding: 8px 16px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.05);
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            display: block;
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .message.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .message.info {
+            display: block;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .api-key-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 18px;
+            word-break: break-all;
+            border: 1px solid var(--border);
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-key-display .key-text {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .api-key-display .actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .key-info {
+            background: var(--bg-primary);
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-top: 15px;
+        }
+
+        .key-info .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .key-info .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .key-info .label {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .key-info .value {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .key-info .value.active {
+            color: var(--success);
+        }
+
+        .key-info .value.inactive {
+            color: var(--danger);
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .user-header .user-email {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .user-header .logout-btn {
+            padding: 6px 14px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .user-header .logout-btn:hover {
+            opacity: 0.8;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .tabs button {
+            padding: 8px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tabs button:hover {
+            color: var(--text-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .tabs button.active {
+            color: var(--accent);
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer-text {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 20px;
+        }
+
+        .footer-text a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .card {
+                padding: 20px;
+            }
+            .api-key-display {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .api-key-display .actions {
+                justify-content: center;
+            }
+            .key-info .info-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+            .user-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            .tabs {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+
+            <!-- Logo -->
+            <div class="logo">
+                <h1>🎮 DVARY <span>GAMES</span></h1>
+                <p>🔑 API Key Management</p>
+            </div>
+
+            <!-- User Header -->
+            <div class="user-header" id="userHeader">
+                <div>
+                    <span class="user-email" id="userEmailDisplay">Not logged in</span>
+                </div>
+                <div>
+                    <button class="logout-btn" id="logoutBtn" onclick="handleLogout()" style="display:none;">🚪 Logout</button>
+                    <button class="logout-btn" id="loginBtn" onclick="window.location.href='/login'" style="background:var(--accent);">🔑 Login</button>
+                </div>
+            </div>
+
+            <!-- Message -->
+            <div class="message" id="message"></div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="active" onclick="switchTab('request')">🔑 Request Key</button>
+                <button onclick="switchTab('manage')">📋 My Keys</button>
+                <button onclick="switchTab('docs')">📖 API Docs</button>
+            </div>
+
+            <!-- Tab 1: Request API Key -->
+            <div class="tab-content active" id="tab-request">
+                <form id="apiKeyForm" onsubmit="requestAPIKey(event)">
+                    <div class="form-group">
+                        <label>Jina la App / Project <span style="color:var(--danger);">*</span></label>
+                        <input type="text" id="appName" placeholder="e.g., MyGameApp" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Maelezo ya Matumizi</label>
+                        <textarea id="description" placeholder="Unataka kutumia API yetu kwa nini?"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Michezo Unayotaka Kutumia</label>
+                        <select id="allowedGames" multiple style="height:100px;">
+                            <option value="all">🎮 Michezo Yote</option>
+                        </select>
+                        <div class="hint">Hold Ctrl (Cmd) ili kuchagua zaidi ya moja</div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="requestBtn">
+                        🔑 Omba API Key
+                    </button>
+                </form>
+
+                <div id="apiKeyResult" style="display:none; margin-top:20px;">
+                    <h3 style="color:var(--success); margin-bottom:10px;">✅ API Key Yako</h3>
+                    <div class="api-key-display">
+                        <span class="key-text" id="generatedKey">dvary_xxxxxxxxxxxxxxxxxxxxxxxx</span>
+                        <div class="actions">
+                            <button class="btn-copy" onclick="copyKey()">📋 Copy</button>
+                        </div>
+                    </div>
+                    <div class="key-info">
+                        <div class="info-row">
+                            <span class="label">📅 Iliundwa</span>
+                            <span class="value" id="keyCreatedAt">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">⏳ Inaisha</span>
+                            <span class="value" id="keyExpiresAt">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">📊 Matumizi</span>
+                            <span class="value" id="keyUsage">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">🔒 Hali</span>
+                            <span class="value active" id="keyStatus">Active</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:15px; padding:12px; background:rgba(239,68,68,0.1); border-radius:8px; border:1px solid rgba(239,68,68,0.2);">
+                        <p style="color:var(--danger); font-size:13px;">
+                            <strong>⚠️ Muhimu:</strong> Hifadhi API Key yako salama! Haionekani tena baada ya kuondoka kwenye ukurasa huu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Manage Keys -->
+            <div class="tab-content" id="tab-manage">
+                <div id="keysList">
+                    <p style="color:var(--text-secondary); text-align:center; padding:40px 0;">
+                        Loading your API Keys...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tab 3: API Docs -->
+            <div class="tab-content" id="tab-docs">
+                <div style="padding:10px 0;">
+                    <h3 style="color:var(--text-primary); margin-bottom:15px;">📖 API Documentation</h3>
+                    
+                    <div style="background:var(--bg-primary); padding:15px; border-radius:10px; border:1px solid var(--border); margin-bottom:15px;">
+                        <h4 style="color:var(--accent);">Authentication</h4>
+                        <p style="color:var(--text-secondary); font-size:14px; margin:5px 0;">
+                            Tumia API Key yako kwenye header:
+                        </p>
+                        <code style="display:block; background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; font-size:13px; color:var(--text-primary);">
+                            x-api-key: dvary_xxxxxxxxxxxxxxxxxxxxxxxx
+                        </code>
+                    </div>
+
+                    <div style="background:var(--bg-primary); padding:15px; border-radius:10px; border:1px solid var(--border); margin-bottom:15px;">
+                        <h4 style="color:var(--accent);">🎮 Get All Games</h4>
+                        <code style="display:block; background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; font-size:13px; color:var(--text-primary);">
+                            GET /api/v1/games
+                        </code>
+                        <p style="color:var(--text-secondary); font-size:13px; margin-top:5px;">
+                            Returns all games with details (name, genre, price, rating, etc.)
+                        </p>
+                    </div>
+
+                    <div style="background:var(--bg-primary); padding:15px; border-radius:10px; border:1px solid var(--border); margin-bottom:15px;">
+                        <h4 style="color:var(--accent);">🎮 Get Single Game</h4>
+                        <code style="display:block; background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; font-size:13px; color:var(--text-primary);">
+                            GET /api/v1/games/:id
+                        </code>
+                        <p style="color:var(--text-secondary); font-size:13px; margin-top:5px;">
+                            Returns details of a specific game by ID
+                        </p>
+                    </div>
+
+                    <div style="background:var(--bg-primary); padding:15px; border-radius:10px; border:1px solid var(--border); margin-bottom:15px;">
+                        <h4 style="color:var(--accent);">🎫 Verify Claim</h4>
+                        <code style="display:block; background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; font-size:13px; color:var(--text-primary);">
+                            POST /api/v1/verify-claim
+                        </code>
+                        <p style="color:var(--text-secondary); font-size:13px; margin-top:5px;">
+                            Body: { "code": "DVARY-XXXXXX" }
+                        </p>
+                    </div>
+
+                    <div style="background:rgba(245,158,11,0.1); padding:15px; border-radius:10px; border:1px solid rgba(245,158,11,0.2);">
+                        <p style="color:var(--warning); font-size:13px;">
+                            <strong>💡 Tip:</strong> All endpoints require the <code style="background:rgba(0,0,0,0.3); padding:2px 8px; border-radius:4px;">x-api-key</code> header.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer-text">
+                <a href="/main">🏠 Back to Home</a> &bull; 
+                <a href="/support">❓ Support</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let currentGeneratedKey = null;
+
+        // ============================================================
+        // AUTH STATE
+        // ============================================================
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('userEmailDisplay').textContent = user.email;
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'inline-block';
+                
+                // Load user's API keys
+                loadUserKeys();
+                loadGamesList();
+            } else {
+                currentUser = null;
+                document.getElementById('userEmailDisplay').textContent = 'Not logged in';
+                document.getElementById('loginBtn').style.display = 'inline-block';
+                document.getElementById('logoutBtn').style.display = 'none';
+                document.getElementById('keysList').innerHTML = `
+                    <p style="color:var(--text-secondary); text-align:center; padding:20px 0;">
+                        🔒 Tafadhali login ili kuona API Keys zako.
+                    </p>
+                `;
+            }
+        });
+
+        // ============================================================
+        // SWITCH TABS
+        // ============================================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`.tabs button[onclick*="${tab}"]`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        // ============================================================
+        // LOAD GAMES LIST
+        // ============================================================
+        async function loadGamesList() {
+            try {
+                const snapshot = await db.collection('games').limit(20).get();
+                const select = document.getElementById('allowedGames');
+                
+                // Clear existing options except "all"
+                select.innerHTML = '<option value="all">🎮 Michezo Yote</option>';
+                
+                snapshot.forEach(doc => {
+                    const game = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = `🎮 ${game.name || 'Unnamed'}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading games:', error);
+            }
+        }
+
+        // ============================================================
+        // REQUEST API KEY
+        // ============================================================
+        async function requestAPIKey(event) {
+            event.preventDefault();
+            
+            if (!currentUser) {
+                showMessage('Tafadhali login kwanza ili kuomba API Key.', 'error');
+                return;
+            }
+            
+            const appName = document.getElementById('appName').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const allowedGamesSelect = document.getElementById('allowedGames');
+            const allowedGames = Array.from(allowedGamesSelect.selectedOptions).map(opt => opt.value);
+            
+            if (!appName) {
+                showMessage('Tafadhali weka jina la App.', 'error');
+                return;
+            }
+            
+            const btn = document.getElementById('requestBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Inaomba...';
+            
+            try {
+                const response = await fetch('/api/request-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: currentUser.email,
+                        appName: appName,
+                        description: description,
+                        allowedGames: allowedGames
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentGeneratedKey = result.apiKey;
+                    document.getElementById('generatedKey').textContent = result.apiKey;
+                    document.getElementById('keyCreatedAt').textContent = new Date().toLocaleDateString();
+                    document.getElementById('keyExpiresAt').textContent = result.expiresAt ? new Date(result.expiresAt).toLocaleDateString() : '1 year';
+                    document.getElementById('keyUsage').textContent = '0';
+                    document.getElementById('keyStatus').textContent = 'Active';
+                    document.getElementById('keyStatus').className = 'value active';
+                    
+                    document.getElementById('apiKeyResult').style.display = 'block';
+                    document.getElementById('apiKeyForm').style.display = 'none';
+                    
+                    showMessage('✅ API Key imeundwa kikamilifu!', 'success');
+                    
+                    // Reload keys list
+                    loadUserKeys();
+                } else {
+                    showMessage(result.error || 'Hitilafu wakati wa kuunda API Key.', 'error');
+                }
+            } catch (error) {
+                console.error('Error requesting API Key:', error);
+                showMessage('Hitilafu ya mtandao. Tafadhali jaribu tena.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🔑 Omba API Key';
+            }
+        }
+
+        // ============================================================
+        // LOAD USER'S API KEYS
+        // ============================================================
+        async function loadUserKeys() {
+            if (!currentUser) return;
+            
+            const container = document.getElementById('keysList');
+            container.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:20px 0;">Loading...</p>';
+            
+            try {
+                const response = await fetch('/api/key-info', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: currentUser.email
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    container.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding:20px 0;">${result.error || 'Error loading keys'}</p>`;
+                    return;
+                }
+                
+                if (!result.hasKey || result.keys.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:30px 0;">
+                            <span style="font-size:48px; display:block; margin-bottom:10px;">🔑</span>
+                            <p style="color:var(--text-secondary);">Huna API Key bado.</p>
+                            <p style="color:var(--text-secondary); font-size:13px;">Nenda kwenye "Request Key" kuomba.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                result.keys.forEach((key, index) => {
+                    const isActive = key.isActive !== false;
+                    const createdAt = key.createdAt ? new Date(key.createdAt).toLocaleDateString() : '-';
+                    const expiresAt = key.expiresAt ? new Date(key.expiresAt).toLocaleDateString() : '1 year';
+                    
+                    html += `
+                        <div style="background:var(--bg-primary); padding:16px; border-radius:10px; border:1px solid var(--border); margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                                <div>
+                                    <strong style="color:var(--text-primary);">${key.appName || 'App'}</strong>
+                                    <span style="color:var(--text-secondary); font-size:12px; margin-left:10px;">#${index + 1}</span>
+                                </div>
+                                <span class="value ${isActive ? 'active' : 'inactive'}">${isActive ? '🟢 Active' : '🔴 Inactive'}</span>
+                            </div>
+                            <div style="font-family:monospace; font-size:13px; color:var(--accent); background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:6px; word-break:break-all;">
+                                ${key.key}
+                            </div>
+                            <div style="display:flex; gap:15px; margin-top:10px; font-size:12px; color:var(--text-secondary); flex-wrap:wrap;">
+                                <span>📅 Iliundwa: ${createdAt}</span>
+                                <span>⏳ Inaisha: ${expiresAt}</span>
+                                <span>📊 Matumizi: ${key.usageCount || 0}</span>
+                            </div>
+                            ${isActive ? `
+                                <button onclick="revokeKey('${key.key}')" class="btn-danger" style="margin-top:10px; font-size:12px; padding:4px 12px;">
+                                    🗑️ Futa Key
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading keys:', error);
+                container.innerHTML = `<p style="color:var(--text-secondary); text-align:center; padding:20px 0;">Error loading keys. Please refresh.</p>`;
+            }
+        }
+
+        // ============================================================
+        // REVOKE API KEY
+        // ============================================================
+        async function revokeKey(apiKey) {
+            if (!confirm('Je, una uhakika unataka kufuta API Key hii? Hatua hii haiwezi kurekebishwa!')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/revoke-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: currentUser.email,
+                        apiKey: apiKey
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('✅ API Key imefutwa kikamilifu.', 'success');
+                    loadUserKeys();
+                } else {
+                    showMessage(result.error || 'Hitilafu wakati wa kufuta API Key.', 'error');
+                }
+            } catch (error) {
+                console.error('Error revoking key:', error);
+                showMessage('Hitilafu ya mtandao. Tafadhali jaribu tena.', 'error');
+            }
+        }
+
+        // ============================================================
+        // COPY API KEY
+        // ============================================================
+        function copyKey() {
+            const key = document.getElementById('generatedKey').textContent;
+            if (!key || key === 'dvary_xxxxxxxxxxxxxxxxxxxxxxxx') return;
+            
+            navigator.clipboard.writeText(key).then(() => {
+                showMessage('✅ API Key imenakiliwa kwenye clipboard!', 'success');
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = key;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showMessage('✅ API Key imenakiliwa kwenye clipboard!', 'success');
+            });
+        }
+
+        // ============================================================
+        // SHOW MESSAGE
+        // ============================================================
+        function showMessage(text, type = 'info') {
+            const el = document.getElementById('message');
+            el.textContent = text;
+            el.className = `message ${type}`;
+            
+            // Auto hide after 8 seconds
+            clearTimeout(el._timeout);
+            el._timeout = setTimeout(() => {
+                el.className = 'message';
+            }, 8000);
+        }
+
+        // ============================================================
+        // LOGOUT
+        // ============================================================
+        function handleLogout() {
+            auth.signOut().then(() => {
+                window.location.reload();
+            }).catch((error) => {
+                console.error('Logout error:', error);
+                showMessage('Error logging out.', 'error');
+            });
+        }
+
+        console.log('🔑 DVARY GAMES - API Key Request System loaded!');
+    </script>
+</body>
+  </html>
