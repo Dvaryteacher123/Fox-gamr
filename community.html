@@ -1,0 +1,3347 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DVARY GAMES • Community</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#0b141a;
+    --header:#17212b;
+    --input:#202b33;
+    --bubble:#18242d;
+    --own:#2b5278;
+    --text:#f1f5f9;
+    --muted:#8b9aa5;
+    --accent:#3390ec;
+    --online:#35c759;
+    --border:rgba(255,255,255,.07);
+    --danger:#ff4d5e;
+}
+
+[data-theme="white"]{
+    --bg:#eef2f5;
+    --header:#ffffff;
+    --input:#ffffff;
+    --bubble:#ffffff;
+    --own:#d9fdd3;
+    --text:#18212b;
+    --muted:#71808c;
+    --border:rgba(0,0,0,.08);
+}
+
+[data-theme="purple"]{
+    --bg:#160d24;
+    --header:#211233;
+    --input:#2a193d;
+    --bubble:#241533;
+    --own:#56327b;
+}
+
+[data-theme="pink"]{
+    --bg:#210d18;
+    --header:#321321;
+    --input:#3a1827;
+    --bubble:#301624;
+    --own:#71324e;
+}
+
+[data-theme="green"]{
+    --bg:#081a15;
+    --header:#10251f;
+    --input:#17352c;
+    --bubble:#122a23;
+    --own:#205b48;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+
+button,
+input,
+textarea{
+    font-family:inherit;
+}
+
+/* APP */
+
+.app{
+    width:100%;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    background:var(--bg);
+    position:relative;
+    overflow:hidden;
+}
+
+/* HEADER */
+
+.header{
+    height:64px;
+    min-height:64px;
+    background:var(--header);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    padding:7px 12px;
+    gap:10px;
+    z-index:20;
+}
+
+.back{
+    width:38px;
+    height:38px;
+    border:0;
+    background:transparent;
+    color:var(--text);
+    font-size:23px;
+    cursor:pointer;
+    display:none;
+}
+
+.group-avatar{
+    width:46px;
+    height:46px;
+    min-width:46px;
+    border-radius:50%;
+    background:
+        linear-gradient(135deg,#3390ec,#7c3aed);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:23px;
+    box-shadow:0 5px 18px rgba(51,144,236,.25);
+}
+
+.group-info{
+    flex:1;
+    min-width:0;
+    cursor:pointer;
+}
+
+.group-name{
+    font-size:16px;
+    font-weight:700;
+    line-height:20px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.group-status{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:1px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.online-dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--online);
+    box-shadow:0 0 7px rgba(53,199,89,.7);
+}
+
+.header-actions{
+    display:flex;
+    align-items:center;
+    gap:2px;
+}
+
+.icon-btn{
+    width:40px;
+    height:40px;
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    border-radius:50%;
+    font-size:19px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.icon-btn:hover{
+    background:rgba(255,255,255,.07);
+    color:var(--text);
+}
+
+/* SEARCH */
+
+.search-bar{
+    position:absolute;
+    top:64px;
+    left:0;
+    right:0;
+    background:var(--header);
+    padding:9px 12px;
+    border-bottom:1px solid var(--border);
+    z-index:30;
+    display:none;
+}
+
+.search-bar.show{
+    display:flex;
+    gap:8px;
+}
+
+.search-input{
+    flex:1;
+    height:42px;
+    border:0;
+    outline:none;
+    border-radius:21px;
+    background:var(--input);
+    color:var(--text);
+    padding:0 17px;
+    font-size:14px;
+}
+
+.search-close{
+    width:42px;
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font-size:21px;
+}
+
+/* PIN */
+
+.pinned{
+    display:none;
+    height:46px;
+    min-height:46px;
+    background:var(--header);
+    border-bottom:1px solid var(--border);
+    align-items:center;
+    padding:5px 14px;
+    gap:10px;
+}
+
+.pinned.show{
+    display:flex;
+}
+
+.pin-line{
+    width:3px;
+    height:30px;
+    border-radius:3px;
+    background:var(--accent);
+}
+
+.pin-content{
+    flex:1;
+    min-width:0;
+}
+
+.pin-title{
+    color:var(--accent);
+    font-size:11px;
+    font-weight:700;
+}
+
+.pin-text{
+    color:var(--muted);
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+/* CHAT */
+
+.chat{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    padding:12px 10px 8px;
+    scroll-behavior:smooth;
+
+    background-color:var(--bg);
+
+    background-image:
+        radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:18px 18px;
+}
+
+.chat::-webkit-scrollbar{
+    width:5px;
+}
+
+.chat::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.12);
+    border-radius:10px;
+}
+
+.messages{
+    width:100%;
+    max-width:850px;
+    margin:auto;
+}
+
+/* DATE */
+
+.date{
+    text-align:center;
+    margin:10px 0 14px;
+}
+
+.date span{
+    background:rgba(20,30,38,.85);
+    color:#b8c5ce;
+    font-size:11px;
+    padding:5px 12px;
+    border-radius:13px;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+
+/* MESSAGE */
+
+.message{
+    display:flex;
+    align-items:flex-end;
+    gap:7px;
+    margin:2px 0;
+    animation:messageIn .18s ease;
+}
+
+.message.own{
+    justify-content:flex-end;
+}
+
+@keyframes messageIn{
+    from{
+        opacity:0;
+        transform:translateY(5px);
+    }
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+.avatar{
+    width:34px;
+    height:34px;
+    min-width:34px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#3390ec,#8b5cf6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    font-size:15px;
+    margin-bottom:3px;
+}
+
+.avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.message.own .avatar{
+    display:none;
+}
+
+.message-body{
+    max-width:min(75%,560px);
+}
+
+.sender{
+    color:#42a5f5;
+    font-size:12px;
+    font-weight:700;
+    margin:0 8px 3px;
+}
+
+.message.own .sender{
+    display:none;
+}
+
+.bubble{
+    background:var(--bubble);
+    border-radius:15px 15px 15px 4px;
+    padding:7px 10px 5px;
+    box-shadow:0 1px 2px rgba(0,0,0,.15);
+    position:relative;
+    word-break:break-word;
+}
+
+.message.own .bubble{
+    background:var(--own);
+    border-radius:15px 15px 4px 15px;
+}
+
+.text{
+    font-size:14px;
+    line-height:1.45;
+    white-space:pre-wrap;
+}
+
+.meta{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:4px;
+    margin-left:8px;
+    margin-top:2px;
+}
+
+.time{
+    color:rgba(255,255,255,.48);
+    font-size:10px;
+}
+
+.message.own .time{
+    color:rgba(255,255,255,.65);
+}
+
+.check{
+    color:#61c7ff;
+    font-size:11px;
+}
+
+/* IMAGE */
+
+.chat-image{
+    display:block;
+    width:100%;
+    max-width:330px;
+    max-height:400px;
+    object-fit:cover;
+    border-radius:10px;
+    margin-bottom:4px;
+    cursor:pointer;
+}
+
+/* REPLY */
+
+.reply{
+    border-left:3px solid var(--accent);
+    background:rgba(0,0,0,.12);
+    padding:5px 8px;
+    border-radius:5px;
+    margin-bottom:5px;
+    cursor:pointer;
+}
+
+.reply-name{
+    color:var(--accent);
+    font-size:11px;
+    font-weight:700;
+}
+
+.reply-text{
+    color:var(--muted);
+    font-size:11px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+/* MENTION */
+
+.mention{
+    color:#42a5f5;
+    font-weight:700;
+    background:rgba(66,165,245,.12);
+    padding:1px 3px;
+    border-radius:4px;
+}
+
+/* REACTIONS */
+
+.reactions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px;
+    margin-top:3px;
+}
+
+.reaction{
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.13);
+    border-radius:12px;
+    padding:2px 7px;
+    font-size:12px;
+    cursor:pointer;
+}
+
+.reaction:hover{
+    border-color:var(--accent);
+}
+
+/* ACTIONS */
+
+.actions{
+    display:none;
+    position:absolute;
+    right:5px;
+    top:-31px;
+    background:var(--header);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:3px;
+    box-shadow:0 5px 20px rgba(0,0,0,.3);
+}
+
+.bubble:hover .actions{
+    display:flex;
+}
+
+.action{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    width:30px;
+    height:27px;
+    cursor:pointer;
+    border-radius:12px;
+}
+
+.action:hover{
+    background:rgba(255,255,255,.08);
+    color:var(--text);
+}
+
+/* EMPTY */
+
+.empty{
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:40px;
+}
+
+.empty-icon{
+    width:75px;
+    height:75px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#3390ec,#7c3aed);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:35px;
+    margin-bottom:15px;
+}
+
+.empty h2{
+    font-size:19px;
+    margin-bottom:6px;
+}
+
+.empty p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* COMPOSER */
+
+.composer-area{
+    background:var(--header);
+    border-top:1px solid var(--border);
+    padding:7px 10px max(7px,env(safe-area-inset-bottom));
+    z-index:15;
+}
+
+.reply-preview{
+    display:none;
+    max-width:850px;
+    margin:0 auto 6px;
+    background:var(--input);
+    border-left:3px solid var(--accent);
+    border-radius:7px;
+    padding:6px 9px;
+    align-items:center;
+    gap:8px;
+}
+
+.reply-preview.show{
+    display:flex;
+}
+
+.reply-info{
+    flex:1;
+    min-width:0;
+}
+
+.reply-preview-name{
+    color:var(--accent);
+    font-size:11px;
+    font-weight:700;
+}
+
+.reply-preview-text{
+    color:var(--muted);
+    font-size:11px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.cancel-reply{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font-size:17px;
+}
+
+.composer{
+    max-width:850px;
+    margin:auto;
+    display:flex;
+    align-items:flex-end;
+    gap:7px;
+}
+
+.attach{
+    width:43px;
+    height:43px;
+    border-radius:50%;
+    border:0;
+    background:var(--input);
+    color:var(--muted);
+    font-size:20px;
+    cursor:pointer;
+    flex-shrink:0;
+}
+
+.input-box{
+    flex:1;
+    min-height:43px;
+    max-height:120px;
+    background:var(--input);
+    border-radius:22px;
+    display:flex;
+    align-items:flex-end;
+    padding:4px 5px 4px 12px;
+}
+
+.emoji-btn{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    width:32px;
+    height:34px;
+    font-size:19px;
+    cursor:pointer;
+}
+
+#messageInput{
+    flex:1;
+    resize:none;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:var(--text);
+    font-size:14px;
+    line-height:20px;
+    min-height:33px;
+    max-height:105px;
+    padding:7px 3px;
+}
+
+#messageInput::placeholder{
+    color:var(--muted);
+}
+
+.send{
+    width:43px;
+    height:43px;
+    border-radius:50%;
+    border:0;
+    background:var(--accent);
+    color:white;
+    font-size:19px;
+    cursor:pointer;
+    box-shadow:0 4px 15px rgba(51,144,236,.3);
+    flex-shrink:0;
+}
+
+.send:disabled{
+    opacity:.45;
+}
+
+/* EMOJI */
+
+.emoji-panel{
+    position:absolute;
+    left:10px;
+    right:10px;
+    bottom:65px;
+    max-width:500px;
+    margin:auto;
+    background:var(--header);
+    border:1px solid var(--border);
+    border-radius:15px;
+    padding:10px;
+    display:none;
+    grid-template-columns:repeat(8,1fr);
+    gap:4px;
+    box-shadow:0 10px 35px rgba(0,0,0,.4);
+    z-index:50;
+}
+
+.emoji-panel.show{
+    display:grid;
+}
+
+.emoji{
+    height:36px;
+    border:0;
+    background:transparent;
+    font-size:23px;
+    cursor:pointer;
+    border-radius:8px;
+}
+
+.emoji:hover{
+    background:rgba(255,255,255,.07);
+}
+
+/* ONLINE FLOAT */
+
+.online-float{
+    position:absolute;
+    right:15px;
+    bottom:72px;
+    background:var(--header);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:7px 12px;
+    color:var(--muted);
+    font-size:11px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    box-shadow:0 5px 20px rgba(0,0,0,.3);
+    pointer-events:none;
+}
+
+/* SCROLL */
+
+.scroll-btn{
+    position:absolute;
+    right:15px;
+    bottom:75px;
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:var(--header);
+    border:1px solid var(--border);
+    color:var(--text);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    font-size:19px;
+    box-shadow:0 5px 20px rgba(0,0,0,.35);
+    cursor:pointer;
+    z-index:25;
+}
+
+.scroll-btn.show{
+    display:flex;
+}
+
+/* SIDE PANEL */
+
+.overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    z-index:80;
+    display:none;
+}
+
+.overlay.show{
+    display:block;
+}
+
+.side-panel{
+    position:fixed;
+    top:0;
+    right:-390px;
+    width:360px;
+    max-width:90%;
+    height:100dvh;
+    background:var(--header);
+    z-index:100;
+    transition:.28s ease;
+    box-shadow:-10px 0 35px rgba(0,0,0,.35);
+    display:flex;
+    flex-direction:column;
+}
+
+.side-panel.show{
+    right:0;
+}
+
+.panel-top{
+    height:65px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 15px;
+    border-bottom:1px solid var(--border);
+}
+
+.panel-top h3{
+    flex:1;
+    font-size:17px;
+}
+
+.close{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font-size:21px;
+    cursor:pointer;
+}
+
+.member-summary{
+    padding:18px 15px;
+    border-bottom:1px solid var(--border);
+}
+
+.big-group{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
+
+.big-avatar{
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#3390ec,#7c3aed);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+}
+
+.member-number{
+    font-size:14px;
+    color:var(--muted);
+    margin-top:3px;
+}
+
+.member-list{
+    flex:1;
+    overflow-y:auto;
+    padding:8px;
+}
+
+.member{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px;
+    border-radius:10px;
+}
+
+.member:hover{
+    background:rgba(255,255,255,.05);
+}
+
+.member-avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#3390ec,#8b5cf6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    position:relative;
+}
+
+.member-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.member-online{
+    position:absolute;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:var(--online);
+    right:0;
+    bottom:0;
+    border:2px solid var(--header);
+}
+
+.member-info{
+    flex:1;
+}
+
+.member-name{
+    font-size:14px;
+    font-weight:600;
+}
+
+.member-status{
+    color:var(--muted);
+    font-size:11px;
+}
+
+/* MENU */
+
+.menu{
+    position:absolute;
+    top:57px;
+    right:8px;
+    width:220px;
+    background:var(--header);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:5px;
+    box-shadow:0 10px 35px rgba(0,0,0,.45);
+    display:none;
+    z-index:200;
+}
+
+.menu.show{
+    display:block;
+}
+
+.menu-item{
+    width:100%;
+    border:0;
+    background:transparent;
+    color:var(--text);
+    padding:11px 12px;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    border-radius:8px;
+    text-align:left;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.menu-item:hover{
+    background:rgba(255,255,255,.07);
+}
+
+.menu-divider{
+    height:1px;
+    background:var(--border);
+    margin:4px;
+}
+
+/* THEME */
+
+.theme-panel{
+    position:fixed;
+    left:50%;
+    bottom:-400px;
+    transform:translateX(-50%);
+    width:430px;
+    max-width:94%;
+    background:var(--header);
+    border:1px solid var(--border);
+    border-radius:20px 20px 0 0;
+    padding:18px;
+    z-index:110;
+    transition:.3s ease;
+}
+
+.theme-panel.show{
+    bottom:0;
+}
+
+.theme-title{
+    display:flex;
+    align-items:center;
+    margin-bottom:14px;
+}
+
+.theme-title h3{
+    flex:1;
+}
+
+.themes{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:9px;
+}
+
+.theme{
+    height:70px;
+    border:2px solid var(--border);
+    border-radius:12px;
+    cursor:pointer;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    padding-bottom:8px;
+    font-size:11px;
+}
+
+.theme:hover{
+    border-color:var(--accent);
+}
+
+.t-dark{background:#0b141a;}
+.t-white{background:#eef2f5;color:#17212b;}
+.t-purple{background:#160d24;}
+.t-pink{background:#210d18;}
+.t-green{background:#081a15;}
+
+.upload-theme{
+    margin-top:12px;
+    border:1px dashed var(--border);
+    padding:13px;
+    text-align:center;
+    border-radius:10px;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:12px;
+}
+
+/* LOGIN */
+
+.login{
+    position:absolute;
+    inset:64px 0 0;
+    background:var(--bg);
+    z-index:40;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:30px;
+}
+
+.login.show{
+    display:flex;
+}
+
+.login-card{
+    max-width:320px;
+}
+
+.login-icon{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    margin:0 auto 15px;
+    background:linear-gradient(135deg,#3390ec,#7c3aed);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:38px;
+}
+
+.login h2{
+    margin-bottom:8px;
+}
+
+.login p{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.5;
+    margin-bottom:18px;
+}
+
+.login-btn{
+    display:inline-block;
+    text-decoration:none;
+    background:var(--accent);
+    color:white;
+    padding:11px 25px;
+    border-radius:22px;
+    font-weight:700;
+}
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:85px;
+    transform:translateX(-50%) translateY(20px);
+    background:#202b33;
+    color:white;
+    padding:9px 15px;
+    border-radius:20px;
+    font-size:12px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+    z-index:999;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+}
+
+/* DESKTOP */
+
+@media(min-width:800px){
+
+    body{
+        background:#071017;
+    }
+
+    .app{
+        max-width:1050px;
+        margin:auto;
+        box-shadow:0 0 60px rgba(0,0,0,.35);
+    }
+
+    .back{
+        display:block;
+    }
+
+    .chat{
+        padding-left:30px;
+        padding-right:30px;
+    }
+
+    .composer-area{
+        padding-left:30px;
+        padding-right:30px;
+    }
+}
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+    .header{
+        height:60px;
+        min-height:60px;
+    }
+
+    .group-avatar{
+        width:42px;
+        height:42px;
+        min-width:42px;
+    }
+
+    .group-name{
+        font-size:15px;
+    }
+
+    .group-status{
+        font-size:11px;
+    }
+
+    .header-actions .icon-btn{
+        width:36px;
+        height:36px;
+    }
+
+    .message-body{
+        max-width:82%;
+    }
+
+    .bubble{
+        padding:6px 9px 5px;
+    }
+
+    .text{
+        font-size:13px;
+    }
+
+    .avatar{
+        width:30px;
+        height:30px;
+        min-width:30px;
+    }
+
+    .online-float{
+        display:none;
+    }
+
+    .emoji-panel{
+        grid-template-columns:repeat(7,1fr);
+    }
+}
+
+@media(max-width:380px){
+
+    .header-actions .icon-btn:first-child{
+        display:none;
+    }
+
+    .message-body{
+        max-width:86%;
+    }
+
+    .text{
+        font-size:12.5px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app" id="app">
+
+    <!-- HEADER -->
+    <header class="header">
+
+        <button class="back" onclick="goBack()">‹</button>
+
+        <div class="group-avatar">🎮</div>
+
+        <div class="group-info" onclick="openMembers()">
+            <div class="group-name">DVARY GAMES Community</div>
+
+            <div class="group-status">
+                <span class="online-dot"></span>
+                <span id="onlineCount">0</span>
+                <span>online</span>
+                <span>•</span>
+                <span id="memberCount">0</span>
+                <span>members</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+
+            <button class="icon-btn"
+                    onclick="toggleSearch()"
+                    title="Search">
+                🔍
+            </button>
+
+            <button class="icon-btn"
+                    onclick="openMembers()"
+                    title="Members">
+                👥
+            </button>
+
+            <button class="icon-btn"
+                    onclick="toggleMenu()"
+                    title="Menu">
+                ⋮
+            </button>
+
+        </div>
+    </header>
+
+    <!-- MENU -->
+    <div class="menu" id="menu">
+
+        <button class="menu-item" onclick="openMembers()">
+            👥 <span>Members</span>
+        </button>
+
+        <button class="menu-item" onclick="showOnline()">
+            🟢 <span>Online Members</span>
+        </button>
+
+        <button class="menu-item" onclick="toggleSearch()">
+            🔍 <span>Search Messages</span>
+        </button>
+
+        <button class="menu-item" onclick="openThemes()">
+            🎨 <span>Chat Theme</span>
+        </button>
+
+        <button class="menu-item" onclick="showToast('🔔 Notifications enabled')">
+            🔔 <span>Notifications</span>
+        </button>
+
+        <div class="menu-divider"></div>
+
+        <button class="menu-item" onclick="showToast('🎮 DVARY GAMES Community')">
+            ℹ️ <span>Community Info</span>
+        </button>
+
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-bar" id="searchBar">
+
+        <input
+            class="search-input"
+            id="searchInput"
+            type="text"
+            placeholder="Search messages..."
+            oninput="searchMessages(this.value)"
+        >
+
+        <button class="search-close" onclick="toggleSearch()">
+            ✕
+        </button>
+
+    </div>
+
+    <!-- PINNED -->
+    <div class="pinned" id="pinned">
+
+        <div class="pin-line"></div>
+
+        <div class="pin-content">
+            <div class="pin-title">📌 PINNED MESSAGE</div>
+            <div class="pin-text" id="pinText">
+                Welcome to DVARY GAMES Community
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CHAT -->
+    <main class="chat" id="chat">
+
+        <div class="messages" id="messages">
+
+            <div class="empty" id="empty">
+
+                <div class="empty-icon">🎮</div>
+
+                <h2>DVARY GAMES Community</h2>
+
+                <p>
+                    Karibu kwenye community yetu.
+                    Anza kuzungumza na gamers wengine.
+                </p>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- SCROLL -->
+    <button class="scroll-btn"
+            id="scrollBtn"
+            onclick="scrollBottom()">
+        ↓
+    </button>
+
+    <!-- ONLINE INDICATOR -->
+    <div class="online-float">
+        <span class="online-dot"></span>
+        <span id="floatingOnline">0</span> online
+    </div>
+
+    <!-- EMOJI -->
+    <div class="emoji-panel" id="emojiPanel">
+
+        <button class="emoji" onclick="addEmoji('😀')">😀</button>
+        <button class="emoji" onclick="addEmoji('😂')">😂</button>
+        <button class="emoji" onclick="addEmoji('🤣')">🤣</button>
+        <button class="emoji" onclick="addEmoji('😍')">😍</button>
+        <button class="emoji" onclick="addEmoji('🥰')">🥰</button>
+        <button class="emoji" onclick="addEmoji('😎')">😎</button>
+        <button class="emoji" onclick="addEmoji('🔥')">🔥</button>
+        <button class="emoji" onclick="addEmoji('❤️')">❤️</button>
+
+        <button class="emoji" onclick="addEmoji('💯')">💯</button>
+        <button class="emoji" onclick="addEmoji('👍')">👍</button>
+        <button class="emoji" onclick="addEmoji('👎')">👎</button>
+        <button class="emoji" onclick="addEmoji('🎮')">🎮</button>
+        <button class="emoji" onclick="addEmoji('🏆')">🏆</button>
+        <button class="emoji" onclick="addEmoji('⚽')">⚽</button>
+        <button class="emoji" onclick="addEmoji('🚀')">🚀</button>
+        <button class="emoji" onclick="addEmoji('👑')">👑</button>
+
+        <button class="emoji" onclick="addEmoji('🤯')">🤯</button>
+        <button class="emoji" onclick="addEmoji('😭')">😭</button>
+        <button class="emoji" onclick="addEmoji('😅')">😅</button>
+        <button class="emoji" onclick="addEmoji('🤔')">🤔</button>
+        <button class="emoji" onclick="addEmoji('💀')">💀</button>
+        <button class="emoji" onclick="addEmoji('👾')">👾</button>
+        <button class="emoji" onclick="addEmoji('🤖')">🤖</button>
+        <button class="emoji" onclick="addEmoji('⚡')">⚡</button>
+
+    </div>
+
+    <!-- REPLY -->
+    <div class="composer-area">
+
+        <div class="reply-preview" id="replyPreview">
+
+            <div class="pin-line"></div>
+
+            <div class="reply-info">
+
+                <div class="reply-preview-name"
+                     id="replyName">
+                    Reply
+                </div>
+
+                <div class="reply-preview-text"
+                     id="replyText">
+                    Message
+                </div>
+
+            </div>
+
+            <button class="cancel-reply"
+                    onclick="cancelReply()">
+                ✕
+            </button>
+
+        </div>
+
+        <!-- COMPOSER -->
+        <div class="composer">
+
+            <button class="attach"
+                    onclick="document.getElementById('imageInput').click()">
+                📎
+            </button>
+
+            <div class="input-box">
+
+                <button class="emoji-btn"
+                        onclick="toggleEmoji()">
+                    😊
+                </button>
+
+                <textarea
+                    id="messageInput"
+                    rows="1"
+                    placeholder="Write a message..."
+                ></textarea>
+
+                <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/*"
+                    hidden
+                >
+
+            </div>
+
+            <button
+                class="send"
+                id="sendBtn"
+                onclick="sendMessage()">
+                ➤
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- LOGIN -->
+    <div class="login" id="login">
+
+        <div class="login-card">
+
+            <div class="login-icon">🎮</div>
+
+            <h2>Join DVARY Community</h2>
+
+            <p>
+                Ingia kwenye account yako ili uweze
+                kuongea na gamers wengine.
+            </p>
+
+            <a href="/login" class="login-btn">
+                🔑 Login
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MEMBERS PANEL -->
+
+<div class="overlay"
+     id="membersOverlay"
+     onclick="closeMembers()">
+</div>
+
+<div class="side-panel"
+     id="membersPanel">
+
+    <div class="panel-top">
+
+        <h3>👥 Community</h3>
+
+        <button class="close"
+                onclick="closeMembers()">
+            ✕
+        </button>
+
+    </div>
+
+    <div class="member-summary">
+
+        <div class="big-group">
+
+            <div class="big-avatar">🎮</div>
+
+            <div>
+
+                <strong>DVARY GAMES</strong>
+
+                <div class="member-number">
+                    <span id="panelOnline">0</span> online
+                    •
+                    <span id="panelMembers">0</span> members
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="member-list"
+         id="memberList">
+
+        Loading members...
+
+    </div>
+
+</div>
+
+
+<!-- THEMES -->
+
+<div class="overlay"
+     id="themeOverlay"
+     onclick="closeThemes()">
+</div>
+
+<div class="theme-panel"
+     id="themePanel">
+
+    <div class="theme-title">
+
+        <h3>🎨 Chat Theme</h3>
+
+        <button class="close"
+                onclick="closeThemes()">
+            ✕
+        </button>
+
+    </div>
+
+    <div class="themes">
+
+        <div class="theme t-dark"
+             onclick="setTheme('dark')">
+            Dark
+        </div>
+
+        <div class="theme t-white"
+             onclick="setTheme('white')">
+            White
+        </div>
+
+        <div class="theme t-purple"
+             onclick="setTheme('purple')">
+            Purple
+        </div>
+
+        <div class="theme t-pink"
+             onclick="setTheme('pink')">
+            Pink
+        </div>
+
+        <div class="theme t-green"
+             onclick="setTheme('green')">
+            Green
+        </div>
+
+    </div>
+
+    <label class="upload-theme">
+
+        📷 Upload Chat Background
+
+        <input
+            type="file"
+            id="themeImage"
+            accept="image/*"
+            hidden
+            onchange="uploadBackground(this)"
+        >
+
+    </label>
+
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+
+/* ============================================================
+   FIREBASE
+============================================================ */
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+    authDomain: "enjoy-game-6c05c.firebaseapp.com",
+    projectId: "enjoy-game-6c05c",
+    storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+    messagingSenderId: "512924203714",
+    appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+    measurementId: "G-Y2H8BYM4LP"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const auth = firebase.auth();
+const storage = firebase.storage();
+
+
+/* ============================================================
+   STATE
+============================================================ */
+
+let currentUser = null;
+let userData = null;
+let allMessages = [];
+let allUsers = [];
+let unsubscribeMessages = null;
+let replyTo = null;
+
+
+/* ============================================================
+   ELEMENTS
+============================================================ */
+
+const chat = document.getElementById("chat");
+const messages = document.getElementById("messages");
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+
+const login = document.getElementById("login");
+
+const onlineCount =
+    document.getElementById("onlineCount");
+
+const floatingOnline =
+    document.getElementById("floatingOnline");
+
+const memberCount =
+    document.getElementById("memberCount");
+
+const panelOnline =
+    document.getElementById("panelOnline");
+
+const panelMembers =
+    document.getElementById("panelMembers");
+
+const memberList =
+    document.getElementById("memberList");
+
+
+/* ============================================================
+   AUTH
+============================================================ */
+
+auth.onAuthStateChanged(async user => {
+
+    if(user){
+
+        currentUser = user;
+
+        login.classList.remove("show");
+
+        await loadUser();
+
+        updatePresence();
+
+        loadMessages();
+
+        loadMembers();
+
+    }else{
+
+        currentUser = null;
+
+        login.classList.add("show");
+
+        messages.innerHTML = "";
+
+    }
+
+});
+
+
+/* ============================================================
+   USER
+============================================================ */
+
+async function loadUser(){
+
+    try{
+
+        const ref =
+            db.collection("users").doc(currentUser.uid);
+
+        const snap = await ref.get();
+
+        if(snap.exists){
+
+            userData = snap.data();
+
+        }else{
+
+            userData = {
+
+                username:
+                    currentUser.displayName || "User",
+
+                displayName:
+                    currentUser.displayName || "User",
+
+                email:
+                    currentUser.email || "",
+
+                photoURL:
+                    currentUser.photoURL || null,
+
+                avatarEmoji:"👤",
+
+                uid:currentUser.uid
+
+            };
+
+            await ref.set(userData);
+
+        }
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+/* ============================================================
+   ONLINE PRESENCE
+============================================================ */
+
+async function updatePresence(){
+
+    if(!currentUser) return;
+
+    try{
+
+        await db.collection("users")
+            .doc(currentUser.uid)
+            .set({
+
+                lastSeen:
+                    firebase.firestore.FieldValue.serverTimestamp()
+
+            },{merge:true});
+
+        updateOnlineCount();
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+async function updateOnlineCount(){
+
+    try{
+
+        const fiveMinutesAgo =
+            new Date(Date.now() - 5 * 60 * 1000);
+
+        const snap =
+            await db.collection("users")
+            .where(
+                "lastSeen",
+                ">=",
+                fiveMinutesAgo
+            )
+            .get();
+
+        const count = snap.size;
+
+        onlineCount.textContent = count;
+
+        floatingOnline.textContent = count;
+
+        panelOnline.textContent = count;
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+async function updateMemberCount(){
+
+    try{
+
+        const snap =
+            await db.collection("users").get();
+
+        const count = snap.size;
+
+        memberCount.textContent = count;
+
+        panelMembers.textContent = count;
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+setInterval(()=>{
+
+    if(currentUser){
+
+        updatePresence();
+        updateMemberCount();
+
+    }
+
+},30000);
+
+
+/* ============================================================
+   MEMBERS
+============================================================ */
+
+async function loadMembers(){
+
+    try{
+
+        const snap =
+            await db.collection("users").get();
+
+        allUsers = [];
+
+        snap.forEach(doc=>{
+
+            const user = doc.data();
+
+            user.id = doc.id;
+
+            allUsers.push(user);
+
+        });
+
+        const fiveMinutesAgo =
+            Date.now() - 5 * 60 * 1000;
+
+        allUsers.forEach(user=>{
+
+            if(user.lastSeen?.toDate){
+
+                user.isOnline =
+                    user.lastSeen.toDate().getTime()
+                    > fiveMinutesAgo;
+
+            }else{
+
+                user.isOnline = false;
+
+            }
+
+        });
+
+        allUsers.sort((a,b)=>{
+
+            if(a.isOnline && !b.isOnline) return -1;
+
+            if(!a.isOnline && b.isOnline) return 1;
+
+            return (a.username || "")
+                .localeCompare(b.username || "");
+
+        });
+
+        renderMembers();
+
+        updateMemberCount();
+        updateOnlineCount();
+
+    }catch(error){
+
+        console.error(error);
+
+        memberList.innerHTML =
+            "❌ Failed to load members";
+
+    }
+
+}
+
+
+function renderMembers(){
+
+    if(!allUsers.length){
+
+        memberList.innerHTML =
+            `<p style="padding:20px;color:var(--muted)">
+                No members yet
+            </p>`;
+
+        return;
+
+    }
+
+    memberList.innerHTML =
+        allUsers.map(user=>{
+
+            const name =
+                user.username ||
+                user.displayName ||
+                "User";
+
+            const avatar =
+                user.avatarEmoji || "👤";
+
+            const photo =
+                user.photoURL;
+
+            return `
+
+                <div class="member">
+
+                    <div class="member-avatar">
+
+                        ${
+                            photo
+                            ?
+                            `<img src="${escapeHtml(photo)}">`
+                            :
+                            avatar
+                        }
+
+                        ${
+                            user.isOnline
+                            ?
+                            `<span class="member-online"></span>`
+                            :
+                            ""
+                        }
+
+                    </div>
+
+                    <div class="member-info">
+
+                        <div class="member-name">
+                            ${escapeHtml(name)}
+                        </div>
+
+                        <div class="member-status">
+                            ${
+                                user.isOnline
+                                ?
+                                "🟢 online"
+                                :
+                                "last seen recently"
+                            }
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }).join("");
+
+}
+
+
+function openMembers(){
+
+    closeMenu();
+
+    document
+        .getElementById("membersPanel")
+        .classList.add("show");
+
+    document
+        .getElementById("membersOverlay")
+        .classList.add("show");
+
+    loadMembers();
+
+}
+
+
+function closeMembers(){
+
+    document
+        .getElementById("membersPanel")
+        .classList.remove("show");
+
+    document
+        .getElementById("membersOverlay")
+        .classList.remove("show");
+
+}
+
+
+function showOnline(){
+
+    openMembers();
+
+    setTimeout(()=>{
+
+        const online =
+            allUsers.filter(u=>u.isOnline);
+
+        if(!online.length){
+
+            memberList.innerHTML =
+                `<p style="padding:20px;color:var(--muted)">
+                    Hakuna members online kwa sasa.
+                </p>`;
+
+            return;
+
+        }
+
+        memberList.innerHTML =
+            online.map(user=>{
+
+                const name =
+                    user.username ||
+                    user.displayName ||
+                    "User";
+
+                return `
+
+                    <div class="member">
+
+                        <div class="member-avatar">
+
+                            ${
+                                user.photoURL
+                                ?
+                                `<img src="${escapeHtml(user.photoURL)}">`
+                                :
+                                (user.avatarEmoji || "👤")
+                            }
+
+                            <span class="member-online"></span>
+
+                        </div>
+
+                        <div class="member-info">
+
+                            <div class="member-name">
+                                ${escapeHtml(name)}
+                            </div>
+
+                            <div class="member-status">
+                                🟢 Online now
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }).join("");
+
+    },300);
+
+}
+
+
+/* ============================================================
+   LOAD MESSAGES
+============================================================ */
+
+function loadMessages(){
+
+    if(unsubscribeMessages){
+
+        unsubscribeMessages();
+
+    }
+
+    unsubscribeMessages =
+        db.collection("community_messages")
+        .orderBy("createdAt","asc")
+        .limit(150)
+        .onSnapshot(snapshot=>{
+
+            allMessages = [];
+
+            snapshot.forEach(doc=>{
+
+                const data = doc.data();
+
+                data.id = doc.id;
+
+                allMessages.push(data);
+
+            });
+
+            renderMessages(allMessages);
+
+            setTimeout(()=>scrollBottom(),100);
+
+        },error=>{
+
+            console.error(error);
+
+            messages.innerHTML = `
+
+                <div class="empty">
+
+                    <div class="empty-icon">⚠️</div>
+
+                    <h2>Unable to load chat</h2>
+
+                    <p>Please try again.</p>
+
+                </div>
+
+            `;
+
+        });
+
+}
+
+
+/* ============================================================
+   RENDER
+============================================================ */
+
+function renderMessages(list){
+
+    if(!list.length){
+
+        messages.innerHTML = `
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    🎮
+                </div>
+
+                <h2>
+                    DVARY GAMES Community
+                </h2>
+
+                <p>
+                    Hakuna messages bado.
+                    Kuwa wa kwanza kuanza mazungumzo.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+    let html = "";
+
+    let lastDate = "";
+
+    list.forEach(msg=>{
+
+        const own =
+            msg.userId === currentUser?.uid;
+
+        const date =
+            msg.createdAt?.toDate
+            ?
+            msg.createdAt.toDate()
+            :
+            new Date();
+
+        const dateString =
+            date.toLocaleDateString();
+
+        if(dateString !== lastDate){
+
+            lastDate = dateString;
+
+            html += `
+
+                <div class="date">
+
+                    <span>
+                        ${formatDate(date)}
+                    </span>
+
+                </div>
+
+            `;
+
+        }
+
+        const name =
+            msg.username ||
+            msg.displayName ||
+            "User";
+
+        const avatar =
+            msg.avatarEmoji ||
+            "👤";
+
+        const photo =
+            msg.photoURL;
+
+        const time =
+            date.toLocaleTimeString(
+                [],
+                {
+                    hour:"2-digit",
+                    minute:"2-digit"
+                }
+            );
+
+        let text =
+            escapeHtml(msg.message || "");
+
+        text =
+            text.replace(
+                /@([a-zA-Z0-9_]+)/g,
+                `<span class="mention">@$1</span>`
+            );
+
+        let reactionsHTML = "";
+
+        const reactions =
+            msg.reactions || {};
+
+        const reactionKeys =
+            Object.keys(reactions);
+
+        if(reactionKeys.length){
+
+            reactionsHTML = `
+
+                <div class="reactions">
+
+                    ${
+                        reactionKeys.map(emoji=>`
+
+                            <span
+                                class="reaction"
+                                onclick="react('${msg.id}','${emoji}')"
+                            >
+                                ${emoji}
+                                ${reactions[emoji].length}
+                            </span>
+
+                        `).join("")
+                    }
+
+                </div>
+
+            `;
+
+        }
+
+        let replyHTML = "";
+
+        if(msg.replyTo){
+
+            replyHTML = `
+
+                <div class="reply">
+
+                    <div class="reply-name">
+                        ${escapeHtml(
+                            msg.replyTo.username || "User"
+                        )}
+                    </div>
+
+                    <div class="reply-text">
+                        ${escapeHtml(
+                            msg.replyTo.message || "Message"
+                        )}
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+        const imageHTML =
+            msg.imageUrl
+            ?
+            `
+                <img
+                    class="chat-image"
+                    src="${escapeHtml(msg.imageUrl)}"
+                    onclick="window.open(this.src,'_blank')"
+                >
+            `
+            :
+            "";
+
+        html += `
+
+            <div
+                class="message ${own ? "own" : ""}"
+                id="msg-${msg.id}"
+            >
+
+                ${
+                    !own
+                    ?
+                    `
+                    <div class="avatar">
+
+                        ${
+                            photo
+                            ?
+                            `<img src="${escapeHtml(photo)}">`
+                            :
+                            avatar
+                        }
+
+                    </div>
+                    `
+                    :
+                    ""
+                }
+
+                <div class="message-body">
+
+                    <div class="sender">
+                        ${escapeHtml(name)}
+                    </div>
+
+                    <div class="bubble">
+
+                        <div class="actions">
+
+                            <button
+                                class="action"
+                                onclick="react('${msg.id}','❤️')"
+                            >
+                                ❤️
+                            </button>
+
+                            <button
+                                class="action"
+                                onclick="react('${msg.id}','👍')"
+                            >
+                                👍
+                            </button>
+
+                            <button
+                                class="action"
+                                onclick="replyMessage('${msg.id}')"
+                            >
+                                ↩
+                            </button>
+
+                            <button
+                                class="action"
+                                onclick="copyMessage('${msg.id}')"
+                            >
+                                📋
+                            </button>
+
+                        </div>
+
+                        ${replyHTML}
+
+                        ${imageHTML}
+
+                        ${
+                            text
+                            ?
+                            `<div class="text">${text}</div>`
+                            :
+                            ""
+                        }
+
+                        ${reactionsHTML}
+
+                        <div class="meta">
+
+                            <span class="time">
+                                ${time}
+                            </span>
+
+                            ${
+                                own
+                                ?
+                                `<span class="check">✓✓</span>`
+                                :
+                                ""
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+    messages.innerHTML = html;
+
+}
+
+
+/* ============================================================
+   SEND
+============================================================ */
+
+async function sendMessage(){
+
+    const text =
+        messageInput.value.trim();
+
+    if(!text) return;
+
+    if(!currentUser){
+
+        showToast("🔒 Please login first");
+
+        return;
+
+    }
+
+    sendBtn.disabled = true;
+
+    try{
+
+        const data = {
+
+            userId:currentUser.uid,
+
+            username:
+                userData?.username ||
+                currentUser.displayName ||
+                "User",
+
+            displayName:
+                userData?.displayName ||
+                userData?.username ||
+                currentUser.displayName ||
+                "User",
+
+            photoURL:
+                userData?.photoURL ||
+                currentUser.photoURL ||
+                null,
+
+            avatarEmoji:
+                userData?.avatarEmoji ||
+                "👤",
+
+            message:text,
+
+            type:"text",
+
+            reactions:{},
+
+            createdAt:
+                firebase.firestore.FieldValue.serverTimestamp()
+
+        };
+
+        if(replyTo){
+
+            data.replyTo = replyTo;
+
+        }
+
+        await db
+            .collection("community_messages")
+            .add(data);
+
+        messageInput.value = "";
+
+        autoResize();
+
+        cancelReply();
+
+        hideEmoji();
+
+        scrollBottom();
+
+    }catch(error){
+
+        console.error(error);
+
+        showToast("❌ Failed to send");
+
+    }
+
+    sendBtn.disabled = false;
+
+}
+
+
+/* ============================================================
+   REPLY
+============================================================ */
+
+function replyMessage(id){
+
+    const msg =
+        allMessages.find(m=>m.id === id);
+
+    if(!msg) return;
+
+    replyTo = {
+
+        id:id,
+
+        username:
+            msg.username ||
+            msg.displayName ||
+            "User",
+
+        message:
+            msg.message ||
+            "📷 Image"
+
+    };
+
+    document
+        .getElementById("replyName")
+        .textContent =
+            "Replying to " +
+            replyTo.username;
+
+    document
+        .getElementById("replyText")
+        .textContent =
+            replyTo.message;
+
+    document
+        .getElementById("replyPreview")
+        .classList.add("show");
+
+    messageInput.focus();
+
+}
+
+
+function cancelReply(){
+
+    replyTo = null;
+
+    document
+        .getElementById("replyPreview")
+        .classList.remove("show");
+
+}
+
+
+/* ============================================================
+   REACTIONS
+============================================================ */
+
+async function react(id,emoji){
+
+    if(!currentUser){
+
+        showToast("🔒 Login to react");
+
+        return;
+
+    }
+
+    try{
+
+        const ref =
+            db.collection("community_messages")
+            .doc(id);
+
+        const snap =
+            await ref.get();
+
+        if(!snap.exists) return;
+
+        const data = snap.data();
+
+        const reactions =
+            data.reactions || {};
+
+        if(!reactions[emoji]){
+
+            reactions[emoji] = [];
+
+        }
+
+        const uid =
+            currentUser.uid;
+
+        const index =
+            reactions[emoji].indexOf(uid);
+
+        if(index >= 0){
+
+            reactions[emoji].splice(index,1);
+
+        }else{
+
+            reactions[emoji].push(uid);
+
+        }
+
+        if(!reactions[emoji].length){
+
+            delete reactions[emoji];
+
+        }
+
+        await ref.update({
+
+            reactions:reactions
+
+        });
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+/* ============================================================
+   IMAGE UPLOAD
+============================================================ */
+
+document
+.getElementById("imageInput")
+.addEventListener("change",async e=>{
+
+    const file =
+        e.target.files[0];
+
+    if(!file) return;
+
+    if(!currentUser){
+
+        showToast("🔒 Login first");
+
+        return;
+
+    }
+
+    if(file.size > 5 * 1024 * 1024){
+
+        showToast("❌ Maximum image size is 5MB");
+
+        return;
+
+    }
+
+    sendBtn.disabled = true;
+
+    try{
+
+        showToast("📤 Uploading image...");
+
+        const path =
+            `community_images/${Date.now()}_${file.name}`;
+
+        const ref =
+            storage.ref(path);
+
+        await ref.put(file);
+
+        const url =
+            await ref.getDownloadURL();
+
+        await db
+            .collection("community_messages")
+            .add({
+
+                userId:currentUser.uid,
+
+                username:
+                    userData?.username ||
+                    "User",
+
+                displayName:
+                    userData?.displayName ||
+                    userData?.username ||
+                    "User",
+
+                photoURL:
+                    userData?.photoURL ||
+                    null,
+
+                avatarEmoji:
+                    userData?.avatarEmoji ||
+                    "👤",
+
+                message:"",
+
+                imageUrl:url,
+
+                type:"image",
+
+                reactions:{},
+
+                createdAt:
+                    firebase.firestore.FieldValue.serverTimestamp()
+
+            });
+
+        showToast("✅ Image sent");
+
+        scrollBottom();
+
+    }catch(error){
+
+        console.error(error);
+
+        showToast("❌ Image upload failed");
+
+    }
+
+    sendBtn.disabled = false;
+
+    e.target.value = "";
+
+});
+
+
+/* ============================================================
+   SEARCH
+============================================================ */
+
+function toggleSearch(){
+
+    closeMenu();
+
+    const bar =
+        document.getElementById("searchBar");
+
+    bar.classList.toggle("show");
+
+    if(bar.classList.contains("show")){
+
+        document
+            .getElementById("searchInput")
+            .focus();
+
+    }else{
+
+        document
+            .getElementById("searchInput")
+            .value = "";
+
+        renderMessages(allMessages);
+
+    }
+
+}
+
+
+function searchMessages(query){
+
+    if(!query.trim()){
+
+        renderMessages(allMessages);
+
+        return;
+
+    }
+
+    const q =
+        query.toLowerCase();
+
+    const results =
+        allMessages.filter(msg=>{
+
+            return (
+
+                (msg.message || "")
+                .toLowerCase()
+                .includes(q)
+
+                ||
+
+                (msg.username || "")
+                .toLowerCase()
+                .includes(q)
+
+            );
+
+        });
+
+    if(!results.length){
+
+        messages.innerHTML = `
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    🔍
+                </div>
+
+                <h2>No results</h2>
+
+                <p>
+                    Hakuna message iliyopatikana.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+    renderMessages(results);
+
+}
+
+
+/* ============================================================
+   MENU
+============================================================ */
+
+function toggleMenu(){
+
+    document
+        .getElementById("menu")
+        .classList.toggle("show");
+
+}
+
+
+function closeMenu(){
+
+    document
+        .getElementById("menu")
+        .classList.remove("show");
+
+}
+
+
+document.addEventListener("click",e=>{
+
+    if(
+        !e.target.closest(".header-actions") &&
+        !e.target.closest(".menu")
+    ){
+
+        closeMenu();
+
+    }
+
+});
+
+
+/* ============================================================
+   EMOJI
+============================================================ */
+
+function toggleEmoji(){
+
+    document
+        .getElementById("emojiPanel")
+        .classList.toggle("show");
+
+}
+
+
+function hideEmoji(){
+
+    document
+        .getElementById("emojiPanel")
+        .classList.remove("show");
+
+}
+
+
+function addEmoji(emoji){
+
+    const input =
+        messageInput;
+
+    const start =
+        input.selectionStart;
+
+    const end =
+        input.selectionEnd;
+
+    input.value =
+        input.value.substring(0,start)
+        +
+        emoji
+        +
+        input.value.substring(end);
+
+    input.focus();
+
+    const pos =
+        start + emoji.length;
+
+    input.setSelectionRange(pos,pos);
+
+    autoResize();
+
+}
+
+
+/* ============================================================
+   TEXTAREA
+============================================================ */
+
+messageInput.addEventListener(
+    "input",
+    autoResize
+);
+
+function autoResize(){
+
+    messageInput.style.height =
+        "auto";
+
+    messageInput.style.height =
+        Math.min(
+            messageInput.scrollHeight,
+            105
+        ) + "px";
+
+}
+
+
+messageInput.addEventListener(
+    "keydown",
+    e=>{
+
+        if(
+            e.key === "Enter" &&
+            !e.shiftKey
+        ){
+
+            e.preventDefault();
+
+            sendMessage();
+
+        }
+
+        if(e.key === "Escape"){
+
+            cancelReply();
+
+            hideEmoji();
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   SCROLL
+============================================================ */
+
+chat.addEventListener("scroll",()=>{
+
+    const distance =
+        chat.scrollHeight -
+        chat.scrollTop -
+        chat.clientHeight;
+
+    document
+        .getElementById("scrollBtn")
+        .classList.toggle(
+            "show",
+            distance > 250
+        );
+
+});
+
+
+function scrollBottom(){
+
+    chat.scrollTo({
+
+        top:chat.scrollHeight,
+
+        behavior:"smooth"
+
+    });
+
+    document
+        .getElementById("scrollBtn")
+        .classList.remove("show");
+
+}
+
+
+/* ============================================================
+   THEMES
+============================================================ */
+
+function openThemes(){
+
+    closeMenu();
+
+    document
+        .getElementById("themePanel")
+        .classList.add("show");
+
+    document
+        .getElementById("themeOverlay")
+        .classList.add("show");
+
+}
+
+
+function closeThemes(){
+
+    document
+        .getElementById("themePanel")
+        .classList.remove("show");
+
+    document
+        .getElementById("themeOverlay")
+        .classList.remove("show");
+
+}
+
+
+function setTheme(theme){
+
+    document.documentElement
+        .setAttribute(
+            "data-theme",
+            theme === "dark"
+            ? ""
+            :
+            theme
+        );
+
+    if(theme === "dark"){
+
+        document.documentElement
+            .removeAttribute("data-theme");
+
+    }
+
+    localStorage.setItem(
+        "dvary-theme",
+        theme
+    );
+
+    showToast(
+        "🎨 Theme: " +
+        theme
+    );
+
+    closeThemes();
+
+}
+
+
+function loadTheme(){
+
+    const theme =
+        localStorage.getItem(
+            "dvary-theme"
+        );
+
+    if(theme && theme !== "dark"){
+
+        document.documentElement
+            .setAttribute(
+                "data-theme",
+                theme
+            );
+
+    }
+
+}
+
+
+/* ============================================================
+   BACKGROUND
+============================================================ */
+
+function uploadBackground(input){
+
+    const file =
+        input.files[0];
+
+    if(!file) return;
+
+    const reader =
+        new FileReader();
+
+    reader.onload = e=>{
+
+        const url =
+            e.target.result;
+
+        chat.style.backgroundImage =
+            `
+            linear-gradient(
+                rgba(0,0,0,.25),
+                rgba(0,0,0,.25)
+            ),
+            url("${url}")
+            `;
+
+        chat.style.backgroundSize =
+            "cover";
+
+        chat.style.backgroundPosition =
+            "center";
+
+        localStorage.setItem(
+            "dvary-chat-background",
+            url
+        );
+
+        showToast(
+            "✅ Background changed"
+        );
+
+    };
+
+    reader.readAsDataURL(file);
+
+}
+
+
+function loadBackground(){
+
+    const url =
+        localStorage.getItem(
+            "dvary-chat-background"
+        );
+
+    if(url){
+
+        chat.style.backgroundImage =
+            `
+            linear-gradient(
+                rgba(0,0,0,.25),
+                rgba(0,0,0,.25)
+            ),
+            url("${url}")
+            `;
+
+        chat.style.backgroundSize =
+            "cover";
+
+        chat.style.backgroundPosition =
+            "center";
+
+    }
+
+}
+
+
+/* ============================================================
+   COPY
+============================================================ */
+
+function copyMessage(id){
+
+    const msg =
+        allMessages.find(m=>m.id === id);
+
+    if(!msg?.message) return;
+
+    navigator.clipboard
+        .writeText(msg.message)
+        .then(()=>{
+
+            showToast("📋 Message copied");
+
+        });
+
+}
+
+
+/* ============================================================
+   DATE
+============================================================ */
+
+function formatDate(date){
+
+    const today =
+        new Date();
+
+    const yesterday =
+        new Date();
+
+    yesterday.setDate(
+        yesterday.getDate() - 1
+    );
+
+    if(
+        date.toDateString()
+        ===
+        today.toDateString()
+    ){
+
+        return "Today";
+
+    }
+
+    if(
+        date.toDateString()
+        ===
+        yesterday.toDateString()
+    ){
+
+        return "Yesterday";
+
+    }
+
+    return date.toLocaleDateString(
+        "en-GB",
+        {
+            day:"numeric",
+            month:"short",
+            year:"numeric"
+        }
+    );
+
+}
+
+
+/* ============================================================
+   TOAST
+============================================================ */
+
+let toastTimer;
+
+function showToast(text){
+
+    const toast =
+        document.getElementById("toast");
+
+    toast.textContent = text;
+
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer =
+        setTimeout(()=>{
+
+            toast.classList.remove("show");
+
+        },2200);
+
+}
+
+
+/* ============================================================
+   ESCAPE HTML
+============================================================ */
+
+function escapeHtml(value){
+
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* ============================================================
+   BACK
+============================================================ */
+
+function goBack(){
+
+    if(document.referrer){
+
+        history.back();
+
+    }else{
+
+        window.location.href="/main";
+
+    }
+
+}
+
+
+/* ============================================================
+   INIT
+============================================================ */
+
+loadTheme();
+
+loadBackground();
+
+console.log(
+    "🎮 DVARY GAMES Community loaded"
+);
+
+</script>
+
+</body>
+  </html>
