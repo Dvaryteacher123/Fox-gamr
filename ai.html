@@ -1,0 +1,741 @@
+<!DOCTYPE html><html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080b14">
+<title>DVARY GAMES AI</title><style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#070a12;
+    --panel:#0d111c;
+    --panel2:#111827;
+    --border:rgba(255,255,255,.08);
+    --text:#f8fafc;
+    --muted:#94a3b8;
+    --accent:#8b5cf6;
+    --accent2:#ec4899;
+}
+
+body{
+    font-family:Inter,Arial,sans-serif;
+    background:
+        radial-gradient(circle at 20% 0%,rgba(139,92,246,.16),transparent 30%),
+        radial-gradient(circle at 90% 20%,rgba(236,72,153,.10),transparent 28%),
+        var(--bg);
+    color:var(--text);
+    height:100vh;
+    overflow:hidden;
+}
+
+/* APP */
+.app{
+    height:100vh;
+    max-width:1000px;
+    margin:auto;
+    display:flex;
+    flex-direction:column;
+}
+
+/* HEADER */
+.header{
+    height:72px;
+    padding:0 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:rgba(7,10,18,.82);
+    backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--border);
+    z-index:10;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.ai-avatar{
+    width:44px;
+    height:44px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:23px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    box-shadow:0 0 25px rgba(139,92,246,.35);
+}
+
+.brand-info h1{
+    font-size:16px;
+    font-weight:800;
+    letter-spacing:.2px;
+}
+
+.status{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    margin-top:3px;
+    color:#86efac;
+    font-size:11px;
+}
+
+.status-dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#22c55e;
+    box-shadow:0 0 8px #22c55e;
+}
+
+.home-btn{
+    width:42px;
+    height:42px;
+    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:white;
+    background:rgba(255,255,255,.06);
+    border:1px solid var(--border);
+    font-size:18px;
+    transition:.2s;
+}
+
+.home-btn:hover{
+    background:rgba(139,92,246,.18);
+    transform:translateY(-2px);
+}
+
+/* CHAT */
+.chat-container{
+    flex:1;
+    overflow-y:auto;
+    padding:28px 20px 130px;
+    scroll-behavior:smooth;
+}
+
+.chat-container::-webkit-scrollbar{
+    width:5px;
+}
+
+.chat-container::-webkit-scrollbar-thumb{
+    background:#252b3a;
+    border-radius:20px;
+}
+
+/* WELCOME */
+.welcome{
+    text-align:center;
+    max-width:600px;
+    margin:50px auto 30px;
+}
+
+.welcome-icon{
+    width:75px;
+    height:75px;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:24px;
+    font-size:38px;
+    background:linear-gradient(135deg,#7c3aed,#db2777);
+    box-shadow:
+        0 0 40px rgba(124,58,237,.3),
+        inset 0 0 20px rgba(255,255,255,.1);
+}
+
+.welcome h2{
+    margin-top:20px;
+    font-size:26px;
+}
+
+.welcome p{
+    color:var(--muted);
+    margin-top:8px;
+    line-height:1.6;
+    font-size:14px;
+}
+
+/* QUICK PROMPTS */
+.quick-prompts{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:20px;
+}
+
+.quick{
+    padding:9px 13px;
+    border-radius:20px;
+    color:#cbd5e1;
+    background:rgba(255,255,255,.045);
+    border:1px solid var(--border);
+    font-size:12px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.quick:hover{
+    border-color:rgba(139,92,246,.5);
+    background:rgba(139,92,246,.12);
+    color:white;
+}
+
+/* MESSAGES */
+.message-row{
+    display:flex;
+    margin:15px 0;
+    gap:10px;
+    animation:appear .25s ease;
+}
+
+@keyframes appear{
+    from{
+        opacity:0;
+        transform:translateY(8px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.message-row.user{
+    justify-content:flex-end;
+}
+
+.mini-avatar{
+    width:32px;
+    height:32px;
+    min-width:32px;
+    border-radius:11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#7c3aed,#db2777);
+    font-size:15px;
+}
+
+.message{
+    max-width:min(76%,650px);
+    padding:12px 15px;
+    border-radius:17px;
+    line-height:1.6;
+    font-size:14px;
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+
+.ai-message{
+    background:linear-gradient(145deg,#111827,#0f1522);
+    border:1px solid var(--border);
+    border-top-left-radius:5px;
+    color:#e5e7eb;
+}
+
+.user-message{
+    background:linear-gradient(135deg,#7c3aed,#db2777);
+    border-top-right-radius:5px;
+    color:white;
+    box-shadow:0 8px 25px rgba(124,58,237,.18);
+}
+
+/* TYPING */
+.typing{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    padding:5px 2px;
+}
+
+.typing span{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#a78bfa;
+    animation:bounce 1.2s infinite;
+}
+
+.typing span:nth-child(2){
+    animation-delay:.15s;
+}
+
+.typing span:nth-child(3){
+    animation-delay:.3s;
+}
+
+@keyframes bounce{
+    0%,60%,100%{transform:translateY(0);opacity:.4}
+    30%{transform:translateY(-5px);opacity:1}
+}
+
+/* INPUT AREA */
+.input-area{
+    position:fixed;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:min(100%,1000px);
+    padding:15px 18px 20px;
+    background:linear-gradient(
+        to top,
+        rgba(7,10,18,1) 65%,
+        rgba(7,10,18,.75),
+        transparent
+    );
+}
+
+.input-box{
+    display:flex;
+    align-items:flex-end;
+    gap:9px;
+    padding:8px;
+    background:rgba(17,24,39,.94);
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:20px;
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.45),
+        0 0 0 1px rgba(139,92,246,.03);
+    backdrop-filter:blur(20px);
+}
+
+textarea{
+    flex:1;
+    resize:none;
+    border:none;
+    outline:none;
+    background:transparent;
+    color:white;
+    font-family:inherit;
+    font-size:14px;
+    line-height:1.5;
+    padding:9px 10px;
+    max-height:120px;
+    min-height:40px;
+}
+
+textarea::placeholder{
+    color:#64748b;
+}
+
+.send-btn{
+    width:44px;
+    height:44px;
+    min-width:44px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(135deg,#7c3aed,#db2777);
+    color:white;
+    cursor:pointer;
+    font-size:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 7px 20px rgba(124,58,237,.3);
+    transition:.2s;
+}
+
+.send-btn:hover{
+    transform:scale(1.05);
+}
+
+.send-btn:active{
+    transform:scale(.94);
+}
+
+.send-btn:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+    transform:none;
+}
+
+.disclaimer{
+    text-align:center;
+    color:#475569;
+    font-size:10px;
+    margin-top:8px;
+}
+
+/* MOBILE */
+@media(max-width:600px){
+
+    .header{
+        height:65px;
+        padding:0 13px;
+    }
+
+    .ai-avatar{
+        width:40px;
+        height:40px;
+        border-radius:12px;
+    }
+
+    .brand-info h1{
+        font-size:14px;
+    }
+
+    .chat-container{
+        padding:20px 12px 125px;
+    }
+
+    .welcome{
+        margin:35px auto 25px;
+    }
+
+    .welcome h2{
+        font-size:22px;
+    }
+
+    .message{
+        max-width:86%;
+        font-size:13.5px;
+    }
+
+    .input-area{
+        padding:10px 10px 14px;
+    }
+
+    .quick{
+        font-size:11px;
+    }
+}
+</style></head><body><div class="app"><!-- HEADER -->
+<header class="header">
+
+    <div class="brand">
+
+        <div class="ai-avatar">
+            🤖
+        </div>
+
+        <div class="brand-info">
+            <h1>DVARY GAMES AI</h1>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                Online
+            </div>
+        </div>
+
+    </div>
+
+    <a href="/main" class="home-btn" title="Rudi Nyumbani">
+        🏠
+    </a>
+
+</header>
+
+
+<!-- CHAT -->
+<main class="chat-container" id="chatContainer">
+
+    <div class="welcome" id="welcome">
+
+        <div class="welcome-icon">
+            ✨
+        </div>
+
+        <h2>Habari, Gamer! 👋</h2>
+
+        <p>
+            Mimi ni <b>DVARY AI</b>. Naweza kukusaidia
+            kuhusu games, downloads, mfumo wa DVARY GAMES
+            na maswali yako mbalimbali.
+        </p>
+
+        <div class="quick-prompts">
+
+            <div class="quick"
+                 onclick="quickMessage('Nisaidie kupata game nzuri')">
+                🎮 Game nzuri
+            </div>
+
+            <div class="quick"
+                 onclick="quickMessage('Nisaidie kuhusu DVARY GAMES')">
+                🕹️ Kuhusu DVARY
+            </div>
+
+            <div class="quick"
+                 onclick="quickMessage('Ninawezaje kudownload game?')">
+                📥 Download game
+            </div>
+
+            <div class="quick"
+                 onclick="quickMessage('Nipe recommendation ya game')">
+                ⭐ Recommendation
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<!-- INPUT -->
+<div class="input-area">
+
+    <div class="input-box">
+
+        <textarea
+            id="userInput"
+            rows="1"
+            placeholder="Muulize DVARY AI chochote..."
+            onkeydown="handleKeyPress(event)"
+        ></textarea>
+
+        <button
+            class="send-btn"
+            id="sendBtn"
+            onclick="sendMessage()"
+            title="Tuma"
+        >
+            ➤
+        </button>
+
+    </div>
+
+    <div class="disclaimer">
+        DVARY AI inaweza kufanya makosa. Hakikisha taarifa muhimu.
+    </div>
+
+</div>
+
+</div><script>
+
+const inputField = document.getElementById("userInput");
+const chatContainer = document.getElementById("chatContainer");
+const sendBtn = document.getElementById("sendBtn");
+const welcome = document.getElementById("welcome");
+
+
+/* AUTO RESIZE */
+inputField.addEventListener("input", function(){
+
+    this.style.height = "auto";
+
+    this.style.height =
+        Math.min(this.scrollHeight,120) + "px";
+
+});
+
+
+/* QUICK MESSAGE */
+function quickMessage(text){
+
+    inputField.value = text;
+
+    inputField.dispatchEvent(new Event("input"));
+
+    sendMessage();
+}
+
+
+/* ADD USER MESSAGE */
+function addUserMessage(text){
+
+    const row = document.createElement("div");
+
+    row.className = "message-row user";
+
+    const msg = document.createElement("div");
+
+    msg.className = "message user-message";
+
+    msg.textContent = text;
+
+    row.appendChild(msg);
+
+    chatContainer.appendChild(row);
+}
+
+
+/* ADD AI MESSAGE */
+function addAIMessage(text){
+
+    const row = document.createElement("div");
+
+    row.className = "message-row";
+
+    const avatar = document.createElement("div");
+
+    avatar.className = "mini-avatar";
+
+    avatar.textContent = "🤖";
+
+    const msg = document.createElement("div");
+
+    msg.className = "message ai-message";
+
+    msg.textContent = text;
+
+    row.appendChild(avatar);
+
+    row.appendChild(msg);
+
+    chatContainer.appendChild(row);
+}
+
+
+/* TYPING */
+function addTyping(){
+
+    const row = document.createElement("div");
+
+    row.className = "message-row";
+
+    row.id = "typingRow";
+
+    const avatar = document.createElement("div");
+
+    avatar.className = "mini-avatar";
+
+    avatar.textContent = "🤖";
+
+    const msg = document.createElement("div");
+
+    msg.className = "message ai-message";
+
+    msg.innerHTML = `
+        <div class="typing">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    `;
+
+    row.appendChild(avatar);
+
+    row.appendChild(msg);
+
+    chatContainer.appendChild(row);
+
+    scrollBottom();
+}
+
+
+/* SCROLL */
+function scrollBottom(){
+
+    chatContainer.scrollTop =
+        chatContainer.scrollHeight;
+}
+
+
+/* SEND MESSAGE */
+async function sendMessage(){
+
+    const text = inputField.value.trim();
+
+    if(!text || sendBtn.disabled) return;
+
+    /* Ficha welcome */
+    if(welcome){
+        welcome.remove();
+    }
+
+    addUserMessage(text);
+
+    inputField.value = "";
+
+    inputField.style.height = "40px";
+
+    scrollBottom();
+
+    sendBtn.disabled = true;
+
+    addTyping();
+
+    try{
+
+        const response = await fetch("/api/ai-chat",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+                message:text
+            })
+
+        });
+
+
+        const data = await response.json();
+
+
+        const typing =
+            document.getElementById("typingRow");
+
+        if(typing){
+            typing.remove();
+        }
+
+
+        if(data.success && data.response){
+
+            addAIMessage(data.response);
+
+        }else{
+
+            addAIMessage(
+                data.error ||
+                "Samahani, AI imeshindwa kupata jibu."
+            );
+
+        }
+
+    }catch(error){
+
+        const typing =
+            document.getElementById("typingRow");
+
+        if(typing){
+            typing.remove();
+        }
+
+        addAIMessage(
+            "⚠️ Imeshindwa kuunganisha na server. Tafadhali jaribu tena."
+        );
+
+    }finally{
+
+        sendBtn.disabled = false;
+
+        inputField.focus();
+
+        scrollBottom();
+
+    }
+
+}
+
+
+/* ENTER TO SEND */
+function handleKeyPress(event){
+
+    if(event.key === "Enter" && !event.shiftKey){
+
+        event.preventDefault();
+
+        sendMessage();
+
+    }
+
+}
+
+</script></body>
+</html>
