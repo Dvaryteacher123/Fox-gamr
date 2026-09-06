@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fox-gamr AI Assistant</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background-color: #1e293b;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid #334155;
+        }
+        .chat-container {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 12px;
+            border-radius: 8px;
+            line-height: 1.4;
+        }
+        .user-message {
+            background-color: #3b82f6;
+            color: white;
+            align-self: flex-end;
+        }
+        .ai-message {
+            background-color: #334155;
+            color: #f8fafc;
+            align-self: flex-start;
+        }
+        .input-container {
+            display: flex;
+            padding: 15px;
+            background-color: #1e293b;
+            border-top: 1px solid #334155;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background-color: #0f172a;
+            color: white;
+            outline: none;
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            margin-left: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>🤖 Fox-gamr AI Chat</header>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="message ai-message">Habari! Mimi ni msaidizi wako wa AI kwenye Fox-gamr. Unataka kujua nini kuhusu michezo leo?</div>
+    </div>
+
+    <div class="input-container">
+        <input type="text" id="userInput" placeholder="Andika ujumbe wako hapa...">
+        <button onclick="sendMessage()">Tuma</button>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const inputField = document.getElementById('userInput');
+            const chatContainer = document.getElementById('chatContainer');
+            const text = inputField.value.trim();
+
+            if (!text) return;
+
+            // Onyesha ujumbe wa mtumiaji
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user-message';
+            userMsg.textContent = text;
+            chatContainer.appendChild(userMsg);
+
+            inputField.value = '';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                // Hapa inaunganisha na seva yako ya backend uliyoweka OpenRouter
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                const data = await response.json();
+
+                // Onyesha jibu la AI
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message ai-message';
+                aiMsg.textContent = data.reply || 'Samahani, kimetokea kitendo cha kiufundi.';
+                chatContainer.appendChild(aiMsg);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            } catch (error) {
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'message ai-message';
+                errorMsg.textContent = 'Imeshindwa kuunganisha na seva.';
+                chatContainer.appendChild(errorMsg);
+            }
+        }
+    </script>
+</body>
+</html>
+
