@@ -1,0 +1,2996 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DVARY GAMES Community</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
+}
+
+:root{
+  --bg:#0b141a;
+  --panel:#17212b;
+  --panel2:#202c33;
+  --bubble:#202c33;
+  --mine:#2b5278;
+  --accent:#3390ec;
+  --text:#f5f5f5;
+  --muted:#9baab5;
+  --border:rgba(255,255,255,.08);
+  --danger:#ef4444;
+  --success:#22c55e;
+  --shadow:0 12px 40px rgba(0,0,0,.35);
+}
+
+body.light{
+  --bg:#e9edef;
+  --panel:#ffffff;
+  --panel2:#f0f2f5;
+  --bubble:#ffffff;
+  --mine:#d9fdd3;
+  --accent:#0088cc;
+  --text:#111827;
+  --muted:#667781;
+  --border:rgba(0,0,0,.08);
+}
+
+body.purple{
+  --accent:#8b5cf6;
+  --mine:#4c3475;
+  --bg:#100b18;
+  --panel:#191126;
+  --panel2:#241836;
+}
+
+body.pink{
+  --accent:#ec4899;
+  --mine:#702d55;
+  --bg:#180b13;
+  --panel:#24111d;
+  --panel2:#321827;
+}
+
+body.green{
+  --accent:#10b981;
+  --mine:#175b4c;
+  --bg:#071712;
+  --panel:#0d251d;
+  --panel2:#12362b;
+}
+
+body.blue{
+  --accent:#3b82f6;
+  --mine:#1e4c80;
+  --bg:#07111f;
+  --panel:#0e1d31;
+  --panel2:#142a43;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+button,input,textarea{
+  font:inherit;
+}
+
+button{
+  border:0;
+  cursor:pointer;
+}
+
+.app{
+  width:100%;
+  height:100vh;
+  display:flex;
+  overflow:hidden;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:340px;
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  z-index:20;
+}
+
+.brand{
+  height:70px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+}
+
+.brand-avatar{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,var(--accent),#7c3aed);
+  font-size:22px;
+}
+
+.brand-title{
+  font-weight:800;
+  font-size:16px;
+}
+
+.brand-sub{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:2px;
+}
+
+.member-search{
+  padding:12px;
+}
+
+.member-search input{
+  width:100%;
+  border:0;
+  outline:none;
+  background:var(--panel2);
+  color:var(--text);
+  padding:12px 15px;
+  border-radius:12px;
+}
+
+.member-list{
+  flex:1;
+  overflow-y:auto;
+}
+
+.member{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:11px 15px;
+  transition:.2s;
+}
+
+.member:hover{
+  background:rgba(255,255,255,.04);
+}
+
+.avatar{
+  width:42px;
+  height:42px;
+  min-width:42px;
+  border-radius:50%;
+  object-fit:cover;
+  background:linear-gradient(135deg,#334155,var(--accent));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  position:relative;
+}
+
+.online-dot{
+  width:11px;
+  height:11px;
+  background:var(--success);
+  border:2px solid var(--panel);
+  position:absolute;
+  right:-1px;
+  bottom:0;
+  border-radius:50%;
+}
+
+.member-info{
+  min-width:0;
+  flex:1;
+}
+
+.member-name{
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.member-status{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:2px;
+}
+
+/* CHAT */
+.chat{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  background:
+    radial-gradient(circle at 20% 10%,rgba(51,144,236,.08),transparent 30%),
+    radial-gradient(circle at 80% 80%,rgba(124,58,237,.06),transparent 30%),
+    var(--bg);
+}
+
+.chat-header{
+  height:70px;
+  min-height:70px;
+  background:var(--panel);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:8px 15px;
+  gap:12px;
+  z-index:10;
+}
+
+.mobile-menu{
+  display:none;
+  background:none;
+  color:var(--text);
+  font-size:23px;
+}
+
+.header-avatar{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,var(--accent),#7c3aed);
+  font-size:23px;
+}
+
+.header-info{
+  flex:1;
+  min-width:0;
+}
+
+.header-title{
+  font-weight:800;
+  font-size:16px;
+}
+
+.header-sub{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:3px;
+}
+
+.header-actions{
+  display:flex;
+  gap:5px;
+}
+
+.icon-btn{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:transparent;
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.07);
+}
+
+.search-box{
+  display:none;
+  padding:8px 14px;
+  background:var(--panel);
+  border-bottom:1px solid var(--border);
+}
+
+.search-box.active{
+  display:block;
+}
+
+.search-box input{
+  width:100%;
+  border:0;
+  outline:0;
+  background:var(--panel2);
+  color:var(--text);
+  padding:11px 14px;
+  border-radius:12px;
+}
+
+.messages{
+  flex:1;
+  overflow-y:auto;
+  padding:18px clamp(10px,4vw,55px);
+  scroll-behavior:smooth;
+}
+
+.message-row{
+  display:flex;
+  gap:8px;
+  margin:3px 0;
+  max-width:850px;
+}
+
+.message-row.mine{
+  margin-left:auto;
+  justify-content:flex-end;
+}
+
+.message-avatar{
+  width:32px;
+  height:32px;
+  min-width:32px;
+  border-radius:50%;
+  object-fit:cover;
+  background:linear-gradient(135deg,#334155,var(--accent));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:800;
+  align-self:flex-end;
+}
+
+.message-avatar.hidden{
+  visibility:hidden;
+}
+
+.bubble{
+  position:relative;
+  max-width:min(75%,650px);
+  background:var(--bubble);
+  border-radius:16px;
+  padding:8px 11px 7px;
+  box-shadow:0 3px 12px rgba(0,0,0,.10);
+}
+
+.mine .bubble{
+  background:var(--mine);
+  border-bottom-right-radius:5px;
+}
+
+.other .bubble{
+  border-bottom-left-radius:5px;
+}
+
+.sender{
+  font-size:13px;
+  font-weight:800;
+  color:var(--accent);
+  margin-bottom:4px;
+}
+
+.message-text{
+  font-size:14px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.message-image{
+  display:block;
+  max-width:100%;
+  max-height:400px;
+  border-radius:12px;
+  margin-bottom:5px;
+  object-fit:cover;
+}
+
+.message-meta{
+  display:flex;
+  justify-content:flex-end;
+  gap:5px;
+  color:var(--muted);
+  font-size:10px;
+  margin-top:4px;
+}
+
+.edited{
+  font-style:italic;
+}
+
+.mention{
+  color:#60a5fa;
+  background:rgba(59,130,246,.13);
+  padding:1px 3px;
+  border-radius:4px;
+  font-weight:700;
+}
+
+.reply-box{
+  background:rgba(255,255,255,.07);
+  border-left:3px solid var(--accent);
+  padding:5px 7px;
+  border-radius:6px;
+  margin-bottom:6px;
+  font-size:11px;
+}
+
+.reply-author{
+  color:var(--accent);
+  font-weight:800;
+}
+
+.reactions{
+  display:flex;
+  gap:4px;
+  flex-wrap:wrap;
+  margin-top:5px;
+}
+
+.reaction{
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.12);
+  color:var(--text);
+  padding:3px 7px;
+  border-radius:20px;
+  font-size:12px;
+}
+
+.message-actions{
+  position:absolute;
+  right:5px;
+  top:-38px;
+  display:none;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  padding:4px;
+  z-index:15;
+}
+
+.bubble:hover .message-actions{
+  display:flex;
+}
+
+.message-actions button{
+  background:transparent;
+  color:var(--text);
+  padding:7px;
+  border-radius:7px;
+}
+
+.message-actions button:hover{
+  background:rgba(255,255,255,.08);
+}
+
+.date-separator{
+  width:max-content;
+  margin:16px auto;
+  background:var(--panel);
+  color:var(--muted);
+  border:1px solid var(--border);
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:11px;
+}
+
+/* COMPOSER */
+.composer-wrap{
+  position:relative;
+  background:var(--panel);
+  border-top:1px solid var(--border);
+  padding:9px 12px 11px;
+}
+
+.reply-preview{
+  display:none;
+  background:var(--panel2);
+  border-left:4px solid var(--accent);
+  padding:9px 40px 9px 12px;
+  border-radius:10px;
+  margin-bottom:7px;
+  position:relative;
+}
+
+.reply-preview.active{
+  display:block;
+}
+
+.reply-preview strong{
+  color:var(--accent);
+}
+
+.cancel-reply{
+  position:absolute;
+  right:8px;
+  top:8px;
+  background:none;
+  color:var(--muted);
+  font-size:18px;
+}
+
+.composer{
+  display:flex;
+  align-items:flex-end;
+  gap:7px;
+}
+
+.composer-btn{
+  width:43px;
+  height:43px;
+  min-width:43px;
+  border-radius:50%;
+  background:transparent;
+  color:var(--muted);
+  font-size:20px;
+}
+
+.composer-btn:hover{
+  color:var(--text);
+  background:rgba(255,255,255,.06);
+}
+
+.input-area{
+  flex:1;
+  position:relative;
+}
+
+#messageInput{
+  width:100%;
+  min-height:43px;
+  max-height:140px;
+  resize:none;
+  border:0;
+  outline:0;
+  background:var(--panel2);
+  color:var(--text);
+  border-radius:22px;
+  padding:12px 15px;
+  line-height:19px;
+}
+
+.send-btn{
+  width:43px;
+  height:43px;
+  min-width:43px;
+  border-radius:50%;
+  background:var(--accent);
+  color:white;
+  font-size:18px;
+  box-shadow:0 5px 20px rgba(51,144,236,.25);
+}
+
+/* MENTION DROPDOWN */
+.mention-suggestions{
+  position:absolute;
+  bottom:55px;
+  left:0;
+  width:min(340px,90vw);
+  max-height:260px;
+  overflow-y:auto;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  display:none;
+  z-index:100;
+}
+
+.mention-suggestions.active{
+  display:block;
+}
+
+.mention-title{
+  padding:9px 12px;
+  color:var(--muted);
+  font-size:11px;
+  border-bottom:1px solid var(--border);
+}
+
+.mention-user{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 11px;
+  cursor:pointer;
+}
+
+.mention-user:hover{
+  background:rgba(255,255,255,.07);
+}
+
+.mention-user .avatar{
+  width:34px;
+  height:34px;
+  min-width:34px;
+}
+
+.mention-user-info{
+  flex:1;
+}
+
+.mention-user-name{
+  font-size:13px;
+  font-weight:800;
+}
+
+.mention-user-handle{
+  color:var(--muted);
+  font-size:11px;
+}
+
+/* EMOJI */
+.emoji-panel{
+  position:absolute;
+  bottom:68px;
+  left:15px;
+  width:300px;
+  max-height:250px;
+  overflow-y:auto;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px;
+  box-shadow:var(--shadow);
+  display:none;
+  z-index:90;
+}
+
+.emoji-panel.active{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:5px;
+}
+
+.emoji-panel button{
+  background:transparent;
+  font-size:23px;
+  padding:5px;
+  border-radius:7px;
+}
+
+.emoji-panel button:hover{
+  background:rgba(255,255,255,.08);
+}
+
+/* UPLOAD */
+.upload-preview{
+  display:none;
+  padding:8px;
+}
+
+.upload-preview.active{
+  display:block;
+}
+
+.upload-preview img{
+  width:80px;
+  height:80px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+.upload-remove{
+  background:var(--danger);
+  color:white;
+  border-radius:50%;
+  width:25px;
+  height:25px;
+  margin-left:5px;
+}
+
+/* PANELS */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  z-index:40;
+}
+
+.overlay.active{
+  display:block;
+}
+
+.side-panel{
+  position:fixed;
+  right:0;
+  top:0;
+  width:min(390px,92vw);
+  height:100%;
+  background:var(--panel);
+  z-index:50;
+  transform:translateX(100%);
+  transition:.25s ease;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+}
+
+.side-panel.active{
+  transform:translateX(0);
+}
+
+.panel-header{
+  height:65px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 15px;
+  border-bottom:1px solid var(--border);
+}
+
+.panel-header button{
+  background:none;
+  color:var(--text);
+  font-size:22px;
+}
+
+.panel-header h3{
+  font-size:16px;
+}
+
+.panel-content{
+  padding:15px;
+  overflow-y:auto;
+}
+
+/* MENU */
+.menu{
+  position:absolute;
+  right:15px;
+  top:60px;
+  width:210px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:13px;
+  box-shadow:var(--shadow);
+  z-index:30;
+  display:none;
+  overflow:hidden;
+}
+
+.menu.active{
+  display:block;
+}
+
+.menu button{
+  width:100%;
+  background:none;
+  color:var(--text);
+  text-align:left;
+  padding:12px 15px;
+}
+
+.menu button:hover{
+  background:rgba(255,255,255,.07);
+}
+
+/* THEME */
+.theme-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+}
+
+.theme-btn{
+  padding:14px 8px;
+  border-radius:12px;
+  background:var(--panel2);
+  color:var(--text);
+}
+
+.color-input{
+  width:100%;
+  height:45px;
+  border:0;
+  margin-top:8px;
+  background:transparent;
+}
+
+/* ADMIN */
+.admin-badge{
+  background:rgba(239,68,68,.15);
+  color:#f87171;
+  padding:3px 7px;
+  border-radius:10px;
+  font-size:10px;
+  font-weight:800;
+}
+
+.blocked-badge{
+  background:rgba(239,68,68,.15);
+  color:#f87171;
+  padding:4px 7px;
+  border-radius:10px;
+  font-size:10px;
+}
+
+/* LOGIN */
+.login{
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 20% 10%,rgba(51,144,236,.2),transparent 35%),
+    radial-gradient(circle at 80% 90%,rgba(124,58,237,.18),transparent 35%),
+    var(--bg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+.login-card{
+  width:min(410px,92vw);
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:28px;
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+
+.login-logo{
+  width:75px;
+  height:75px;
+  margin:auto;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,var(--accent),#7c3aed);
+  font-size:36px;
+  box-shadow:0 15px 40px rgba(51,144,236,.25);
+}
+
+.login-card h1{
+  margin-top:18px;
+  font-size:25px;
+}
+
+.login-card p{
+  color:var(--muted);
+  margin-top:7px;
+  font-size:13px;
+}
+
+.login-btn{
+  width:100%;
+  margin-top:20px;
+  padding:13px;
+  border-radius:13px;
+  background:var(--accent);
+  color:white;
+  font-weight:800;
+}
+
+.logout-btn{
+  width:100%;
+  margin-top:20px;
+  padding:12px;
+  border-radius:12px;
+  background:var(--danger);
+  color:white;
+}
+
+/* TOAST */
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:90px;
+  transform:translateX(-50%) translateY(20px);
+  background:#111827;
+  color:white;
+  padding:11px 16px;
+  border-radius:12px;
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+  z-index:1000;
+  font-size:13px;
+  box-shadow:var(--shadow);
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* SCROLL */
+.scroll-bottom{
+  position:absolute;
+  right:20px;
+  bottom:82px;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:var(--panel);
+  color:var(--text);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  display:none;
+  z-index:8;
+}
+
+.scroll-bottom.active{
+  display:block;
+}
+
+/* MOBILE */
+@media(max-width:800px){
+  .sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:320px;
+    transform:translateX(-100%);
+    transition:.25s;
+    z-index:60;
+  }
+
+  .sidebar.active{
+    transform:translateX(0);
+  }
+
+  .mobile-menu{
+    display:block;
+  }
+
+  .bubble{
+    max-width:84%;
+  }
+
+  .messages{
+    padding:12px 7px;
+  }
+
+  .message-avatar{
+    width:28px;
+    height:28px;
+    min-width:28px;
+  }
+
+  .header-actions .hide-mobile{
+    display:none;
+  }
+}
+
+@media(max-width:450px){
+  .header-title{
+    font-size:14px;
+  }
+
+  .header-sub{
+    font-size:10px;
+  }
+
+  .header-avatar{
+    width:40px;
+    height:40px;
+  }
+
+  .icon-btn{
+    width:38px;
+    height:38px;
+  }
+
+  .composer-wrap{
+    padding-left:7px;
+    padding-right:7px;
+  }
+
+  .composer-btn{
+    width:38px;
+    min-width:38px;
+  }
+
+  .send-btn{
+    width:40px;
+    min-width:40px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="loginScreen" class="login">
+  <div class="login-card">
+    <div class="login-logo">🎮</div>
+    <h1>DVARY GAMES</h1>
+    <p>Community ya gamers. Ingia ili uanze ku-chat na members wengine.</p>
+    <button class="login-btn" onclick="login()">INGIA KWENYE COMMUNITY</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+
+    <div class="brand">
+      <div class="brand-avatar">🎮</div>
+      <div>
+        <div class="brand-title">DVARY GAMES</div>
+        <div class="brand-sub"><span id="sideOnline">0</span> online</div>
+      </div>
+    </div>
+
+    <div class="member-search">
+      <input id="memberSearch" placeholder="🔎 Tafuta member..." oninput="filterMembers()">
+    </div>
+
+    <div id="memberList" class="member-list"></div>
+
+  </aside>
+
+  <!-- CHAT -->
+  <main class="chat">
+
+    <header class="chat-header">
+
+      <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+
+      <div class="header-avatar">🎮</div>
+
+      <div class="header-info">
+        <div class="header-title">DVARY GAMES Community</div>
+        <div class="header-sub">
+          <span id="onlineCount">0</span> online •
+          <span id="memberCount">0</span> members
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="icon-btn" onclick="toggleSearch()">⌕</button>
+        <button class="icon-btn hide-mobile" onclick="openMembers()">👥</button>
+        <button class="icon-btn" onclick="toggleMenu()">⋮</button>
+      </div>
+
+      <div id="menu" class="menu">
+        <button onclick="openMembers();closeMenu()">👥 Members</button>
+        <button onclick="openTheme();closeMenu()">🎨 Muonekano</button>
+        <button onclick="scrollBottom();closeMenu()">⬇️ Latest message</button>
+        <button onclick="logout()">🚪 Logout</button>
+      </div>
+
+    </header>
+
+    <div id="searchBox" class="search-box">
+      <input id="messageSearch" placeholder="🔎 Tafuta kwenye messages..." oninput="searchMessages()">
+    </div>
+
+    <div id="messages" class="messages"></div>
+
+    <button id="scrollBtn" class="scroll-bottom" onclick="scrollBottom()">↓</button>
+
+    <!-- COMPOSER -->
+    <div class="composer-wrap">
+
+      <div id="replyPreview" class="reply-preview">
+        <button class="cancel-reply" onclick="cancelReply()">×</button>
+        <strong id="replyAuthor"></strong>
+        <div id="replyText"></div>
+      </div>
+
+      <div id="uploadPreview" class="upload-preview">
+        <img id="previewImage">
+        <button class="upload-remove" onclick="removeUpload()">×</button>
+      </div>
+
+      <div id="emojiPanel" class="emoji-panel"></div>
+
+      <!-- REAL @TAG SUGGESTIONS -->
+      <div id="mentionSuggestions" class="mention-suggestions"></div>
+
+      <div class="composer">
+
+        <button class="composer-btn" onclick="document.getElementById('imageInput').click()">📎</button>
+
+        <input
+          id="imageInput"
+          type="file"
+          accept="image/*"
+          hidden
+          onchange="handleImage(this)"
+        >
+
+        <button class="composer-btn" onclick="toggleEmoji()">😊</button>
+
+        <div class="input-area">
+
+          <textarea
+            id="messageInput"
+            rows="1"
+            placeholder="Andika ujumbe... Tumia @ kumtag member"
+            oninput="handleTyping()"
+            onkeydown="handleKey(event)"
+          ></textarea>
+
+        </div>
+
+        <button class="send-btn" onclick="sendMessage()">➤</button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay" class="overlay" onclick="closePanels()"></div>
+
+<!-- MEMBERS PANEL -->
+<div id="membersPanel" class="side-panel">
+
+  <div class="panel-header">
+    <button onclick="closePanels()">‹</button>
+    <h3>👥 Wanachama</h3>
+  </div>
+
+  <div class="panel-content">
+    <p style="color:var(--muted);font-size:12px;margin-bottom:12px">
+      Walio online wanaonekana kwanza.
+    </p>
+
+    <div id="panelMembers"></div>
+  </div>
+
+</div>
+
+<!-- THEME PANEL -->
+<div id="themePanel" class="side-panel">
+
+  <div class="panel-header">
+    <button onclick="closePanels()">‹</button>
+    <h3>🎨 Muonekano</h3>
+  </div>
+
+  <div class="panel-content">
+
+    <p style="color:var(--muted);font-size:12px;margin-bottom:12px">
+      Chagua theme unayopenda.
+    </p>
+
+    <div class="theme-grid">
+      <button class="theme-btn" onclick="setTheme('dark')">🌑 Dark</button>
+      <button class="theme-btn" onclick="setTheme('light')">☀️ Light</button>
+      <button class="theme-btn" onclick="setTheme('purple')">🟣 Purple</button>
+      <button class="theme-btn" onclick="setTheme('pink')">💗 Pink</button>
+      <button class="theme-btn" onclick="setTheme('green')">🟢 Green</button>
+      <button class="theme-btn" onclick="setTheme('blue')">🔵 Blue</button>
+    </div>
+
+    <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+    <label style="font-size:13px;font-weight:700">Background color</label>
+
+    <input
+      class="color-input"
+      type="color"
+      id="bgColor"
+      onchange="changeBackground(this.value)"
+    >
+
+    <button
+      class="theme-btn"
+      style="width:100%;margin-top:15px"
+      onclick="resetBackground()"
+    >
+      ♻️ Reset background
+    </button>
+
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+
+/* =========================================================
+   FIREBASE
+========================================================= */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+  authDomain: "enjoy-game-6c05c.firebaseapp.com",
+  projectId: "enjoy-game-6c05c",
+  storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+  messagingSenderId: "512924203714",
+  appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+  measurementId: "G-Y2H8BYM4LP"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+const FieldValue = firebase.firestore.FieldValue;
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+const ADMIN_EMAIL = "dullamanyama0@gmail.com";
+
+let currentUser = null;
+let currentUserData = null;
+let allUsers = [];
+let allMessages = [];
+let selectedFile = null;
+let replyData = null;
+let selectedMentions = [];
+let unsubscribeMessages = null;
+let unsubscribeUsers = null;
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function escapeHTML(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function isAdmin(){
+  return currentUser &&
+    currentUser.email &&
+    currentUser.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+}
+
+function getUsername(user){
+  return (
+    user.username ||
+    user.displayName ||
+    user.name ||
+    (user.email ? user.email.split("@")[0] : "Member")
+  ).replace(/\s+/g,"");
+}
+
+function getDisplayName(user){
+  return user.displayName || user.name || user.username || "Member";
+}
+
+function getAvatar(user){
+  return user.photoURL || user.avatar || "";
+}
+
+function initials(name){
+  return String(name || "M")
+    .trim()
+    .split(/\s+/)
+    .slice(0,2)
+    .map(x=>x[0])
+    .join("")
+    .toUpperCase();
+}
+
+function toDate(value){
+  if(!value) return new Date();
+
+  if(value.toDate) return value.toDate();
+
+  if(value instanceof Date) return value;
+
+  if(typeof value === "number") return new Date(value);
+
+  return new Date(value);
+}
+
+function isOnline(user){
+  if(!user.lastSeen) return false;
+
+  const date = toDate(user.lastSeen);
+
+  return Date.now() - date.getTime() <= 5 * 60 * 1000;
+}
+
+function showToast(text){
+  const toast = document.getElementById("toast");
+
+  toast.textContent = text;
+  toast.classList.add("show");
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer = setTimeout(()=>{
+    toast.classList.remove("show");
+  },2800);
+}
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+auth.onAuthStateChanged(async user=>{
+
+  if(!user){
+    currentUser = null;
+    currentUserData = null;
+
+    document.getElementById("loginScreen").style.display = "flex";
+
+    return;
+  }
+
+  currentUser = user;
+
+  document.getElementById("loginScreen").style.display = "none";
+
+  await loadUserData();
+  await updatePresence();
+
+  startUsersListener();
+  startMessagesListener();
+
+  setInterval(updatePresence,30000);
+});
+
+async function login(){
+
+  try{
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    await auth.signInWithPopup(provider);
+
+  }catch(error){
+
+    /*
+      Kwa mobile baadhi ya browsers popup inaweza kukataa.
+      Tunajaribu redirect.
+    */
+
+    try{
+      await auth.signInWithRedirect(provider);
+    }catch(e){
+      showToast(e.message);
+    }
+
+  }
+}
+
+async function logout(){
+
+  try{
+
+    await auth.signOut();
+
+    showToast("Umetoka kwenye account.");
+
+  }catch(error){
+    showToast(error.message);
+  }
+}
+
+/* =========================================================
+   USER DATA
+========================================================= */
+
+async function loadUserData(){
+
+  const ref = db.collection("users").doc(currentUser.uid);
+
+  const snap = await ref.get();
+
+  if(snap.exists){
+
+    currentUserData = snap.data();
+
+  }else{
+
+    currentUserData = {
+      uid:currentUser.uid,
+      email:currentUser.email || "",
+      displayName:currentUser.displayName || "Member",
+      username:getUsername({
+        displayName:currentUser.displayName,
+        email:currentUser.email
+      }),
+      photoURL:currentUser.photoURL || "",
+      blocked:false,
+      createdAt:FieldValue.serverTimestamp(),
+      lastSeen:FieldValue.serverTimestamp()
+    };
+
+    await ref.set(currentUserData,{merge:true});
+  }
+}
+
+async function updatePresence(){
+
+  if(!currentUser) return;
+
+  try{
+
+    await db.collection("users")
+      .doc(currentUser.uid)
+      .set({
+        uid:currentUser.uid,
+        email:currentUser.email || "",
+        displayName:currentUser.displayName || currentUserData?.displayName || "Member",
+        username:currentUserData?.username || getUsername(currentUser),
+        photoURL:currentUser.photoURL || currentUserData?.photoURL || "",
+        lastSeen:FieldValue.serverTimestamp()
+      },{merge:true});
+
+  }catch(error){
+    console.log("Presence:",error);
+  }
+}
+
+/* =========================================================
+   USERS
+========================================================= */
+
+function startUsersListener(){
+
+  if(unsubscribeUsers) unsubscribeUsers();
+
+  unsubscribeUsers = db.collection("users")
+    .onSnapshot(snapshot=>{
+
+      allUsers = [];
+
+      snapshot.forEach(doc=>{
+
+        allUsers.push({
+          id:doc.id,
+          ...doc.data()
+        });
+
+      });
+
+      allUsers.sort((a,b)=>{
+
+        const onlineA = isOnline(a);
+        const onlineB = isOnline(b);
+
+        if(onlineA !== onlineB) return onlineB - onlineA;
+
+        return getDisplayName(a)
+          .localeCompare(getDisplayName(b));
+
+      });
+
+      updateCounts();
+      renderMembers();
+      renderPanelMembers();
+
+      checkCurrentUserBlock();
+
+    },error=>{
+
+      console.error(error);
+      showToast("Imeshindikana kupakia members.");
+
+    });
+}
+
+function updateCounts(){
+
+  const total = allUsers.length;
+
+  const online = allUsers.filter(isOnline).length;
+
+  document.getElementById("memberCount").textContent = total;
+  document.getElementById("onlineCount").textContent = online;
+  document.getElementById("sideOnline").textContent = online;
+}
+
+function checkCurrentUserBlock(){
+
+  const me = allUsers.find(x=>x.id === currentUser?.uid);
+
+  if(me){
+
+    currentUserData = me;
+
+    if(me.blocked && !isAdmin()){
+
+      document.getElementById("messageInput").disabled = true;
+
+      document.getElementById("messageInput").placeholder =
+        "🚫 Ume-blockiwa na admin";
+
+      document.querySelector(".send-btn").disabled = true;
+
+      showToast("🚫 Ume-blockiwa na admin.");
+
+    }else{
+
+      document.getElementById("messageInput").disabled = false;
+
+      document.getElementById("messageInput").placeholder =
+        "Andika ujumbe... Tumia @ kumtag member";
+
+      document.querySelector(".send-btn").disabled = false;
+    }
+  }
+}
+
+function renderAvatar(user,sizeClass=""){
+
+  const avatar = getAvatar(user);
+
+  if(avatar){
+
+    return `
+      <img
+        class="avatar ${sizeClass}"
+        src="${escapeHTML(avatar)}"
+        alt=""
+      >
+    `;
+
+  }
+
+  return `
+    <div class="avatar ${sizeClass}">
+      ${escapeHTML(initials(getDisplayName(user)))}
+      ${isOnline(user) ? '<span class="online-dot"></span>' : ''}
+    </div>
+  `;
+}
+
+function renderMembers(){
+
+  const container = document.getElementById("memberList");
+
+  const search = document
+    .getElementById("memberSearch")
+    .value
+    .toLowerCase();
+
+  const filtered = allUsers.filter(user=>{
+
+    const text = (
+      getDisplayName(user) +
+      " " +
+      getUsername(user)
+    ).toLowerCase();
+
+    return text.includes(search);
+
+  });
+
+  container.innerHTML = filtered.map(user=>{
+
+    return `
+      <div class="member">
+
+        ${renderAvatar(user)}
+
+        <div class="member-info">
+
+          <div class="member-name">
+            ${escapeHTML(getDisplayName(user))}
+
+            ${
+              user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()
+              ? '<span class="admin-badge">ADMIN</span>'
+              : ''
+            }
+
+            ${
+              user.blocked
+              ? '<span class="blocked-badge">BLOCKED</span>'
+              : ''
+            }
+
+          </div>
+
+          <div class="member-status">
+            @${escapeHTML(getUsername(user))}
+            • ${isOnline(user) ? "online" : "offline"}
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+  }).join("");
+}
+
+function renderPanelMembers(){
+
+  const container = document.getElementById("panelMembers");
+
+  container.innerHTML = allUsers.map(user=>{
+
+    return `
+      <div
+        style="
+          display:flex;
+          align-items:center;
+          gap:10px;
+          padding:10px 5px;
+          border-bottom:1px solid var(--border)
+        "
+      >
+
+        ${renderAvatar(user)}
+
+        <div style="flex:1">
+
+          <div style="font-weight:800;font-size:13px">
+
+            ${escapeHTML(getDisplayName(user))}
+
+            ${
+              user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()
+              ? '<span class="admin-badge">ADMIN</span>'
+              : ''
+            }
+
+          </div>
+
+          <div style="font-size:11px;color:var(--muted)">
+            @${escapeHTML(getUsername(user))}
+            • ${isOnline(user) ? "🟢 online" : "⚫ offline"}
+          </div>
+
+        </div>
+
+        ${
+          isAdmin() && user.id !== currentUser.uid
+          ? `
+            <button
+              onclick="toggleBlock('${escapeHTML(user.id)}',${user.blocked ? "false":"true"})"
+              style="
+                background:${user.blocked ? "var(--success)":"var(--danger)"};
+                color:white;
+                border-radius:8px;
+                padding:7px 9px;
+                font-size:10px;
+                font-weight:800;
+              "
+            >
+              ${user.blocked ? "UNBLOCK":"BLOCK"}
+            </button>
+          `
+          : ''
+        }
+
+      </div>
+    `;
+
+  }).join("");
+}
+
+function filterMembers(){
+  renderMembers();
+}
+
+/* =========================================================
+   ADMIN BLOCK SYSTEM
+========================================================= */
+
+async function toggleBlock(uid,shouldBlock){
+
+  if(!isAdmin()){
+
+    showToast("🚫 Huna ruhusa ya kufanya hivi.");
+
+    return;
+  }
+
+  if(uid === currentUser.uid){
+
+    showToast("Huwezi kujiblock mwenyewe.");
+
+    return;
+  }
+
+  const user = allUsers.find(x=>x.id === uid);
+
+  if(!user) return;
+
+  const action = shouldBlock ? "BLOCK" : "UNBLOCK";
+
+  const ok = confirm(
+    `${action} ${getDisplayName(user)}?`
+  );
+
+  if(!ok) return;
+
+  try{
+
+    await db.collection("users")
+      .doc(uid)
+      .update({
+        blocked:shouldBlock,
+        blockedAt:shouldBlock
+          ? FieldValue.serverTimestamp()
+          : null,
+        blockedBy:shouldBlock
+          ? currentUser.uid
+          : null
+      });
+
+    showToast(
+      shouldBlock
+      ? "🚫 Member ameblockiwa."
+      : "✅ Member ame-unblockiwa."
+    );
+
+    renderPanelMembers();
+
+  }catch(error){
+
+    console.error(error);
+    showToast("Imeshindikana kubadilisha block.");
+
+  }
+}
+
+/* =========================================================
+   MESSAGES LISTENER
+========================================================= */
+
+function startMessagesListener(){
+
+  if(unsubscribeMessages) unsubscribeMessages();
+
+  unsubscribeMessages = db.collection("community_messages")
+    .orderBy("createdAt","asc")
+    .limitToLast(300)
+    .onSnapshot(snapshot=>{
+
+      allMessages = [];
+
+      snapshot.forEach(doc=>{
+
+        allMessages.push({
+          id:doc.id,
+          ...doc.data()
+        });
+
+      });
+
+      renderMessages();
+
+    },error=>{
+
+      console.error(error);
+
+      showToast(
+        "Messages hazijapakia. Angalia Firestore rules/index."
+      );
+
+    });
+}
+
+/* =========================================================
+   RENDER MESSAGES
+========================================================= */
+
+function formatTime(value){
+
+  const date = toDate(value);
+
+  return date.toLocaleTimeString("sw-TZ",{
+    hour:"2-digit",
+    minute:"2-digit"
+  });
+}
+
+function formatDate(value){
+
+  const date = toDate(value);
+
+  return date.toLocaleDateString("sw-TZ",{
+    day:"numeric",
+    month:"long",
+    year:"numeric"
+  });
+}
+
+function highlightMentions(text){
+
+  let safe = escapeHTML(text);
+
+  safe = safe.replace(
+    /@([a-zA-Z0-9_.-]+)/g,
+    '<span class="mention">@$1</span>'
+  );
+
+  return safe;
+}
+
+function renderMessages(){
+
+  const container = document.getElementById("messages");
+
+  const wasNearBottom =
+    container.scrollHeight -
+    container.scrollTop -
+    container.clientHeight < 180;
+
+  let html = "";
+
+  let previous = null;
+  let previousDate = "";
+
+  allMessages.forEach(message=>{
+
+    const date = formatDate(message.createdAt);
+
+    if(date !== previousDate){
+
+      html += `
+        <div class="date-separator">
+          ${escapeHTML(date)}
+        </div>
+      `;
+
+      previousDate = date;
+    }
+
+    const isMine =
+      message.senderId === currentUser?.uid;
+
+    const user = allUsers.find(
+      x=>x.id === message.senderId
+    ) || {
+      displayName:message.senderName || "Member",
+      username:message.senderUsername || "member",
+      photoURL:message.senderPhotoURL || ""
+    };
+
+    const sameSender =
+      previous &&
+      previous.senderId === message.senderId;
+
+    const rowClass =
+      isMine ? "message-row mine" : "message-row other";
+
+    html += `
+      <div
+        class="${rowClass}"
+        id="message-${escapeHTML(message.id)}"
+      >
+
+        ${
+          !isMine
+          ? `
+            ${
+              sameSender
+              ? '<div class="message-avatar hidden"></div>'
+              : renderAvatar(user)
+            }
+          `
+          : ''
+        }
+
+        <div class="bubble">
+
+          <div class="message-actions">
+
+            <button onclick="replyMessage('${escapeHTML(message.id)}')">
+              ↩️
+            </button>
+
+            <button onclick="react('${escapeHTML(message.id)}','❤️')">
+              ❤️
+            </button>
+
+            <button onclick="copyMessage('${escapeHTML(message.id)}')">
+              📋
+            </button>
+
+            ${
+              isMine || isAdmin()
+              ? `
+                <button
+                  onclick="deleteMessage('${escapeHTML(message.id)}')"
+                  title="Delete for everyone"
+                >
+                  🗑️
+                </button>
+              `
+              : ''
+            }
+
+          </div>
+
+          ${
+            !isMine && !sameSender
+            ? `
+              <div class="sender">
+                ${escapeHTML(getDisplayName(user))}
+                ${
+                  user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()
+                  ? '<span class="admin-badge">ADMIN</span>'
+                  : ''
+                }
+              </div>
+            `
+            : ''
+          }
+
+          ${
+            message.replyTo
+            ? `
+              <div
+                class="reply-box"
+                onclick="jumpToMessage('${escapeHTML(message.replyTo.id || "")}')"
+                style="cursor:pointer"
+              >
+                <div class="reply-author">
+                  ${escapeHTML(message.replyTo.senderName || "Member")}
+                </div>
+
+                <div>
+                  ${escapeHTML(
+                    String(message.replyTo.text || "Image")
+                      .slice(0,100)
+                  )}
+                </div>
+              </div>
+            `
+            : ''
+          }
+
+          ${
+            message.imageUrl
+            ? `
+              <img
+                class="message-image"
+                src="${escapeHTML(message.imageUrl)}"
+                alt="image"
+                loading="lazy"
+              >
+            `
+            : ''
+          }
+
+          ${
+            message.text
+            ? `
+              <div class="message-text">
+                ${highlightMentions(message.text)}
+              </div>
+            `
+            : ''
+          }
+
+          ${
+            message.reactions
+            ? `
+              <div class="reactions">
+
+                ${
+                  Object.entries(message.reactions)
+                  .map(([emoji,count])=>`
+                    <button
+                      class="reaction"
+                      onclick="react('${escapeHTML(message.id)}','${escapeHTML(emoji)}')"
+                    >
+                      ${emoji} ${count}
+                    </button>
+                  `)
+                  .join("")
+                }
+
+              </div>
+            `
+            : ''
+          }
+
+          <div class="message-meta">
+
+            ${
+              message.deleted
+              ? '<span class="edited">deleted</span>'
+              : ''
+            }
+
+            <span>
+              ${formatTime(message.createdAt)}
+            </span>
+
+            ${
+              isMine
+              ? '<span>✓✓</span>'
+              : ''
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+    previous = message;
+
+  });
+
+  container.innerHTML = html;
+
+  if(wasNearBottom){
+    requestAnimationFrame(()=>{
+      container.scrollTop = container.scrollHeight;
+    });
+  }
+}
+
+/* =========================================================
+   SEND MESSAGE
+========================================================= */
+
+async function sendMessage(){
+
+  if(!currentUser) return;
+
+  const user = allUsers.find(
+    x=>x.id === currentUser.uid
+  );
+
+  if(user?.blocked && !isAdmin()){
+
+    showToast("🚫 Ume-blockiwa na admin.");
+
+    return;
+  }
+
+  const input = document.getElementById("messageInput");
+
+  const text = input.value.trim();
+
+  if(!text && !selectedFile) return;
+
+  const sendBtn = document.querySelector(".send-btn");
+
+  sendBtn.disabled = true;
+
+  try{
+
+    let imageUrl = "";
+
+    if(selectedFile){
+
+      showToast("⏳ Uploading image...");
+
+      const fileName =
+        Date.now() +
+        "_" +
+        selectedFile.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+
+      const ref = storage
+        .ref()
+        .child("community_images/" + currentUser.uid + "/" + fileName);
+
+      const upload = await ref.put(selectedFile);
+
+      imageUrl = await upload.ref.getDownloadURL();
+    }
+
+    /*
+      Remove mentions ambazo mtumiaji alichagua
+      lakini amezifuta kwenye textarea.
+    */
+
+    selectedMentions = selectedMentions.filter(mention=>{
+
+      return text.includes("@" + mention.username);
+
+    });
+
+    const mentionedUserIds =
+      [...new Set(
+        selectedMentions.map(x=>x.id)
+      )];
+
+    const messageData = {
+
+      text:text || "",
+
+      imageUrl:imageUrl || "",
+
+      senderId:currentUser.uid,
+
+      senderName:
+        getDisplayName(user || currentUser),
+
+      senderUsername:
+        getUsername(user || currentUser),
+
+      senderPhotoURL:
+        getAvatar(user || currentUser),
+
+      mentionedUserIds,
+
+      reactions:{},
+
+      deleted:false,
+
+      createdAt:FieldValue.serverTimestamp()
+
+    };
+
+    if(replyData){
+
+      messageData.replyTo = {
+
+        id:replyData.id,
+
+        senderId:replyData.senderId,
+
+        senderName:replyData.senderName,
+
+        text:replyData.text || ""
+
+      };
+    }
+
+    const messageRef =
+      await db.collection("community_messages")
+      .add(messageData);
+
+    /*
+      Optional in-app notifications.
+      Firestore rules zinapaswa kuruhusu notification creation
+      kwa mfumo wako.
+    */
+
+    if(mentionedUserIds.length){
+
+      for(const userId of mentionedUserIds){
+
+        if(userId === currentUser.uid) continue;
+
+        try{
+
+          await db.collection("notifications").add({
+
+            userId:userId,
+
+            type:"mention",
+
+            fromUserId:currentUser.uid,
+
+            fromUsername:getUsername(user || currentUser),
+
+            messageId:messageRef.id,
+
+            messageText:text.slice(0,180),
+
+            read:false,
+
+            createdAt:FieldValue.serverTimestamp()
+
+          });
+
+        }catch(notificationError){
+
+          console.log(
+            "Notification skipped:",
+            notificationError
+          );
+        }
+      }
+    }
+
+    input.value = "";
+
+    input.style.height = "43px";
+
+    removeUpload();
+
+    cancelReply();
+
+    selectedMentions = [];
+
+    closeMentionSuggestions();
+
+    document.getElementById("emojiPanel")
+      .classList.remove("active");
+
+  }catch(error){
+
+    console.error(error);
+
+    showToast(
+      "❌ Imeshindikana kutuma: " + error.message
+    );
+
+  }finally{
+
+    sendBtn.disabled = false;
+  }
+}
+
+/* =========================================================
+   DELETE FOR EVERYONE
+========================================================= */
+
+async function deleteMessage(messageId){
+
+  if(!currentUser) return;
+
+  const message =
+    allMessages.find(x=>x.id === messageId);
+
+  if(!message) return;
+
+  const canDelete =
+    message.senderId === currentUser.uid ||
+    isAdmin();
+
+  if(!canDelete){
+
+    showToast("🚫 Huwezi kufuta message ya mtu mwingine.");
+
+    return;
+  }
+
+  const ok = confirm(
+    isAdmin() && message.senderId !== currentUser.uid
+    ? "Admin: Unataka kufuta message hii kwa kila mtu?"
+    : "Unataka kufuta message hii kwa kila mtu?"
+  );
+
+  if(!ok) return;
+
+  try{
+
+    /*
+      DELETE FOR EVERYONE:
+      Hapa tunafuta document kabisa.
+      Hivyo message itaondoka kwa members wote.
+    */
+
+    await db.collection("community_messages")
+      .doc(messageId)
+      .delete();
+
+    showToast("🗑️ Message imefutwa kwa kila mtu.");
+
+  }catch(error){
+
+    console.error(error);
+
+    showToast(
+      "❌ Huwezi kufuta. Angalia Firestore rules."
+    );
+  }
+}
+
+/* =========================================================
+   REPLY
+========================================================= */
+
+function replyMessage(messageId){
+
+  const message =
+    allMessages.find(x=>x.id === messageId);
+
+  if(!message) return;
+
+  replyData = message;
+
+  document.getElementById("replyAuthor")
+    .textContent =
+    message.senderName || "Member";
+
+  document.getElementById("replyText")
+    .textContent =
+    message.text || "📷 Image";
+
+  document.getElementById("replyPreview")
+    .classList.add("active");
+
+  document.getElementById("messageInput").focus();
+}
+
+function cancelReply(){
+
+  replyData = null;
+
+  document.getElementById("replyPreview")
+    .classList.remove("active");
+}
+
+function jumpToMessage(id){
+
+  const el = document.getElementById("message-" + id);
+
+  if(!el) return;
+
+  el.scrollIntoView({
+    behavior:"smooth",
+    block:"center"
+  });
+
+  el.style.transform = "scale(1.03)";
+
+  setTimeout(()=>{
+    el.style.transform = "";
+  },900);
+}
+
+/* =========================================================
+   REACTIONS
+========================================================= */
+
+async function react(messageId,emoji){
+
+  const message =
+    allMessages.find(x=>x.id === messageId);
+
+  if(!message) return;
+
+  const reactions = {
+    ...(message.reactions || {})
+  };
+
+  reactions[emoji] =
+    (reactions[emoji] || 0) + 1;
+
+  try{
+
+    await db.collection("community_messages")
+      .doc(messageId)
+      .update({
+        reactions
+      });
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+}
+
+/* =========================================================
+   COPY
+========================================================= */
+
+async function copyMessage(messageId){
+
+  const message =
+    allMessages.find(x=>x.id === messageId);
+
+  if(!message) return;
+
+  try{
+
+    await navigator.clipboard.writeText(
+      message.text || ""
+    );
+
+    showToast("📋 Ujumbe umenakiliwa.");
+
+  }catch(error){
+
+    showToast("Imeshindikana ku-copy.");
+
+  }
+}
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+function handleImage(input){
+
+  const file = input.files?.[0];
+
+  if(!file) return;
+
+  if(!file.type.startsWith("image/")){
+
+    showToast("Tafadhali chagua image.");
+
+    return;
+  }
+
+  if(file.size > 10 * 1024 * 1024){
+
+    showToast("Image iwe chini ya 10MB.");
+
+    input.value = "";
+
+    return;
+  }
+
+  selectedFile = file;
+
+  const reader = new FileReader();
+
+  reader.onload = e=>{
+
+    document.getElementById("previewImage").src =
+      e.target.result;
+
+    document.getElementById("uploadPreview")
+      .classList.add("active");
+
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function removeUpload(){
+
+  selectedFile = null;
+
+  document.getElementById("imageInput").value = "";
+
+  document.getElementById("uploadPreview")
+    .classList.remove("active");
+
+  document.getElementById("previewImage").src = "";
+}
+
+/* =========================================================
+   REAL @TAG SYSTEM
+========================================================= */
+
+function getMentionQuery(){
+
+  const input = document.getElementById("messageInput");
+
+  const text = input.value;
+
+  const cursor = input.selectionStart;
+
+  const beforeCursor = text.slice(0,cursor);
+
+  /*
+    Tunatafuta @ ya mwisho ambayo iko mwanzo
+    au baada ya space/newline.
+  */
+
+  const match =
+    beforeCursor.match(/(?:^|\s)@([a-zA-Z0-9_.-]*)$/);
+
+  if(!match) return null;
+
+  return {
+    query:match[1].toLowerCase(),
+    start:cursor - match[1].length - 1,
+    end:cursor
+  };
+}
+
+function handleTyping(){
+
+  const input = document.getElementById("messageInput");
+
+  input.style.height = "43px";
+
+  input.style.height =
+    Math.min(input.scrollHeight,140) + "px";
+
+  showMentionSuggestions();
+
+}
+
+function showMentionSuggestions(){
+
+  const data = getMentionQuery();
+
+  const box =
+    document.getElementById("mentionSuggestions");
+
+  if(!data){
+
+    closeMentionSuggestions();
+
+    return;
+  }
+
+  const query = data.query;
+
+  const users = allUsers
+    .filter(user=>{
+
+      if(user.id === currentUser?.uid) return false;
+
+      const name =
+        getDisplayName(user).toLowerCase();
+
+      const username =
+        getUsername(user).toLowerCase();
+
+      return (
+        name.includes(query) ||
+        username.includes(query)
+      );
+
+    })
+    .slice(0,12);
+
+  if(!users.length){
+
+    box.innerHTML = `
+      <div class="mention-title">
+        Hakuna member anayepatikana
+      </div>
+    `;
+
+    box.classList.add("active");
+
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="mention-title">
+      👤 Chagua member wa kumtag
+    </div>
+
+    ${users.map(user=>`
+
+      <div
+        class="mention-user"
+        data-mention-id="${escapeHTML(user.id)}"
+      >
+
+        ${
+          getAvatar(user)
+          ? `
+            <img
+              class="avatar"
+              src="${escapeHTML(getAvatar(user))}"
+              style="width:34px;height:34px;min-width:34px"
+            >
+          `
+          : `
+            <div
+              class="avatar"
+              style="width:34px;height:34px;min-width:34px"
+            >
+              ${escapeHTML(initials(getDisplayName(user)))}
+              ${
+                isOnline(user)
+                ? '<span class="online-dot"></span>'
+                : ''
+              }
+            </div>
+          `
+        }
+
+        <div class="mention-user-info">
+
+          <div class="mention-user-name">
+            ${escapeHTML(getDisplayName(user))}
+          </div>
+
+          <div class="mention-user-handle">
+            @${escapeHTML(getUsername(user))}
+            • ${isOnline(user) ? "online":"offline"}
+          </div>
+
+        </div>
+
+      </div>
+
+    `).join("")}
+  `;
+
+  box.classList.add("active");
+}
+
+document
+  .getElementById("mentionSuggestions")
+  .addEventListener("click",event=>{
+
+    const item =
+      event.target.closest(".mention-user");
+
+    if(!item) return;
+
+    const userId =
+      item.dataset.mentionId;
+
+    selectMention(userId);
+  });
+
+function selectMention(userId){
+
+  const user =
+    allUsers.find(x=>x.id === userId);
+
+  if(!user) return;
+
+  const input =
+    document.getElementById("messageInput");
+
+  const data =
+    getMentionQuery();
+
+  if(!data) return;
+
+  const username =
+    getUsername(user);
+
+  const before =
+    input.value.slice(0,data.start);
+
+  const after =
+    input.value.slice(data.end);
+
+  input.value =
+    before +
+    "@" + username + " " +
+    after;
+
+  /*
+    Hifadhi member ID kwa ajili ya notification.
+  */
+
+  const exists =
+    selectedMentions.some(x=>x.id === user.id);
+
+  if(!exists){
+
+    selectedMentions.push({
+      id:user.id,
+      username:username
+    });
+  }
+
+  const newCursor =
+    before.length +
+    username.length +
+    2;
+
+  input.focus();
+
+  input.setSelectionRange(
+    newCursor,
+    newCursor
+  );
+
+  closeMentionSuggestions();
+
+  handleTyping();
+}
+
+function closeMentionSuggestions(){
+
+  document
+    .getElementById("mentionSuggestions")
+    .classList.remove("active");
+}
+
+/* =========================================================
+   EMOJI
+========================================================= */
+
+const emojis = [
+  "😀","😂","🤣","😊","😍","🥰","😘","😎",
+  "🤩","😱","😭","😡","🤔","😴","🙌","👏",
+  "🔥","❤️","💯","🎮","🎯","🏆","⚽","🥶",
+  "😈","👀","👍","👎","🙏","💀","🚀","⭐",
+  "✨","💥","🎉","🥳","🤝","💪","🤑","😇",
+  "🤯","😅","😏","😢","😮","🤦","🤷","❤️"
+];
+
+document.getElementById("emojiPanel").innerHTML =
+  emojis.map(emoji=>`
+    <button onclick="insertEmoji('${emoji}')">
+      ${emoji}
+    </button>
+  `).join("");
+
+function toggleEmoji(){
+
+  document.getElementById("emojiPanel")
+    .classList.toggle("active");
+
+  closeMentionSuggestions();
+}
+
+function insertEmoji(emoji){
+
+  const input =
+    document.getElementById("messageInput");
+
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+
+  input.value =
+    input.value.slice(0,start) +
+    emoji +
+    input.value.slice(end);
+
+  input.focus();
+
+  const position =
+    start + emoji.length;
+
+  input.setSelectionRange(
+    position,
+    position
+  );
+
+  handleTyping();
+}
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
+
+function handleKey(event){
+
+  if(event.key === "Enter" && !event.shiftKey){
+
+    event.preventDefault();
+
+    sendMessage();
+
+  }
+
+  if(event.key === "Escape"){
+
+    closeMentionSuggestions();
+
+    document.getElementById("emojiPanel")
+      .classList.remove("active");
+  }
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+function toggleSearch(){
+
+  document
+    .getElementById("searchBox")
+    .classList.toggle("active");
+
+  if(document.getElementById("searchBox").classList.contains("active")){
+
+    document.getElementById("messageSearch").focus();
+
+  }
+}
+
+function searchMessages(){
+
+  const query =
+    document.getElementById("messageSearch")
+    .value
+    .toLowerCase()
+    .trim();
+
+  document
+    .querySelectorAll(".message-row")
+    .forEach(row=>{
+
+      if(!query){
+
+        row.style.display = "";
+
+        return;
+      }
+
+      row.style.display =
+        row.innerText.toLowerCase().includes(query)
+        ? ""
+        : "none";
+
+    });
+}
+
+/* =========================================================
+   MENU / PANELS
+========================================================= */
+
+function toggleMenu(){
+
+  document
+    .getElementById("menu")
+    .classList.toggle("active");
+}
+
+function closeMenu(){
+
+  document
+    .getElementById("menu")
+    .classList.remove("active");
+}
+
+function openMembers(){
+
+  document
+    .getElementById("membersPanel")
+    .classList.add("active");
+
+  document
+    .getElementById("overlay")
+    .classList.add("active");
+
+  renderPanelMembers();
+}
+
+function openTheme(){
+
+  document
+    .getElementById("themePanel")
+    .classList.add("active");
+
+  document
+    .getElementById("overlay")
+    .classList.add("active");
+}
+
+function closePanels(){
+
+  document
+    .querySelectorAll(".side-panel")
+    .forEach(x=>x.classList.remove("active"));
+
+  document
+    .getElementById("overlay")
+    .classList.remove("active");
+}
+
+function toggleSidebar(){
+
+  document
+    .getElementById("sidebar")
+    .classList.toggle("active");
+
+  document
+    .getElementById("overlay")
+    .classList.toggle("active");
+}
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+const messagesContainer =
+  document.getElementById("messages");
+
+messagesContainer.addEventListener("scroll",()=>{
+
+  const distance =
+    messagesContainer.scrollHeight -
+    messagesContainer.scrollTop -
+    messagesContainer.clientHeight;
+
+  document
+    .getElementById("scrollBtn")
+    .classList.toggle("active",distance > 250);
+
+});
+
+function scrollBottom(){
+
+  messagesContainer.scrollTo({
+    top:messagesContainer.scrollHeight,
+    behavior:"smooth"
+  });
+}
+
+/* =========================================================
+   THEMES
+========================================================= */
+
+function setTheme(theme){
+
+  document.body.classList.remove(
+    "light",
+    "purple",
+    "pink",
+    "green",
+    "blue"
+  );
+
+  if(theme !== "dark"){
+    document.body.classList.add(theme);
+  }
+
+  localStorage.setItem(
+    "dvary-theme",
+    theme
+  );
+}
+
+function changeBackground(color){
+
+  document.documentElement.style
+    .setProperty("--bg",color);
+
+  localStorage.setItem(
+    "dvary-bg",
+    color
+  );
+}
+
+function resetBackground(){
+
+  document.documentElement.style
+    .setProperty("--bg","#0b141a");
+
+  localStorage.removeItem("dvary-bg");
+
+  document.getElementById("bgColor").value =
+    "#0b141a";
+}
+
+(function loadTheme(){
+
+  const theme =
+    localStorage.getItem("dvary-theme") || "dark";
+
+  setTheme(theme);
+
+  const bg =
+    localStorage.getItem("dvary-bg");
+
+  if(bg){
+
+    document.documentElement.style
+      .setProperty("--bg",bg);
+
+    document.getElementById("bgColor").value = bg;
+  }
+
+})();
+
+/* =========================================================
+   CLOSE WHEN CLICKING OUTSIDE
+========================================================= */
+
+document.addEventListener("click",event=>{
+
+  const menu =
+    document.getElementById("menu");
+
+  if(
+    !menu.contains(event.target) &&
+    !event.target.closest(".header-actions")
+  ){
+
+    menu.classList.remove("active");
+  }
+
+});
+
+/* =========================================================
+   PERIODIC ONLINE REFRESH
+========================================================= */
+
+setInterval(()=>{
+
+  updateCounts();
+  renderMembers();
+  renderPanelMembers();
+
+},60000);
+
+</script>
+
+</body>
+  </html>
