@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DVARY GAMES — Login</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --purple: #7c3aed;
+            --violet: #a855f7;
+            --blue: #4f46e5;
+            --white: #ffffff;
+            --muted: #8d93a8;
+            --glass: rgba(12, 12, 24, 0.72);
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow: hidden;
+            font-family:
+                Inter,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+            background: #030308;
+            color: white;
+        }
+
+        /* =========================================
+           BACKGROUND
+        ========================================= */
+
+        .background {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            z-index: -10;
+            background:
+                radial-gradient(
+                    circle at 50% 40%,
+                    rgba(92, 45, 180, .18),
+                    transparent 35%
+                ),
+                #030308;
+        }
+
+        .bg-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: .25;
+            filter:
+                brightness(.55)
+                contrast(1.15)
+                saturate(.8);
+        }
+
+        .dark-overlay {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(3,3,8,.92),
+                    rgba(3,3,8,.55),
+                    rgba(3,3,8,.9)
+                );
+        }
+
+        /* =========================================
+           GLOW
+        ========================================= */
+
+        .glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(110px);
+            pointer-events: none;
+        }
+
+        .glow-1 {
+            width: 380px;
+            height: 380px;
+            top: -140px;
+            left: -100px;
+            background: rgba(124,58,237,.28);
+            animation: glowMove1 10s ease-in-out infinite;
+        }
+
+        .glow-2 {
+            width: 350px;
+            height: 350px;
+            right: -120px;
+            bottom: -120px;
+            background: rgba(79,70,229,.25);
+            animation: glowMove2 12s ease-in-out infinite;
+        }
+
+        .glow-3 {
+            width: 230px;
+            height: 230px;
+            left: 45%;
+            top: 20%;
+            background: rgba(168,85,247,.12);
+            filter: blur(100px);
+        }
+
+        @keyframes glowMove1 {
+            0%,100% {
+                transform: translate(0,0);
+            }
+
+            50% {
+                transform: translate(100px,70px);
+            }
+        }
+
+        @keyframes glowMove2 {
+            0%,100% {
+                transform: translate(0,0);
+            }
+
+            50% {
+                transform: translate(-90px,-70px);
+            }
+        }
+
+        /* =========================================
+           GRID
+        ========================================= */
+
+        .grid {
+            position: absolute;
+            inset: 0;
+            opacity: .13;
+            background-image:
+                linear-gradient(
+                    rgba(255,255,255,.08) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255,255,255,.08) 1px,
+                    transparent 1px
+                );
+            background-size: 70px 70px;
+            mask-image: radial-gradient(
+                circle at center,
+                black,
+                transparent 75%
+            );
+        }
+
+        /* =========================================
+           PARTICLES
+        ========================================= */
+
+        .particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255,255,255,.7);
+            border-radius: 50%;
+            animation: particleFloat linear infinite;
+        }
+
+        .particle:nth-child(1) {
+            left: 8%;
+            top: 20%;
+            animation-duration: 8s;
+        }
+
+        .particle:nth-child(2) {
+            left: 18%;
+            top: 75%;
+            animation-duration: 11s;
+        }
+
+        .particle:nth-child(3) {
+            left: 32%;
+            top: 13%;
+            animation-duration: 9s;
+        }
+
+        .particle:nth-child(4) {
+            left: 48%;
+            top: 82%;
+            animation-duration: 12s;
+        }
+
+        .particle:nth-child(5) {
+            left: 64%;
+            top: 18%;
+            animation-duration: 10s;
+        }
+
+        .particle:nth-child(6) {
+            left: 76%;
+            top: 70%;
+            animation-duration: 7s;
+        }
+
+        .particle:nth-child(7) {
+            left: 88%;
+            top: 30%;
+            animation-duration: 13s;
+        }
+
+        .particle:nth-child(8) {
+            left: 94%;
+            top: 82%;
+            animation-duration: 9s;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 1;
+            }
+
+            80% {
+                opacity: .8;
+            }
+
+            100% {
+                transform: translateY(-130px);
+                opacity: 0;
+            }
+        }
+
+        /* =========================================
+           TOP LOGO
+        ========================================= */
+
+        .top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 82px;
+            padding: 0 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            z-index: 20;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .logo-mark {
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 13px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--purple),
+                    var(--violet)
+                );
+
+            box-shadow:
+                0 0 25px rgba(124,58,237,.4);
+        }
+
+        .logo-mark span {
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-size: 19px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .logo-text span {
+            color: #a855f7;
+        }
+
+        .top-link {
+            color: #a2a6b7;
+            text-decoration: none;
+            font-size: 13px;
+            transition: .25s;
+        }
+
+        .top-link:hover {
+            color: white;
+        }
+
+        /* =========================================
+           MAIN
+        ========================================= */
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 90px 20px 35px;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 430px;
+            position: relative;
+
+            animation:
+                loginAppear .8s
+                cubic-bezier(.2,.8,.2,1);
+        }
+
+        @keyframes loginAppear {
+            from {
+                opacity: 0;
+                transform:
+                    translateY(35px)
+                    scale(.96);
+            }
+
+            to {
+                opacity: 1;
+                transform:
+                    translateY(0)
+                    scale(1);
+            }
+        }
+
+        /* =========================================
+           CARD
+        ========================================= */
+
+        .card {
+            position: relative;
+            padding: 38px;
+
+            border-radius: 28px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(22,22,39,.82),
+                    rgba(7,7,15,.72)
+                );
+
+            border:
+                1px solid rgba(255,255,255,.1);
+
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+
+            box-shadow:
+                0 40px 100px rgba(0,0,0,.6),
+                inset 0 1px 0 rgba(255,255,255,.06);
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            left: 12%;
+            right: 12%;
+            top: -1px;
+            height: 2px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    #7c3aed,
+                    #c084fc,
+                    #7c3aed,
+                    transparent
+                );
+
+            box-shadow:
+                0 0 22px rgba(139,92,246,.8);
+        }
+
+        .corner {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border-color: rgba(139,92,246,.45);
+            pointer-events: none;
+        }
+
+        .corner.tl {
+            top: 13px;
+            left: 13px;
+            border-top: 1px solid;
+            border-left: 1px solid;
+            border-radius: 10px 0 0 0;
+        }
+
+        .corner.tr {
+            top: 13px;
+            right: 13px;
+            border-top: 1px solid;
+            border-right: 1px solid;
+            border-radius: 0 10px 0 0;
+        }
+
+        .corner.bl {
+            bottom: 13px;
+            left: 13px;
+            border-bottom: 1px solid;
+            border-left: 1px solid;
+            border-radius: 0 0 0 10px;
+        }
+
+        .corner.br {
+            bottom: 13px;
+            right: 13px;
+            border-bottom: 1px solid;
+            border-right: 1px solid;
+            border-radius: 0 0 10px 0;
+        }
+
+        /* =========================================
+           HEADER
+        ========================================= */
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .avatar {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 22px;
+
+            background:
+                radial-gradient(
+                    circle at 35% 30%,
+                    rgba(255,255,255,.15),
+                    transparent 30%
+                ),
+                linear-gradient(
+                    135deg,
+                    rgba(124,58,237,.3),
+                    rgba(168,85,247,.12)
+                );
+
+            border:
+                1px solid rgba(168,85,247,.3);
+
+            box-shadow:
+                0 0 45px rgba(124,58,237,.18),
+                inset 0 1px 0 rgba(255,255,255,.08);
+        }
+
+        .avatar span {
+            font-size: 31px;
+            filter: drop-shadow(
+                0 0 12px rgba(168,85,247,.7)
+            );
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 850;
+            letter-spacing: -.7px;
+            margin-bottom: 9px;
+        }
+
+        .header p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* =========================================
+           FORM
+        ========================================= */
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 9px;
+        }
+
+        .label label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #c7cada;
+        }
+
+        .forgot {
+            font-size: 11px;
+            color: #a78bfa;
+            text-decoration: none;
+        }
+
+        .forgot:hover {
+            color: white;
+        }
+
+        .input-box {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #656b80;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        input {
+            width: 100%;
+            height: 54px;
+
+            padding:
+                0 48px;
+
+            border-radius: 14px;
+
+            border:
+                1px solid rgba(255,255,255,.08);
+
+            outline: none;
+
+            background:
+                rgba(0,0,0,.3);
+
+            color: white;
+
+            font-size: 13px;
+
+            transition:
+                border .25s,
+                box-shadow .25s,
+                background .25s;
+        }
+
+        input::placeholder {
+            color: #555c70;
+        }
+
+        input:hover {
+            background: rgba(0,0,0,.4);
+            border-color: rgba(255,255,255,.14);
+        }
+
+        input:focus {
+            background: rgba(0,0,0,.42);
+
+            border-color:
+                rgba(139,92,246,.65);
+
+            box-shadow:
+                0 0 0 4px
+                rgba(124,58,237,.08),
+                0 0 30px
+                rgba(124,58,237,.08);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+
+            width: 38px;
+            height: 38px;
+
+            border: none;
+            border-radius: 10px;
+
+            background: transparent;
+
+            color: #686f84;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+        .password-toggle:hover {
+            color: white;
+            background: rgba(255,255,255,.06);
+        }
+
+        /* =========================================
+           MESSAGE
+        ========================================= */
+
+        .message {
+            display: none;
+
+            padding: 12px 14px;
+            margin-bottom: 15px;
+
+            border-radius: 12px;
+
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .message.show {
+            display: block;
+            animation: messageIn .25s ease;
+        }
+
+        .error {
+            color: #fda4af;
+            background: rgba(244,63,94,.08);
+            border: 1px solid rgba(244,63,94,.16);
+        }
+
+        .success {
+            color: #86efac;
+            background: rgba(34,197,94,.08);
+            border: 1px solid rgba(34,197,94,.16);
+        }
+
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================================
+           LOGIN BUTTON
+        ========================================= */
+
+        .login-button {
+            position: relative;
+
+            width: 100%;
+            height: 55px;
+
+            border: none;
+            border-radius: 14px;
+
+            cursor: pointer;
+
+            color: white;
+
+            font-size: 13px;
+            font-weight: 850;
+            letter-spacing: .7px;
+
+            background:
+                linear-gradient(
+                    110deg,
+                    #5b21b6,
+                    #7c3aed,
+                    #a855f7,
+                    #7c3aed
+                );
+
+            background-size: 250% 100%;
+
+            box-shadow:
+                0 12px 35px
+                rgba(124,58,237,.27);
+
+            transition:
+                transform .25s,
+                box-shadow .25s;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 18px 45px
+                rgba(124,58,237,.4);
+
+            animation:
+                buttonGradient 2s
+                linear infinite;
+        }
+
+        .login-button:active {
+            transform: scale(.985);
+        }
+
+        .login-button:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes buttonGradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .loader {
+            display: none;
+
+            width: 18px;
+            height: 18px;
+
+            margin: auto;
+
+            border:
+                2px solid
+                rgba(255,255,255,.3);
+
+            border-top-color: white;
+
+            border-radius: 50%;
+
+            animation:
+                spin .7s linear infinite;
+        }
+
+        .loading .button-text {
+            display: none;
+        }
+
+        .loading .loader {
+            display: block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* =========================================
+           BOTTOM
+        ========================================= */
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            margin: 23px 0;
+
+            color: #555c70;
+
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background:
+                rgba(255,255,255,.07);
+        }
+
+        .signup {
+            text-align: center;
+
+            color: #70778b;
+
+            font-size: 12px;
+        }
+
+        .signup a {
+            color: #a78bfa;
+            font-weight: 750;
+            text-decoration: none;
+        }
+
+        .signup a:hover {
+            color: white;
+        }
+
+        .bottom-line {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+
+            margin-top: 23px;
+
+            color: #4d5365;
+
+            font-size: 9px;
+        }
+
+        .bottom-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+        }
+
+        /* =========================================
+           ALREADY LOGGED
+        ========================================= */
+
+        .already {
+            display: none;
+            text-align: center;
+        }
+
+        .already-avatar {
+            width: 76px;
+            height: 76px;
+
+            margin: 0 auto 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #7c3aed,
+                    #a855f7
+                );
+
+            box-shadow:
+                0 0 40px
+                rgba(124,58,237,.35);
+
+            font-size: 28px;
+        }
+
+        .already h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .already p {
+            color: #777e92;
+            font-size: 12px;
+            margin-bottom: 22px;
+            word-break: break-word;
+        }
+
+        .continue,
+        .logout {
+            width: 100%;
+            height: 50px;
+
+            border: none;
+            border-radius: 13px;
+
+            cursor: pointer;
+
+            font-weight: 750;
+
+            margin-bottom: 10px;
+        }
+
+        .continue {
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #6366f1,
+                    #a855f7
+                );
+        }
+
+        .logout {
+            color: #fda4af;
+
+            background:
+                rgba(244,63,94,.07);
+
+            border:
+                1px solid
+                rgba(244,63,94,.15);
+        }
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 600px) {
+
+            body {
+                overflow-y: auto;
+            }
+
+            .top {
+                height: 70px;
+                padding: 0 18px;
+            }
+
+            .logo-mark {
+                width: 38px;
+                height: 38px;
+            }
+
+            .logo-text {
+                font-size: 16px;
+            }
+
+            .top-link {
+                font-size: 11px;
+            }
+
+            .page {
+                min-height: 100vh;
+                padding:
+                    92px
+                    15px
+                    35px;
+            }
+
+            .card {
+                padding: 30px 19px;
+                border-radius: 23px;
+            }
+
+            .header {
+                margin-bottom: 25px;
+            }
+
+            .avatar {
+                width: 64px;
+                height: 64px;
+                border-radius: 19px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .header p {
+                font-size: 12px;
+            }
+
+            .glow-1 {
+                width: 240px;
+                height: 240px;
+            }
+
+            .glow-2 {
+                width: 230px;
+                height: 230px;
+            }
+        }
+
+        @media (max-width: 360px) {
+
+            .card {
+                padding: 26px 16px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================================
+         BACKGROUND
+    ========================================== -->
+
+    <div class="background">
+
+        <!-- Optional background video -->
+        <video
+            class="bg-image"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+        >
+            <source
+                src="assets/login-bg.mp4"
+                type="video/mp4"
+            >
+        </video>
+
+        <div class="dark-overlay"></div>
+
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="glow glow-3"></div>
+
+        <div class="grid"></div>
+
+        <div class="particles">
+
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <span class="particle"></span>
+            <span class="particle"></span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         TOP
+    ========================================== -->
+
+    <header class="top">
+
+        <a href="/" class="logo">
+
+            <div class="logo-mark">
+                <span>🎮</span>
+            </div>
+
+            <div class="logo-text">
+                DVARY <span>GAMES</span>
+            </div>
+
+        </a>
+
+        <a
+            href="/signup"
+            class="top-link"
+        >
+            New here? Create account
+        </a>
+
+    </header>
+
+
+    <!-- =========================================
+         LOGIN
+    ========================================== -->
+
+    <main class="page">
+
+        <div class="login-box">
+
+            <div class="card">
+
+                <span class="corner tl"></span>
+                <span class="corner tr"></span>
+                <span class="corner bl"></span>
+                <span class="corner br"></span>
+
+
+                <!-- LOGIN SECTION -->
+
+                <div id="loginSection">
+
+                    <div class="header">
+
+                        <div class="avatar">
+                            <span>🎮</span>
+                        </div>
+
+                        <h1>
+                            Welcome Back
+                        </h1>
+
+                        <p>
+                            Sign in and continue your journey
+                        </p>
+
+                    </div>
+
+
+                    <form id="loginForm">
+
+                        <!-- EMAIL -->
+
+                        <div class="form-group">
+
+                            <div class="label">
+                                <label>
+                                    EMAIL
+                                </label>
+                            </div>
+
+                            <div class="input-box">
+
+                                <span class="input-icon">
+                                    ✉
+                                </span>
+
+                                <input
+                                    type="email"
+                                    id="email"
+                                    placeholder="Enter your email"
+                                    autocomplete="email"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PASSWORD -->
+
+                        <div class="form-group">
+
+                            <div class="label">
+
+                                <label>
+                                    PASSWORD
+                                </label>
+
+                                <a
+                                    href="#"
+                                    class="forgot"
+                                    id="forgotPassword"
+                                >
+                                    Forgot password?
+                                </a>
+
+                            </div>
+
+                            <div class="input-box">
+
+                                <span class="input-icon">
+                                    🔒
+                                </span>
+
+                                <input
+                                    type="password"
+                                    id="password"
+                                    placeholder="Enter your password"
+                                    autocomplete="current-password"
+                                    minlength="6"
+                                    required
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    id="togglePassword"
+                                    aria-label="Show password"
+                                >
+                                    👁
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- MESSAGES -->
+
+                        <div
+                            id="errorMessage"
+                            class="message error"
+                        ></div>
+
+                        <div
+                            id="successMessage"
+                            class="message success"
+                        ></div>
+
+
+                        <!-- BUTTON -->
+
+                        <button
+                            type="submit"
+                            class="login-button"
+                            id="loginBtn"
+                        >
+
+                            <span class="button-text">
+                                ENTER DVARY GAMES
+                            </span>
+
+                            <span class="loader"></span>
+
+                        </button>
+
+                    </form>
+
+
+                    <div class="divider">
+                        OR
+                    </div>
+
+
+                    <div class="signup">
+
+                        Don't have an account?
+
+                        <a href="/signup">
+                            Sign Up
+                        </a>
+
+                    </div>
+
+
+                    <div class="bottom-line">
+                        <span class="bottom-dot"></span>
+                        DVARY GAMES
+                    </div>
+
+                </div>
+
+
+                <!-- ALREADY LOGGED -->
+
+                <div
+                    id="alreadyLogged"
+                    class="already"
+                >
+
+                    <div class="already-avatar">
+                        👤
+                    </div>
+
+                    <h2>
+                        Welcome Back
+                    </h2>
+
+                    <p id="loggedEmail"></p>
+
+                    <button
+                        class="continue"
+                        onclick="continueHome()"
+                    >
+                        CONTINUE
+                    </button>
+
+                    <button
+                        class="logout"
+                        onclick="logout()"
+                    >
+                        SIGN OUT
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================================
+         FIREBASE
+    ========================================== -->
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+
+    <script>
+
+        /* =========================================
+           FIREBASE CONFIG
+        ========================================== */
+
+        const firebaseConfig = {
+
+            apiKey:
+                "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+
+            authDomain:
+                "enjoy-game-6c05c.firebaseapp.com",
+
+            projectId:
+                "enjoy-game-6c05c",
+
+            storageBucket:
+                "enjoy-game-6c05c.firebasestorage.app",
+
+            messagingSenderId:
+                "512924203714",
+
+            appId:
+                "1:512924203714:web:47b16f7ce1b786a224195b",
+
+            measurementId:
+                "G-Y2H8BYM4LP"
+        };
+
+
+        /* =========================================
+           INIT
+        ========================================== */
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+
+        const db = firebase.firestore();
+
+
+        /* =========================================
+           ELEMENTS
+        ========================================== */
+
+        const loginForm =
+            document.getElementById("loginForm");
+
+        const emailInput =
+            document.getElementById("email");
+
+        const passwordInput =
+            document.getElementById("password");
+
+        const loginBtn =
+            document.getElementById("loginBtn");
+
+        const errorMessage =
+            document.getElementById("errorMessage");
+
+        const successMessage =
+            document.getElementById("successMessage");
+
+        const loginSection =
+            document.getElementById("loginSection");
+
+        const alreadyLogged =
+            document.getElementById("alreadyLogged");
+
+        const loggedEmail =
+            document.getElementById("loggedEmail");
+
+        const togglePassword =
+            document.getElementById("togglePassword");
+
+        const forgotPassword =
+            document.getElementById("forgotPassword");
+
+
+        /* =========================================
+           PASSWORD TOGGLE
+        ========================================== */
+
+        togglePassword.addEventListener(
+            "click",
+            function () {
+
+                if (
+                    passwordInput.type ===
+                    "password"
+                ) {
+
+                    passwordInput.type =
+                        "text";
+
+                    togglePassword.textContent =
+                        "🙈";
+
+                } else {
+
+                    passwordInput.type =
+                        "password";
+
+                    togglePassword.textContent =
+                        "👁";
+                }
+            }
+        );
+
+
+        /* =========================================
+           MESSAGES
+        ========================================== */
+
+        function clearMessages() {
+
+            errorMessage.textContent = "";
+            successMessage.textContent = "";
+
+            errorMessage.classList.remove(
+                "show"
+            );
+
+            successMessage.classList.remove(
+                "show"
+            );
+        }
+
+
+        function showError(message) {
+
+            successMessage.classList.remove(
+                "show"
+            );
+
+            errorMessage.textContent =
+                message;
+
+            errorMessage.classList.add(
+                "show"
+            );
+        }
+
+
+        function showSuccess(message) {
+
+            errorMessage.classList.remove(
+                "show"
+            );
+
+            successMessage.textContent =
+                message;
+
+            successMessage.classList.add(
+                "show"
+            );
+        }
+
+
+        /* =========================================
+           LOADING
+        ========================================== */
+
+        function setLoading(state) {
+
+            loginBtn.disabled = state;
+
+            if (state) {
+
+                loginBtn.classList.add(
+                    "loading"
+                );
+
+                emailInput.disabled = true;
+
+                passwordInput.disabled = true;
+
+            } else {
+
+                loginBtn.classList.remove(
+                    "loading"
+                );
+
+                emailInput.disabled = false;
+
+                passwordInput.disabled = false;
+            }
+        }
+
+
+        /* =========================================
+           AUTH STATE
+        ========================================== */
+
+        auth.onAuthStateChanged(
+            function (user) {
+
+                if (user) {
+
+                    loginSection.style.display =
+                        "none";
+
+                    alreadyLogged.style.display =
+                        "block";
+
+                    loggedEmail.textContent =
+                        user.email || "";
+
+                } else {
+
+                    loginSection.style.display =
+                        "block";
+
+                    alreadyLogged.style.display =
+                        "none";
+                }
+            }
+        );
+
+
+        /* =========================================
+           LOGIN
+        ========================================== */
+
+        loginForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+                clearMessages();
+
+                const email =
+                    emailInput.value.trim();
+
+                const password =
+                    passwordInput.value;
+
+
+                if (!email) {
+
+                    showError(
+                        "Please enter your email."
+                    );
+
+                    emailInput.focus();
+
+                    return;
+                }
+
+
+                if (!password) {
+
+                    showError(
+                        "Please enter your password."
+                    );
+
+                    passwordInput.focus();
+
+                    return;
+                }
+
+
+                if (password.length < 6) {
+
+                    showError(
+                        "Password must be at least 6 characters."
+                    );
+
+                    passwordInput.focus();
+
+                    return;
+                }
+
+
+                setLoading(true);
+
+
+                try {
+
+                    const result =
+                        await auth
+                            .signInWithEmailAndPassword(
+                                email,
+                                password
+                            );
+
+                    const user =
+                        result.user;
+
+
+                    /* Update user information */
+
+                    await db
+                        .collection("users")
+                        .doc(user.uid)
+                        .set({
+
+                            uid:
+                                user.uid,
+
+                            email:
+                                user.email || email,
+
+                            displayName:
+                                user.displayName || "",
+
+                            lastLogin:
+                                firebase.firestore
+                                    .FieldValue
+                                    .serverTimestamp()
+
+                        }, {
+                            merge: true
+                        });
+
+
+                    showSuccess(
+                        "Welcome back. Loading your account..."
+                    );
+
+
+                    setTimeout(
+                        function () {
+
+                            window.location.href =
+                                "/";
+
+                        },
+                        900
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        error
+                    );
+
+
+                    let message =
+                        "Unable to sign in. Please try again.";
+
+
+                    switch (error.code) {
+
+                        case "auth/user-not-found":
+
+                            message =
+                                "No account was found with this email.";
+
+                            break;
+
+
+                        case "auth/wrong-password":
+
+                            message =
+                                "The password you entered is incorrect.";
+
+                            break;
+
+
+                        case "auth/invalid-credential":
+
+                            message =
+                                "Email or password is incorrect.";
+
+                            break;
+
+
+                        case "auth/invalid-email":
+
+                            message =
+                                "Please enter a valid email address.";
+
+                            break;
+
+
+                        case "auth/user-disabled":
+
+                            message =
+                                "This account is currently unavailable.";
+
+                            break;
+
+
+                        case "auth/too-many-requests":
+
+                            message =
+                                "Too many attempts. Please try again later.";
+
+                            break;
+
+
+                        case "auth/network-request-failed":
+
+                            message =
+                                "Check your internet connection and try again.";
+
+                            break;
+                    }
+
+
+                    showError(message);
+
+                } finally {
+
+                    setLoading(false);
+                }
+
+            }
+        );
+
+
+        /* =========================================
+           FORGOT PASSWORD
+        ========================================== */
+
+        forgotPassword.addEventListener(
+            "click",
+            async function (event) {
+
+                event.preventDefault();
+
+                clearMessages();
+
+                const email =
+                    emailInput.value.trim();
+
+
+                if (!email) {
+
+                    showError(
+                        "Enter your email first."
+                    );
+
+                    emailInput.focus();
+
+                    return;
+                }
+
+
+                try {
+
+                    await auth
+                        .sendPasswordResetEmail(
+                            email
+                        );
+
+                    showSuccess(
+                        "Password reset instructions have been sent to your email."
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        error
+                    );
+
+                    let message =
+                        "Unable to send password reset email.";
+
+
+                    if (
+                        error.code ===
+                        "auth/invalid-email"
+                    ) {
+
+                        message =
+                            "Please enter a valid email.";
+
+                    } else if (
+                        error.code ===
+                        "auth/user-not-found"
+                    ) {
+
+                        message =
+                            "No account was found with this email.";
+
+                    } else if (
+                        error.code ===
+                        "auth/too-many-requests"
+                    ) {
+
+                        message =
+                            "Too many requests. Try again later.";
+                    }
+
+
+                    showError(message);
+                }
+
+            }
+        );
+
+
+        /* =========================================
+           LOGOUT
+        ========================================== */
+
+        async function logout() {
+
+            try {
+
+                await auth.signOut();
+
+                window.location.reload();
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+            }
+        }
+
+
+        /* =========================================
+           CONTINUE
+        ========================================== */
+
+        function continueHome() {
+
+            window.location.href = "/";
+        }
+
+
+        /* =========================================
+           ENTER KEY
+        ========================================== */
+
+        passwordInput.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (event.key === "Enter") {
+
+                    loginForm.requestSubmit();
+                }
+            }
+        );
+
+    </script>
+
+</body>
+  </html>tr
