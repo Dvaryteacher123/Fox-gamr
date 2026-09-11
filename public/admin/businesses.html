@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games — DVARY GAMES Admin</title>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1a1a2e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --border: #2d2d44;
+            --shadow: rgba(99, 102, 241, 0.2);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+        }
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --border: #cbd5e1;
+            --shadow: rgba(99, 102, 241, 0.3);
+            --glass-bg: rgba(0, 0, 0, 0.02);
+            --glass-border: rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* ============================================================
+           SIDEBAR
+           ============================================================ */
+        .sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            padding: 30px 20px;
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .sidebar h1 {
+            color: var(--accent);
+            font-size: 28px;
+            margin-bottom: 40px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .sidebar h1 span { color: var(--text-primary); }
+        .nav-links { list-style: none; flex: 1; }
+        .nav-links li { margin-bottom: 12px; }
+        .nav-links a {
+            display: block;
+            padding: 12px 18px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--accent);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* ============================================================
+           MAIN CONTENT
+           ============================================================ */
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .admin-header h2 { font-size: 32px; color: var(--accent); }
+        .admin-header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+        .admin-header .user-info .avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 14px;
+        }
+        .admin-header .user-info .name { color: var(--text-primary); font-weight: 600; font-size: 14px; }
+        .admin-header .user-info .email { color: var(--text-secondary); font-size: 13px; }
+        .admin-badge {
+            background: var(--accent);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* ============================================================
+           ACCESS DENIED / NOT LOGGED IN
+           ============================================================ */
+        .access-denied, .not-logged-in {
+            text-align: center;
+            padding: 80px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+        }
+        .access-denied .denied-icon, .not-logged-in .login-icon {
+            font-size: 80px; display: block; margin-bottom: 20px;
+        }
+        .access-denied h2 { color: var(--danger); font-size: 42px; margin-bottom: 15px; font-weight: 800; }
+        .not-logged-in h2 { color: var(--text-primary); font-size: 38px; margin-bottom: 15px; }
+        .access-denied p, .not-logged-in p {
+            color: var(--text-secondary); font-size: 18px; max-width: 500px; line-height: 1.8;
+        }
+        .access-denied .denied-code {
+            font-size: 14px; color: var(--text-secondary); margin-top: 10px; opacity: 0.5;
+        }
+        .access-denied .btn-go-home, .not-logged-in .btn-login {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 14px 40px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+        .access-denied .btn-go-home:hover, .not-logged-in .btn-login:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        /* ============================================================
+           TABS
+           ============================================================ */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .tabs button {
+            padding: 10px 25px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        .tabs button:hover {
+            color: var(--text-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .tabs button.active {
+            color: var(--accent);
+            background: rgba(99, 102, 241, 0.15);
+        }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================================
+           FORMS
+           ============================================================ */
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .form-group label .required { color: var(--danger); }
+        .form-group label .hint {
+            color: var(--text-secondary);
+            font-weight: 400;
+            font-size: 12px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group select option { background: var(--bg-secondary); }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* ============================================================
+           BUTTONS
+           ============================================================ */
+        .submit-btn {
+            padding: 14px 30px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .submit-btn:hover { background: var(--accent-hover); transform: scale(1.02); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-danger {
+            padding: 6px 16px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover { background: #dc2626; transform: scale(1.05); }
+
+        .btn-edit {
+            padding: 6px 16px;
+            background: var(--warning);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-edit:hover { background: #d97706; transform: scale(1.05); }
+
+        .btn-success {
+            padding: 6px 16px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover { background: #16a34a; transform: scale(1.05); }
+
+        .btn-secondary {
+            padding: 10px 24px;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            cursor: pointer;
+        }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.08); }
+
+        /* ============================================================
+           TOOLBAR
+           ============================================================ */
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .toolbar .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+        }
+        .toolbar .search-box:focus { border-color: var(--accent); }
+        .toolbar .toolbar-btn {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .toolbar .toolbar-btn:hover { background: var(--accent-hover); transform: scale(1.02); }
+        .toolbar .toolbar-btn.danger { background: var(--danger); }
+        .toolbar .toolbar-btn.danger:hover { background: #dc2626; }
+        .toolbar .toolbar-btn.success { background: var(--success); }
+        .toolbar .toolbar-btn.success:hover { background: #16a34a; }
+
+        /* ============================================================
+           GAMES LIST (dynamic)
+           ============================================================ */
+        .games-list { display: flex; flex-direction: column; gap: 14px; }
+        .game-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            transition: all 0.3s ease;
+        }
+        .game-item:hover { border-color: var(--accent); }
+        .game-info { display: flex; gap: 14px; flex: 1; min-width: 260px; }
+        .game-info .thumb {
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .game-info .thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .game-info .details { flex: 1; }
+        .game-info .details h4 { margin-bottom: 4px; color: var(--text-primary); }
+        .game-info .details .meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .game-info .details .meta span { color: var(--text-primary); }
+        .game-info .details .download-links {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .download-links .dl-link {
+            font-size: 11px;
+            padding: 3px 10px;
+            background: var(--accent);
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+        .download-links .dl-link:hover { background: var(--accent-hover); }
+        .game-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .game-actions .btn-delete {
+            padding: 6px 16px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .game-actions .btn-delete:hover { background: #dc2626; transform: scale(1.05); }
+
+        /* ============================================================
+           SCREENSHOT / DOWNLOAD LINKS
+           ============================================================ */
+        .screenshot-links-section,
+        .download-links-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 5px;
+        }
+        .screenshot-links-section .link-row,
+        .download-links-section .link-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .screenshot-links-section .link-row:last-child,
+        .download-links-section .link-row:last-child { margin-bottom: 0; }
+        .screenshot-links-section .link-row input,
+        .download-links-section .link-row input {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+        }
+        .screenshot-links-section .link-row input:focus,
+        .download-links-section .link-row input:focus { border-color: var(--accent); }
+        .screenshot-links-section .link-row .link-label,
+        .download-links-section .link-row .link-label {
+            min-width: 80px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .screenshot-links-section .link-row .remove-link,
+        .download-links-section .link-row .remove-link {
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .screenshot-links-section .link-row .remove-link:hover,
+        .download-links-section .link-row .remove-link:hover { transform: scale(1.1); }
+        .screenshot-links-section .link-row .remove-link.hidden,
+        .download-links-section .link-row .remove-link.hidden { display: none; }
+
+        .add-link-btn {
+            padding: 6px 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+        .add-link-btn:hover { background: var(--accent-hover); transform: scale(1.02); }
+        .add-link-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ============================================================
+           CHECKBOX GROUP
+           ============================================================ */
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding-top: 4px;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        /* ============================================================
+           MODAL
+           ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-box h3 { font-size: 1.3rem; margin-bottom: 1rem; color: var(--text-primary); }
+        .modal-box .form-group { margin-bottom: 1rem; }
+        .modal-box .form-group label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+        }
+        .modal-box .form-group input,
+        .modal-box .form-group textarea,
+        .modal-box .form-group select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            font-family: inherit;
+        }
+        .modal-box .form-group input:focus,
+        .modal-box .form-group textarea:focus,
+        .modal-box .form-group select:focus { border-color: var(--accent); }
+        .modal-box .form-group textarea { min-height: 80px; resize: vertical; }
+        .modal-box .modal-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+        .modal-box .modal-actions .btn-secondary {
+            padding: 0.7rem 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+        }
+        .modal-box .modal-actions .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+        .modal-box .modal-actions .submit-btn { border-radius: 50px; }
+
+        /* ============================================================
+           TOAST
+           ============================================================ */
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 3000;
+            animation: slideIn 0.5s ease;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        .notification-toast.success { background: var(--success); }
+        .notification-toast.error { background: var(--danger); }
+        .notification-toast.info { background: var(--accent); }
+        .notification-toast.warning { background: var(--warning); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .notification-toast .close-btn {
+            background: none; border: none; color: white;
+            font-size: 20px; cursor: pointer; margin-left: 15px; opacity: 0.7;
+        }
+        .notification-toast .close-btn:hover { opacity: 1; }
+
+        /* ============================================================
+           LOADING & EMPTY
+           ============================================================ */
+        .loading-spinner { text-align: center; padding: 40px; color: var(--text-secondary); }
+        .loading-spinner .spinner {
+            display: inline-block;
+            width: 40px; height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .empty-state { text-align: center; padding: 60px; color: var(--text-secondary); }
+        .empty-state h3 { color: var(--text-primary); margin-bottom: 10px; }
+        .empty-state .empty-icon { font-size: 48px; display: block; margin-bottom: 15px; }
+
+        /* ============================================================
+           THEME TOGGLE
+           ============================================================ */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 48px; height: 48px;
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: var(--text-primary);
+        }
+        .theme-toggle:hover { transform: scale(1.1); border-color: var(--accent); }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1024px) {
+            .form-row-3 { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; padding: 20px 15px; }
+            .main-content { padding: 20px; }
+            .form-row, .form-row-3 { grid-template-columns: 1fr; }
+            .admin-header { flex-direction: column; align-items: flex-start; }
+            .checkbox-group { flex-direction: column; gap: 8px; }
+            .screenshot-links-section .link-row,
+            .download-links-section .link-row { flex-direction: column; align-items: stretch; }
+            .screenshot-links-section .link-row .link-label,
+            .download-links-section .link-row .link-label { min-width: auto; }
+            .tabs button { font-size: 14px; padding: 8px 16px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .toolbar .search-box { min-width: auto; }
+            .modal-box { padding: 1.5rem; max-width: 100%; }
+            .modal-box .modal-actions { flex-direction: column; }
+            .modal-box .modal-actions .btn-secondary { width: 100%; text-align: center; }
+        }
+        @media (max-width: 600px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%; height: auto; position: relative;
+                border-right: none; border-bottom: 1px solid var(--border);
+                padding: 15px;
+            }
+            .sidebar h1 { font-size: 22px; margin-bottom: 15px; }
+            .nav-links { display: flex; flex-wrap: wrap; gap: 8px; }
+            .nav-links li { margin-bottom: 0; }
+            .nav-links a { padding: 8px 14px; font-size: 14px; }
+            .admin-header .user-info { flex-wrap: wrap; width: 100%; }
+            .tabs button { font-size: 12px; padding: 6px 12px; flex: 1; text-align: center; min-width: 60px; }
+            .notification-toast { left: 16px; right: 16px; max-width: none; font-size: 14px; padding: 12px 18px; }
+            .theme-toggle { bottom: 70px; right: 15px; width: 40px; height: 40px; font-size: 18px; }
+            .access-denied .denied-icon, .not-logged-in .login-icon { font-size: 56px; }
+            .access-denied h2, .not-logged-in h2 { font-size: 24px; }
+            .access-denied p, .not-logged-in p { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        <ul class="nav-links">
+            <li><a href="/main">🏠 Home</a></li>
+            <li><a href="/games">🎮 Games</a></li>
+            <li><a href="/ai">🤖 AI Chat</a></li>
+            <li><a href="/login">🔑 Login</a></li>
+            <li><a href="/signup">📝 Sign Up</a></li>
+            <li><a href="/profile">👤 Profile</a></li>
+            <li><a href="/settings">⚙️ Settings</a></li>
+        </ul>
+        <hr style="border-color: var(--border); margin: 20px 0; opacity: 0.4;" />
+        <ul class="nav-links">
+            <li><a href="index.html">📊 Dashboard</a></li>
+            <li><a href="businesses.html" class="active">🎮 Games</a></li>
+            <li><a href="claims.html">🎫 Claims</a></li>
+            <li><a href="reviews.html">👥 Users</a></li>
+            <li><a href="settings.html">⚙️ Settings</a></li>
+        </ul>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div id="adminContent">
+
+            <!-- NOT LOGGED IN -->
+            <div id="notLoggedIn" class="not-logged-in" style="display: none;">
+                <span class="login-icon">🔒</span>
+                <h2>Please Login</h2>
+                <p>You need to be logged in to access the admin panel.</p>
+                <a href="/login" class="btn-login">🔑 Login</a>
+            </div>
+
+            <!-- ACCESS DENIED -->
+            <div id="accessDenied" class="access-denied" style="display: none;">
+                <span class="denied-icon">⛔</span>
+                <h2>Access Denied</h2>
+                <p>You do not have permission to access this page.</p>
+                <p style="font-size: 14px; margin-top: 8px; color: var(--text-secondary); opacity: 0.7;">
+                    This area is restricted to authorized administrators only.
+                </p>
+                <p class="denied-code">Error 403 - Forbidden</p>
+                <a href="/main" class="btn-go-home">🏠 Return to Home</a>
+            </div>
+
+            <!-- ADMIN PANEL -->
+            <div id="adminPanel" style="display: none;">
+
+                <!-- HEADER -->
+                <div class="admin-header">
+                    <h2>🎮 Manage Games</h2>
+                    <div class="user-info">
+                        <div class="avatar" id="adminAvatar">U</div>
+                        <div>
+                            <div class="name" id="adminName">User</div>
+                            <div class="email" id="adminEmail">user@example.com</div>
+                        </div>
+                        <span class="admin-badge">👑 Admin</span>
+                    </div>
+                </div>
+
+                <!-- TABS -->
+                <div class="tabs">
+                    <button class="active" onclick="switchTab('add')">➕ Add Game</button>
+                    <button onclick="switchTab('manage')">📋 Manage Games</button>
+                </div>
+
+                <!-- ============================================================
+                     TAB: ADD GAME
+                     ============================================================ -->
+                <div id="tab-add" class="tab-content active">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">Add New Game</h3>
+                    <form id="addGameForm">
+
+                        <div class="form-group">
+                            <label>Game Name <span class="required">*</span></label>
+                            <input type="text" id="gameName" placeholder="e.g., Real Racing 7" required />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Genre <span class="required">*</span></label>
+                                <input type="text" id="gameGenre" placeholder="e.g., Racing, Action" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Platform</label>
+                                <input type="text" id="gamePlatform" placeholder="e.g., Android, iOS, PC" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description <span class="required">*</span></label>
+                            <textarea id="gameDescription" placeholder="Describe the game..." required></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Price (TZS) <span class="hint">(Leave empty for free)</span></label>
+                                <input type="number" id="gamePrice" placeholder="e.g., 5000" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label>Currency</label>
+                                <select id="gameCurrency">
+                                    <option value="TZS">TZS - Tanzanian Shilling</option>
+                                    <option value="USD">USD - US Dollar</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="KES">KES - Kenyan Shilling</option>
+                                    <option value="UGX">UGX - Ugandan Shilling</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Rating (1-5)</label>
+                                <input type="number" id="gameRating" min="1" max="5" step="0.5" placeholder="e.g., 4.5" />
+                            </div>
+                            <div class="form-group">
+                                <label>Release Date</label>
+                                <input type="date" id="gameReleased" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Image URL <span class="hint">(Game cover/icon image)</span></label>
+                            <input type="url" id="gameImageUrl" placeholder="https://example.com/game-image.jpg" />
+                        </div>
+
+                        <!-- SCREENSHOT LINKS -->
+                        <div class="form-group">
+                            <label>Screenshot URLs <span class="hint">(Add up to 5 screenshot links)</span></label>
+                            <div class="screenshot-links-section" id="screenshotLinksContainer">
+                                <div class="link-row" id="ssLinkRow1">
+                                    <span class="link-label">SS 1</span>
+                                    <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot1.jpg" />
+                                    <button type="button" class="remove-link hidden" onclick="removeScreenshotLink(1)">✕</button>
+                                </div>
+                                <div class="link-row" id="ssLinkRow2">
+                                    <span class="link-label">SS 2</span>
+                                    <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot2.jpg" />
+                                    <button type="button" class="remove-link" onclick="removeScreenshotLink(2)">✕</button>
+                                </div>
+                                <div class="link-row" id="ssLinkRow3">
+                                    <span class="link-label">SS 3</span>
+                                    <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot3.jpg" />
+                                    <button type="button" class="remove-link" onclick="removeScreenshotLink(3)">✕</button>
+                                </div>
+                                <div class="link-row" id="ssLinkRow4">
+                                    <span class="link-label">SS 4</span>
+                                    <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot4.jpg" />
+                                    <button type="button" class="remove-link" onclick="removeScreenshotLink(4)">✕</button>
+                                </div>
+                                <div class="link-row" id="ssLinkRow5">
+                                    <span class="link-label">SS 5</span>
+                                    <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot5.jpg" />
+                                    <button type="button" class="remove-link" onclick="removeScreenshotLink(5)">✕</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Video/Trailer URL <span class="hint">(YouTube embed)</span></label>
+                            <input type="url" id="gameVideoUrl" placeholder="https://www.youtube.com/embed/VIDEO_ID" />
+                        </div>
+
+                        <!-- DOWNLOAD LINKS -->
+                        <div class="form-group">
+                            <label>Download Links <span class="required">*</span></label>
+                            <div class="download-links-section" id="downloadLinksContainer">
+                                <div class="link-row" id="linkRow1">
+                                    <span class="link-label">Link 1</span>
+                                    <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" required />
+                                    <button type="button" class="remove-link hidden" onclick="removeLinkRow(1)">✕</button>
+                                </div>
+                                <div class="link-row" id="linkRow2">
+                                    <span class="link-label">Link 2</span>
+                                    <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" />
+                                    <button type="button" class="remove-link" onclick="removeLinkRow(2)">✕</button>
+                                </div>
+                                <div class="link-row" id="linkRow3">
+                                    <span class="link-label">Link 3</span>
+                                    <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" />
+                                    <button type="button" class="remove-link" onclick="removeLinkRow(3)">✕</button>
+                                </div>
+                                <div class="link-row" id="linkRow4">
+                                    <span class="link-label">Link 4</span>
+                                    <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" />
+                                    <button type="button" class="remove-link" onclick="removeLinkRow(4)">✕</button>
+                                </div>
+                                <div class="link-row" id="linkRow5">
+                                    <span class="link-label">Link 5</span>
+                                    <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" />
+                                    <button type="button" class="remove-link" onclick="removeLinkRow(5)">✕</button>
+                                </div>
+                            </div>
+                            <button type="button" class="add-link-btn" id="addLinkBtn" onclick="addLinkRow()">➕ Add Another Link</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>File Size <span class="hint">(e.g., 2.5 GB, 500 MB)</span></label>
+                            <input type="text" id="gameFileSize" placeholder="e.g., 2.5 GB" />
+                        </div>
+
+                        <!-- GAME TYPE -->
+                        <div class="form-group">
+                            <label>Game Type <span class="required">*</span></label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="gameIsFree" /> 🆓 Free Game</label>
+                                <label><input type="checkbox" id="gameIsVip" /> ⭐ VIP Game</label>
+                            </div>
+                            <p style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">
+                                <strong>Free</strong> games are available for direct download.
+                                <strong>VIP</strong> games require a claim code to unlock.
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Extra Features</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="gameIsPremium" /> 💎 Premium</label>
+                                <label><input type="checkbox" id="gameIsFeatured" /> 🔥 Featured</label>
+                                <label><input type="checkbox" id="gameIsTrending" /> 📈 Trending</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="addGameBtn">➕ Add Game</button>
+                    </form>
+                </div>
+
+                <!-- ============================================================
+                     TAB: MANAGE GAMES
+                     ============================================================ -->
+                <div id="tab-manage" class="tab-content">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">📋 Manage Games</h3>
+
+                    <div class="toolbar">
+                        <input type="text" class="search-box" id="searchGames" placeholder="🔍 Search games..." oninput="filterGames()" />
+                        <button class="toolbar-btn success" onclick="exportGamesCSV()">📥 Export CSV</button>
+                        <button class="toolbar-btn danger" onclick="bulkDeleteGames()">🗑️ Bulk Delete</button>
+                        <button class="toolbar-btn" onclick="loadGamesList()">🔄 Refresh</button>
+                    </div>
+
+                    <div id="gamesListContainer">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p>Loading games...</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============================================================
+         EDIT GAME MODAL
+         ============================================================ -->
+    <div class="modal-overlay" id="editGameModal">
+        <div class="modal-box">
+            <h3>✏️ Edit Game</h3>
+            <form id="editGameForm">
+                <input type="hidden" id="editGameId" />
+                <div class="form-group">
+                    <label>Game Name <span class="required">*</span></label>
+                    <input type="text" id="editGameName" required />
+                </div>
+                <div class="form-group">
+                    <label>Genre <span class="required">*</span></label>
+                    <input type="text" id="editGameGenre" required />
+                </div>
+                <div class="form-group">
+                    <label>Platform</label>
+                    <input type="text" id="editGamePlatform" />
+                </div>
+                <div class="form-group">
+                    <label>Description <span class="required">*</span></label>
+                    <textarea id="editGameDescription" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price (TZS)</label>
+                        <input type="number" id="editGamePrice" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label>Currency</label>
+                        <select id="editGameCurrency">
+                            <option value="TZS">TZS</option>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="KES">KES</option>
+                            <option value="UGX">UGX</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Rating (1-5)</label>
+                        <input type="number" id="editGameRating" min="1" max="5" step="0.5" />
+                    </div>
+                    <div class="form-group">
+                        <label>Release Date</label>
+                        <input type="date" id="editGameReleased" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="url" id="editGameImageUrl" placeholder="https://example.com/image.jpg" />
+                </div>
+                <div class="form-group">
+                    <label>Screenshot URLs (comma separated)</label>
+                    <input type="text" id="editGameScreenshots" placeholder="https://ex.com/ss1.jpg, https://ex.com/ss2.jpg" />
+                </div>
+                <div class="form-group">
+                    <label>Video/Trailer URL</label>
+                    <input type="url" id="editGameVideoUrl" placeholder="https://www.youtube.com/embed/VIDEO_ID" />
+                </div>
+                <div class="form-group">
+                    <label>File Size</label>
+                    <input type="text" id="editGameFileSize" placeholder="e.g., 2.5 GB" />
+                </div>
+                <div class="form-group">
+                    <label>Game Type</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="editGameIsFree" /> 🆓 Free</label>
+                        <label><input type="checkbox" id="editGameIsVip" /> ⭐ VIP</label>
+                        <label><input type="checkbox" id="editGameIsPremium" /> 💎 Premium</label>
+                        <label><input type="checkbox" id="editGameIsFeatured" /> 🔥 Featured</label>
+                        <label><input type="checkbox" id="editGameIsTrending" /> 📈 Trending</label>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="submit-btn" id="editGameBtn">💾 Save Changes</button>
+                    <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="notificationContainer"></div>
+
+    <!-- THEME TOGGLE -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</button>
+
+    <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ============================================================
+        // ALLOWED ADMIN EMAILS
+        // ============================================================
+        const ALLOWED_ADMINS = [
+            "dullamanyama0@gmail.com",
+            "admin@dvary.com",
+            "dollary@gmail.com",
+            "dvary@admin.com"
+        ];
+        for (let i = 1; i <= 300; i++) {
+            ALLOWED_ADMINS.push(`admin${i}@dvary.com`);
+        }
+        function isAllowedAdmin(email) {
+            return ALLOWED_ADMINS.includes(email);
+        }
+
+        // ============================================================
+        // THEME
+        // ============================================================
+        function getTheme() {
+            return localStorage.getItem('dvary-theme') || 'dark';
+        }
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('dvary-theme', theme);
+            const btn = document.getElementById('themeToggle');
+            if (btn) btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+        setTheme(getTheme());
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const current = getTheme();
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let isAdmin = false;
+        let allGames = [];
+        let linkCounter = 5;
+        let ssLinkCounter = 5;
+
+        // ============================================================
+        // AUTH STATE
+        // ============================================================
+        auth.onAuthStateChanged((user) => {
+            const adminPanel = document.getElementById('adminPanel');
+            const accessDenied = document.getElementById('accessDenied');
+            const notLoggedIn = document.getElementById('notLoggedIn');
+
+            if (user) {
+                currentUser = user;
+                if (isAllowedAdmin(user.email)) {
+                    isAdmin = true;
+                    adminPanel.style.display = 'block';
+                    accessDenied.style.display = 'none';
+                    notLoggedIn.style.display = 'none';
+                    loadUserInfo(user);
+                    loadGamesList();
+                } else {
+                    isAdmin = false;
+                    adminPanel.style.display = 'none';
+                    accessDenied.style.display = 'block';
+                    notLoggedIn.style.display = 'none';
+                }
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                adminPanel.style.display = 'none';
+                accessDenied.style.display = 'none';
+                notLoggedIn.style.display = 'block';
+            }
+        });
+
+        // ============================================================
+        // LOAD USER INFO
+        // ============================================================
+        async function loadUserInfo(user) {
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    const name = data.username || data.displayName || 'User';
+                    document.getElementById('adminName').textContent = name;
+                    document.getElementById('adminEmail').textContent = user.email;
+                    document.getElementById('adminAvatar').textContent = name.charAt(0).toUpperCase();
+                } else {
+                    document.getElementById('adminName').textContent = 'Admin';
+                    document.getElementById('adminEmail').textContent = user.email;
+                    document.getElementById('adminAvatar').textContent = 'A';
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+
+        // ============================================================
+        // SWITCH TAB
+        // ============================================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            const map = { 'add': 'tab-add', 'manage': 'tab-manage' };
+            const target = map[tab];
+            if (target) {
+                document.getElementById(target).classList.add('active');
+                document.querySelectorAll('.tabs button').forEach(btn => {
+                    if (btn.textContent.toLowerCase().includes(tab === 'add' ? 'add' : 'manage')) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            if (tab === 'manage') loadGamesList();
+        }
+
+        // ============================================================
+        // LOAD GAMES LIST
+        // ============================================================
+        async function loadGamesList() {
+            const container = document.getElementById('gamesListContainer');
+            try {
+                const snapshot = await db.collection('games').orderBy('createdAt', 'desc').get();
+                allGames = [];
+                snapshot.forEach(doc => {
+                    const game = doc.data();
+                    game.id = doc.id;
+                    allGames.push(game);
+                });
+
+                if (allGames.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <span class="empty-icon">🎮</span>
+                            <h3>No games found</h3>
+                            <p>Add your first game using the "Add Game" tab.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                renderGames(allGames);
+            } catch (error) {
+                console.error('Error loading games:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">❌</span>
+                        <h3>Error loading games</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                showNotification('error', 'Failed to load games: ' + error.message);
+            }
+        }
+
+        // ============================================================
+        // RENDER GAMES
+        // ============================================================
+        function renderGames(games) {
+            const container = document.getElementById('gamesListContainer');
+            let html = '<div class="games-list">';
+            games.forEach((game) => {
+                const icon = getGameIcon(game.name || '');
+                const downloadLinks = game.downloadLinks || [];
+                const price = game.price ? `TZS ${Number(game.price).toLocaleString()}` : 'Free';
+                const isPaid = game.price && game.price > 0;
+
+                let typeBadge = '';
+                if (game.isVip) typeBadge = '⭐ VIP';
+                else if (game.isFree) typeBadge = '🆓 Free';
+                else typeBadge = '📦 Standard';
+
+                const screenshotUrls = game.screenshotUrls || [];
+                const hasScreenshots = screenshotUrls.length > 0;
+
+                html += `
+                    <div class="game-item" id="game-${game.id}">
+                        <div class="game-info">
+                            <div class="thumb">
+                                ${game.imageUrl ? `<img src="${game.imageUrl}" alt="${game.name}" />` : icon}
+                            </div>
+                            <div class="details">
+                                <h4>${game.name || 'Unnamed Game'}</h4>
+                                <div class="meta">
+                                    Genre: <span>${game.genre || 'General'}</span>
+                                    ${game.platform ? `| Platform: <span>${game.platform}</span>` : ''}
+                                    ${game.rating ? `| ⭐ ${game.rating}/5` : ''}
+                                    ${game.fileSize ? `| 📦 <span>${game.fileSize}</span>` : ''}
+                                    ${game.released ? `| 📅 <span>${game.released}</span>` : ''}
+                                </div>
+                                <div class="meta">
+                                    Type: <span style="color: var(--warning);">${typeBadge}</span>
+                                    | Price: <span style="color: ${isPaid ? 'var(--warning)' : 'var(--success)'}; font-weight: 700;">💰 ${price}</span>
+                                    ${hasScreenshots ? `| 📸 <span style="color:var(--accent);">${screenshotUrls.length} Screenshots</span>` : ''}
+                                    ${game.videoUrl ? '| 🎬 <span style="color:var(--accent);">Has Video</span>' : ''}
+                                </div>
+                                ${downloadLinks.length > 0 ? `
+                                    <div class="download-links">
+                                        ${downloadLinks.map((link, i) => `
+                                            <a href="${link}" class="dl-link" target="_blank" rel="noopener noreferrer">⬇️ Link ${i + 1}</a>
+                                        `).join('')}
+                                    </div>
+                                ` : '<div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">No download links</div>'}
+                            </div>
+                        </div>
+                        <div class="game-actions">
+                            <button class="btn-edit" onclick="openEditModal('${game.id}')">✏️ Edit</button>
+                            <button class="btn-delete" onclick="deleteGame('${game.id}')">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // FILTER GAMES
+        // ============================================================
+        function filterGames() {
+            const search = document.getElementById('searchGames').value.toLowerCase().trim();
+            if (!search) { renderGames(allGames); return; }
+            const filtered = allGames.filter(game =>
+                (game.name || '').toLowerCase().includes(search) ||
+                (game.genre || '').toLowerCase().includes(search) ||
+                (game.platform || '').toLowerCase().includes(search)
+            );
+            renderGames(filtered);
+        }
+
+        // ============================================================
+        // EXPORT CSV
+        // ============================================================
+        function exportGamesCSV() {
+            if (allGames.length === 0) {
+                showNotification('warning', 'No games to export!');
+                return;
+            }
+            let csv = 'Name,Genre,Platform,Price,Rating,File Size,Download Links,Is VIP,Is Free,Screenshot URLs,Video URL\n';
+            allGames.forEach(game => {
+                const links = (game.downloadLinks || []).join('; ');
+                const screenshots = (game.screenshotUrls || []).join('; ');
+                csv += `"${game.name || ''}","${game.genre || ''}","${game.platform || ''}","${game.price || 'Free'}","${game.rating || ''}","${game.fileSize || ''}","${links}","${game.isVip ? 'Yes' : 'No'}","${game.isFree ? 'Yes' : 'No'}","${screenshots}","${game.videoUrl || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dvary_games_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('success', '✅ Games exported successfully!');
+        }
+
+        // ============================================================
+        // BULK DELETE
+        // ============================================================
+        function bulkDeleteGames() {
+            if (allGames.length === 0) {
+                showNotification('warning', 'No games to delete!');
+                return;
+            }
+            if (!confirm(`⚠️ Are you sure you want to delete ALL ${allGames.length} games? This cannot be undone!`)) return;
+            if (!confirm('⚠️ FINAL CONFIRMATION: Delete all games?')) return;
+
+            let deleted = 0;
+            const promises = allGames.map(game =>
+                db.collection('games').doc(game.id).delete()
+                    .then(() => { deleted++; })
+                    .catch(err => console.error('Error deleting game:', err))
+            );
+            Promise.all(promises).then(() => {
+                showNotification('success', `✅ ${deleted} games deleted successfully!`);
+                loadGamesList();
+            }).catch(error => {
+                showNotification('error', '❌ Error during bulk delete: ' + error.message);
+            });
+        }
+
+        // ============================================================
+        // DELETE GAME
+        // ============================================================
+        async function deleteGame(gameId) {
+            if (!confirm('Are you sure you want to delete this game? This action cannot be undone!')) return;
+            try {
+                await db.collection('games').doc(gameId).delete();
+                showNotification('success', '✅ Game deleted successfully!');
+                const element = document.getElementById(`game-${gameId}`);
+                if (element) {
+                    element.style.opacity = '0';
+                    element.style.transform = 'scale(0.9)';
+                    setTimeout(() => element.remove(), 300);
+                }
+            } catch (error) {
+                console.error('Error deleting game:', error);
+                showNotification('error', '❌ Failed to delete game: ' + error.message);
+            }
+        }
+
+        // ============================================================
+        // EDIT MODAL
+        // ============================================================
+        function openEditModal(gameId) {
+            const game = allGames.find(g => g.id === gameId);
+            if (!game) { showNotification('error', 'Game not found!'); return; }
+
+            document.getElementById('editGameId').value = game.id;
+            document.getElementById('editGameName').value = game.name || '';
+            document.getElementById('editGameGenre').value = game.genre || '';
+            document.getElementById('editGamePlatform').value = game.platform || '';
+            document.getElementById('editGameDescription').value = game.description || '';
+            document.getElementById('editGamePrice').value = game.price || '';
+            document.getElementById('editGameCurrency').value = game.currency || 'TZS';
+            document.getElementById('editGameRating').value = game.rating || '';
+            document.getElementById('editGameReleased').value = game.released || '';
+            document.getElementById('editGameImageUrl').value = game.imageUrl || '';
+            document.getElementById('editGameScreenshots').value = (game.screenshotUrls || []).join(', ');
+            document.getElementById('editGameVideoUrl').value = game.videoUrl || '';
+            document.getElementById('editGameFileSize').value = game.fileSize || '';
+
+            document.getElementById('editGameIsFree').checked = game.isFree || false;
+            document.getElementById('editGameIsVip').checked = game.isVip || false;
+            document.getElementById('editGameIsPremium').checked = game.isPremium || false;
+            document.getElementById('editGameIsFeatured').checked = game.isFeatured || false;
+            document.getElementById('editGameIsTrending').checked = game.isTrending || false;
+
+            document.getElementById('editGameModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editGameModal').classList.remove('active');
+        }
+
+        // ============================================================
+        // SAVE EDITED GAME
+        // ============================================================
+        document.getElementById('editGameForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const gameId = document.getElementById('editGameId').value;
+            if (!gameId) { showNotification('error', 'Game ID not found!'); return; }
+
+            const name = document.getElementById('editGameName').value.trim();
+            const genre = document.getElementById('editGameGenre').value.trim();
+            const platform = document.getElementById('editGamePlatform').value.trim();
+            const description = document.getElementById('editGameDescription').value.trim();
+            const price = document.getElementById('editGamePrice').value;
+            const currency = document.getElementById('editGameCurrency').value;
+            const rating = document.getElementById('editGameRating').value;
+            const released = document.getElementById('editGameReleased').value;
+            const imageUrl = document.getElementById('editGameImageUrl').value.trim();
+            const screenshotUrls = document.getElementById('editGameScreenshots').value.split(',').map(s => s.trim()).filter(s => s);
+            const videoUrl = document.getElementById('editGameVideoUrl').value.trim();
+            const fileSize = document.getElementById('editGameFileSize').value.trim();
+
+            const isFree = document.getElementById('editGameIsFree').checked;
+            const isVip = document.getElementById('editGameIsVip').checked;
+            const isPremium = document.getElementById('editGameIsPremium').checked;
+            const isFeatured = document.getElementById('editGameIsFeatured').checked;
+            const isTrending = document.getElementById('editGameIsTrending').checked;
+
+            if (!name || !genre || !description) {
+                showNotification('error', 'Please fill in all required fields');
+                return;
+            }
+            if (isFree && isVip) {
+                showNotification('error', 'A game cannot be both Free and VIP. Please select only one.');
+                return;
+            }
+
+            const editBtn = document.getElementById('editGameBtn');
+            editBtn.disabled = true;
+            editBtn.textContent = '⏳ Saving...';
+
+            try {
+                await db.collection('games').doc(gameId).update({
+                    name, genre,
+                    platform: platform || 'Multi-platform',
+                    description,
+                    price: price ? parseInt(price) : null,
+                    currency: currency || 'TZS',
+                    rating: rating ? parseFloat(rating) : null,
+                    released: released || null,
+                    imageUrl: imageUrl || null,
+                    screenshotUrls,
+                    videoUrl: videoUrl || null,
+                    fileSize: fileSize || 'Unknown',
+                    isFree, isVip, isPremium, isFeatured, isTrending,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedBy: auth.currentUser.uid,
+                    updatedByEmail: auth.currentUser.email
+                });
+
+                showNotification('success', `✅ Game "${name}" updated successfully!`);
+                closeEditModal();
+                loadGamesList();
+            } catch (error) {
+                console.error('Error updating game:', error);
+                showNotification('error', '❌ Failed to update game: ' + error.message);
+            } finally {
+                editBtn.disabled = false;
+                editBtn.textContent = '💾 Save Changes';
+            }
+        });
+
+        // ============================================================
+        // SCREENSHOT LINKS
+        // ============================================================
+        function addScreenshotLink() {
+            if (ssLinkCounter >= 5) {
+                showNotification('info', 'Maximum 5 screenshot links allowed');
+                return;
+            }
+            ssLinkCounter++;
+            const container = document.getElementById('screenshotLinksContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'link-row';
+            newRow.id = `ssLinkRow${ssLinkCounter}`;
+            newRow.innerHTML = `
+                <span class="link-label">SS ${ssLinkCounter}</span>
+                <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot${ssLinkCounter}.jpg" />
+                <button type="button" class="remove-link" onclick="removeScreenshotLink(${ssLinkCounter})">✕</button>
+            `;
+            container.appendChild(newRow);
+        }
+
+        function removeScreenshotLink(id) {
+            if (id === 1) {
+                showNotification('info', 'Screenshot 1 is required and cannot be removed');
+                return;
+            }
+            const row = document.getElementById(`ssLinkRow${id}`);
+            if (row) row.remove();
+        }
+
+        // ============================================================
+        // DOWNLOAD LINKS
+        // ============================================================
+        function addLinkRow() {
+            if (linkCounter >= 10) {
+                showNotification('info', 'Maximum 10 download links allowed');
+                document.getElementById('addLinkBtn').disabled = true;
+                return;
+            }
+            linkCounter++;
+            const container = document.getElementById('downloadLinksContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'link-row';
+            newRow.id = `linkRow${linkCounter}`;
+            newRow.innerHTML = `
+                <span class="link-label">Link ${linkCounter}</span>
+                <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" />
+                <button type="button" class="remove-link" onclick="removeLinkRow(${linkCounter})">✕</button>
+            `;
+            container.appendChild(newRow);
+            if (linkCounter >= 10) document.getElementById('addLinkBtn').disabled = true;
+        }
+
+        function removeLinkRow(id) {
+            if (id === 1) {
+                showNotification('info', 'Link 1 is required and cannot be removed');
+                return;
+            }
+            const row = document.getElementById(`linkRow${id}`);
+            if (row) {
+                row.remove();
+                document.getElementById('addLinkBtn').disabled = false;
+            }
+        }
+
+        // ============================================================
+        // RESET GAME FORM
+        // ============================================================
+        function resetGameForm() {
+            document.getElementById('addGameForm').reset();
+            document.querySelectorAll('#addGameForm .checkbox-group input').forEach(cb => cb.checked = false);
+
+            const ssContainer = document.getElementById('screenshotLinksContainer');
+            ssContainer.innerHTML = `
+                <div class="link-row" id="ssLinkRow1">
+                    <span class="link-label">SS 1</span>
+                    <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot1.jpg" />
+                    <button type="button" class="remove-link hidden" onclick="removeScreenshotLink(1)">✕</button>
+                </div>
+                <div class="link-row" id="ssLinkRow2">
+                    <span class="link-label">SS 2</span>
+                    <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot2.jpg" />
+                    <button type="button" class="remove-link" onclick="removeScreenshotLink(2)">✕</button>
+                </div>
+                <div class="link-row" id="ssLinkRow3">
+                    <span class="link-label">SS 3</span>
+                    <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot3.jpg" />
+                    <button type="button" class="remove-link" onclick="removeScreenshotLink(3)">✕</button>
+                </div>
+                <div class="link-row" id="ssLinkRow4">
+                    <span class="link-label">SS 4</span>
+                    <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot4.jpg" />
+                    <button type="button" class="remove-link" onclick="removeScreenshotLink(4)">✕</button>
+                </div>
+                <div class="link-row" id="ssLinkRow5">
+                    <span class="link-label">SS 5</span>
+                    <input type="url" class="screenshot-link-input" placeholder="https://example.com/screenshot5.jpg" />
+                    <button type="button" class="remove-link" onclick="removeScreenshotLink(5)">✕</button>
+                </div>
+            `;
+            ssLinkCounter = 5;
+
+            const dlContainer = document.getElementById('downloadLinksContainer');
+            dlContainer.innerHTML = `
+                <div class="link-row" id="linkRow1">
+                    <span class="link-label">Link 1</span>
+                    <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" required />
+                    <button type="button" class="remove-link hidden" onclick="removeLinkRow(1)">✕</button>
+                </div>
+                <div class="link-row" id="linkRow2">
+                    <span class="link-label">Link 2</span>
+                    <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" />
+                    <button type="button" class="remove-link" onclick="removeLinkRow(2)">✕</button>
+                </div>
+                <div class="link-row" id="linkRow3">
+                    <span class="link-label">Link 3</span>
+                    <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" />
+                    <button type="button" class="remove-link" onclick="removeLinkRow(3)">✕</button>
+                </div>
+                <div class="link-row" id="linkRow4">
+                    <span class="link-label">Link 4</span>
+                    <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" />
+                    <button type="button" class="remove-link" onclick="removeLinkRow(4)">✕</button>
+                </div>
+                <div class="link-row" id="linkRow5">
+                    <span class="link-label">Link 5</span>
+                    <input type="url" class="download-link-input" placeholder="https://example.com/game.zip" />
+                    <button type="button" class="remove-link" onclick="removeLinkRow(5)">✕</button>
+                </div>
+            `;
+            linkCounter = 5;
+            document.getElementById('addLinkBtn').disabled = false;
+        }
+
+        // ============================================================
+        // VIP/FREE MUTUALLY EXCLUSIVE
+        // ============================================================
+        document.getElementById('gameIsVip').addEventListener('change', function() {
+            if (this.checked) document.getElementById('gameIsFree').checked = false;
+        });
+        document.getElementById('gameIsFree').addEventListener('change', function() {
+            if (this.checked) document.getElementById('gameIsVip').checked = false;
+        });
+
+        // ============================================================
+        // ADD GAME SUBMIT
+        // ============================================================
+        document.getElementById('addGameForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!currentUser) { showNotification('error', 'Please login first'); return; }
+            if (!isAdmin) { showNotification('error', 'You are not authorized to add games'); return; }
+
+            const name = document.getElementById('gameName').value.trim();
+            const genre = document.getElementById('gameGenre').value.trim();
+            const platform = document.getElementById('gamePlatform').value.trim();
+            const description = document.getElementById('gameDescription').value.trim();
+            const rating = document.getElementById('gameRating').value;
+            const released = document.getElementById('gameReleased').value;
+            const imageUrl = document.getElementById('gameImageUrl').value.trim();
+
+            const ssInputs = document.querySelectorAll('.screenshot-link-input');
+            const screenshotUrls = [];
+            ssInputs.forEach(input => {
+                const val = input.value.trim();
+                if (val) screenshotUrls.push(val);
+            });
+
+            const videoUrl = document.getElementById('gameVideoUrl').value.trim();
+            const fileSize = document.getElementById('gameFileSize').value.trim();
+            const price = document.getElementById('gamePrice').value.trim();
+            const currency = document.getElementById('gameCurrency').value;
+
+            const isFree = document.getElementById('gameIsFree').checked;
+            const isVip = document.getElementById('gameIsVip').checked;
+            const isPremium = document.getElementById('gameIsPremium').checked;
+            const isFeatured = document.getElementById('gameIsFeatured').checked;
+            const isTrending = document.getElementById('gameIsTrending').checked;
+
+            if (isFree && isVip) {
+                showNotification('error', 'A game cannot be both Free and VIP. Please select only one.');
+                return;
+            }
+
+            const linkInputs = document.querySelectorAll('.download-link-input');
+            const downloadLinks = [];
+            linkInputs.forEach(input => {
+                const val = input.value.trim();
+                if (val) downloadLinks.push(val);
+            });
+
+            if (!name || !genre || !description) {
+                showNotification('error', 'Please fill in all required fields (Name, Genre, Description)');
+                return;
+            }
+            if (downloadLinks.length === 0) {
+                showNotification('error', 'Please provide at least one download link');
+                return;
+            }
+
+            try {
+                const existingGame = await db.collection('games').where('name', '==', name).get();
+                if (!existingGame.empty) {
+                    showNotification('error', '❌ A game with this name already exists!');
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking duplicate:', error);
+                showNotification('error', 'Error checking for existing game. Please try again.');
+                return;
+            }
+
+            const addBtn = document.getElementById('addGameBtn');
+            addBtn.disabled = true;
+            addBtn.textContent = 'Adding game...';
+
+            try {
+                let tier = 'standard';
+                if (isVip) tier = 'vip';
+                else if (isFree) tier = 'free';
+
+                const gameData = {
+                    name, genre,
+                    platform: platform || 'Multi-platform',
+                    description,
+                    rating: rating ? parseFloat(rating) : null,
+                    released: released || null,
+                    imageUrl: imageUrl || null,
+                    screenshotUrls,
+                    videoUrl: videoUrl || null,
+                    downloadLinks,
+                    fileSize: fileSize || 'Unknown',
+                    price: price ? parseInt(price) : null,
+                    currency: currency || 'TZS',
+                    isFree, isVip, isPremium, isFeatured, isTrending,
+                    tier,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: auth.currentUser.uid,
+                    createdByEmail: auth.currentUser.email,
+                    createdByName: auth.currentUser.displayName || 'User'
+                };
+
+                await db.collection('games').add(gameData);
+
+                showNotification('success', `✅ Game "${name}" added successfully with ${downloadLinks.length} download links and ${screenshotUrls.length} screenshots!`);
+
+                await db.collection('notifications').add({
+                    title: '🎮 New Game Added!',
+                    message: `${name} has been added to DVARY GAMES. Check it out now!`,
+                    icon: '🎮',
+                    read: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: auth.currentUser.uid,
+                    createdByEmail: auth.currentUser.email
+                });
+
+                resetGameForm();
+                loadGamesList();
+            } catch (error) {
+                console.error('Error adding game:', error);
+                showNotification('error', '❌ Failed to add game: ' + error.message);
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = '➕ Add Game';
+            }
+        });
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showNotification(type, message) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification-toast ${type}`;
+            const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+            notification.innerHTML = `
+                ${icons[type] || 'ℹ️'} ${message}
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(notification);
+            setTimeout(() => { if (notification.parentElement) notification.remove(); }, 5000);
+        }
+
+        // ============================================================
+        // GET GAME ICON
+        // ============================================================
+        function getGameIcon(name) {
+            const icons = ['🎮', '⚔️', '🏎️', '🧙', '🚀', '🏆', '🎯', '👾', '🤖', '👽', '🕹️', '🎲'];
+            const index = (name || '').length % icons.length;
+            return icons[index] || '🎮';
+        }
+
+        console.log('🎮 DVARY GAMES — Businesses (Games) Loaded!');
+    </script>
+
+</body>
+  </html>
