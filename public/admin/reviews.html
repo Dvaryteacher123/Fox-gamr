@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users — DVARY GAMES Admin</title>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1a1a2e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --border: #2d2d44;
+            --shadow: rgba(99, 102, 241, 0.2);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+        }
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --border: #cbd5e1;
+            --shadow: rgba(99, 102, 241, 0.3);
+            --glass-bg: rgba(0, 0, 0, 0.02);
+            --glass-border: rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* ============================================================
+           SIDEBAR
+           ============================================================ */
+        .sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            padding: 30px 20px;
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .sidebar h1 {
+            color: var(--accent);
+            font-size: 28px;
+            margin-bottom: 40px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .sidebar h1 span { color: var(--text-primary); }
+        .nav-links { list-style: none; flex: 1; }
+        .nav-links li { margin-bottom: 12px; }
+        .nav-links a {
+            display: block;
+            padding: 12px 18px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--accent);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* ============================================================
+           MAIN CONTENT
+           ============================================================ */
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .admin-header h2 { font-size: 32px; color: var(--accent); }
+        .admin-header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+        .admin-header .user-info .avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 14px;
+        }
+        .admin-header .user-info .name { color: var(--text-primary); font-weight: 600; font-size: 14px; }
+        .admin-header .user-info .email { color: var(--text-secondary); font-size: 13px; }
+        .admin-badge {
+            background: var(--accent);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* ============================================================
+           ACCESS DENIED / NOT LOGGED IN
+           ============================================================ */
+        .access-denied, .not-logged-in {
+            text-align: center;
+            padding: 80px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+        }
+        .access-denied .denied-icon, .not-logged-in .login-icon {
+            font-size: 80px; display: block; margin-bottom: 20px;
+        }
+        .access-denied h2 { color: var(--danger); font-size: 42px; margin-bottom: 15px; font-weight: 800; }
+        .not-logged-in h2 { color: var(--text-primary); font-size: 38px; margin-bottom: 15px; }
+        .access-denied p, .not-logged-in p {
+            color: var(--text-secondary); font-size: 18px; max-width: 500px; line-height: 1.8;
+        }
+        .access-denied .denied-code {
+            font-size: 14px; color: var(--text-secondary); margin-top: 10px; opacity: 0.5;
+        }
+        .access-denied .btn-go-home, .not-logged-in .btn-login {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 14px 40px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+        .access-denied .btn-go-home:hover, .not-logged-in .btn-login:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        /* ============================================================
+           TABLE (USERS)
+           ============================================================ */
+        .table-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+        .users-table thead {
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--border);
+        }
+        .users-table th {
+            padding: 14px 16px;
+            text-align: left;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+        .users-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        .users-table tbody tr { transition: background 0.3s; }
+        .users-table tbody tr:hover { background: var(--glass-bg); }
+        .users-table tbody tr:last-child td { border-bottom: none; }
+
+        /* User cell */
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+        .user-cell .user-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 16px;
+            flex-shrink: 0;
+        }
+        .user-cell .user-info { display: flex; flex-direction: column; }
+        .user-cell .user-name {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .user-cell .user-email {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        /* Role badge */
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .role-badge.admin {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+        .role-badge.user {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent);
+        }
+
+        /* Online status */
+        .status-online {
+            color: var(--success);
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .status-offline {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Claim code */
+        .claim-code-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        .no-claims-text {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        /* Claim actions */
+        .claim-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .claim-btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            background: var(--accent);
+            color: white;
+        }
+        .claim-btn:hover { background: var(--accent-hover); transform: scale(1.05); }
+        .claim-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .claim-btn.copy-btn { background: var(--success); }
+        .claim-btn.copy-btn:hover { background: #16a34a; }
+        .claim-btn.cancel-btn { background: var(--danger); }
+        .claim-btn.cancel-btn:hover { background: #dc2626; }
+        .claim-btn.claimed {
+            background: var(--success);
+            cursor: default;
+        }
+
+        /* ============================================================
+           LOADING & EMPTY
+           ============================================================ */
+        .loading-spinner { text-align: center; padding: 40px; color: var(--text-secondary); }
+        .loading-spinner .spinner {
+            display: inline-block;
+            width: 40px; height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .empty-state { text-align: center; padding: 60px; color: var(--text-secondary); }
+        .empty-state h3 { color: var(--text-primary); margin-bottom: 10px; }
+        .empty-state .empty-icon { font-size: 48px; display: block; margin-bottom: 15px; }
+
+        /* ============================================================
+           TOAST
+           ============================================================ */
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 3000;
+            animation: slideIn 0.5s ease;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        .notification-toast.success { background: var(--success); }
+        .notification-toast.error { background: var(--danger); }
+        .notification-toast.info { background: var(--accent); }
+        .notification-toast.warning { background: var(--warning); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .notification-toast .close-btn {
+            background: none; border: none; color: white;
+            font-size: 20px; cursor: pointer; margin-left: 15px; opacity: 0.7;
+        }
+        .notification-toast .close-btn:hover { opacity: 1; }
+
+        /* ============================================================
+           THEME TOGGLE
+           ============================================================ */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 48px; height: 48px;
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: var(--text-primary);
+        }
+        .theme-toggle:hover { transform: scale(1.1); border-color: var(--accent); }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; padding: 20px 15px; }
+            .main-content { padding: 20px; }
+            .admin-header { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 600px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%; height: auto; position: relative;
+                border-right: none; border-bottom: 1px solid var(--border);
+                padding: 15px;
+            }
+            .sidebar h1 { font-size: 22px; margin-bottom: 15px; }
+            .nav-links { display: flex; flex-wrap: wrap; gap: 8px; }
+            .nav-links li { margin-bottom: 0; }
+            .nav-links a { padding: 8px 14px; font-size: 14px; }
+            .admin-header .user-info { flex-wrap: wrap; width: 100%; }
+            .notification-toast { left: 16px; right: 16px; max-width: none; font-size: 14px; padding: 12px 18px; }
+            .theme-toggle { bottom: 70px; right: 15px; width: 40px; height: 40px; font-size: 18px; }
+            .access-denied .denied-icon, .not-logged-in .login-icon { font-size: 56px; }
+            .access-denied h2, .not-logged-in h2 { font-size: 24px; }
+            .access-denied p, .not-logged-in p { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        <ul class="nav-links">
+            <li><a href="/main">🏠 Home</a></li>
+            <li><a href="/games">🎮 Games</a></li>
+            <li><a href="/ai">🤖 AI Chat</a></li>
+            <li><a href="/login">🔑 Login</a></li>
+            <li><a href="/signup">📝 Sign Up</a></li>
+            <li><a href="/profile">👤 Profile</a></li>
+            <li><a href="/settings">⚙️ Settings</a></li>
+        </ul>
+        <hr style="border-color: var(--border); margin: 20px 0; opacity: 0.4;" />
+        <ul class="nav-links">
+            <li><a href="index.html">📊 Dashboard</a></li>
+            <li><a href="businesses.html">🎮 Games</a></li>
+            <li><a href="claims.html">🎫 Claims</a></li>
+            <li><a href="reviews.html" class="active">👥 Users</a></li>
+            <li><a href="settings.html">⚙️ Settings</a></li>
+        </ul>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div id="adminContent">
+
+            <!-- NOT LOGGED IN -->
+            <div id="notLoggedIn" class="not-logged-in" style="display: none;">
+                <span class="login-icon">🔒</span>
+                <h2>Please Login</h2>
+                <p>You need to be logged in to access the admin panel.</p>
+                <a href="/login" class="btn-login">🔑 Login</a>
+            </div>
+
+            <!-- ACCESS DENIED -->
+            <div id="accessDenied" class="access-denied" style="display: none;">
+                <span class="denied-icon">⛔</span>
+                <h2>Access Denied</h2>
+                <p>You do not have permission to access this page.</p>
+                <p style="font-size: 14px; margin-top: 8px; color: var(--text-secondary); opacity: 0.7;">
+                    This area is restricted to authorized administrators only.
+                </p>
+                <p class="denied-code">Error 403 - Forbidden</p>
+                <a href="/main" class="btn-go-home">🏠 Return to Home</a>
+            </div>
+
+            <!-- ADMIN PANEL -->
+            <div id="adminPanel" style="display: none;">
+
+                <!-- HEADER -->
+                <div class="admin-header">
+                    <h2>👥 All Users</h2>
+                    <div class="user-info">
+                        <div class="avatar" id="adminAvatar">U</div>
+                        <div>
+                            <div class="name" id="adminName">User</div>
+                            <div class="email" id="adminEmail">user@example.com</div>
+                        </div>
+                        <span class="admin-badge">👑 Admin</span>
+                    </div>
+                </div>
+
+                <!-- USERS LIST -->
+                <div id="usersListContainer">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Loading users...</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="notificationContainer"></div>
+
+    <!-- THEME TOGGLE -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</button>
+
+    <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ============================================================
+        // ALLOWED ADMIN EMAILS
+        // ============================================================
+        const ALLOWED_ADMINS = [
+            "dullamanyama0@gmail.com",
+            "admin@dvary.com",
+            "dollary@gmail.com",
+            "dvary@admin.com"
+        ];
+        for (let i = 1; i <= 300; i++) {
+            ALLOWED_ADMINS.push(`admin${i}@dvary.com`);
+        }
+        function isAllowedAdmin(email) {
+            return ALLOWED_ADMINS.includes(email);
+        }
+
+        // ============================================================
+        // THEME
+        // ============================================================
+        function getTheme() {
+            return localStorage.getItem('dvary-theme') || 'dark';
+        }
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('dvary-theme', theme);
+            const btn = document.getElementById('themeToggle');
+            if (btn) btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+        setTheme(getTheme());
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const current = getTheme();
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let isAdmin = false;
+        let allUsers = [];
+        let allClaims = [];
+
+        // ============================================================
+        // AUTH STATE
+        // ============================================================
+        auth.onAuthStateChanged((user) => {
+            const adminPanel = document.getElementById('adminPanel');
+            const accessDenied = document.getElementById('accessDenied');
+            const notLoggedIn = document.getElementById('notLoggedIn');
+
+            if (user) {
+                currentUser = user;
+                if (isAllowedAdmin(user.email)) {
+                    isAdmin = true;
+                    adminPanel.style.display = 'block';
+                    accessDenied.style.display = 'none';
+                    notLoggedIn.style.display = 'none';
+                    loadUserInfo(user);
+                    loadUsersList();
+                } else {
+                    isAdmin = false;
+                    adminPanel.style.display = 'none';
+                    accessDenied.style.display = 'block';
+                    notLoggedIn.style.display = 'none';
+                }
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                adminPanel.style.display = 'none';
+                accessDenied.style.display = 'none';
+                notLoggedIn.style.display = 'block';
+            }
+        });
+
+        // ============================================================
+        // LOAD USER INFO
+        // ============================================================
+        async function loadUserInfo(user) {
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    const name = data.username || data.displayName || 'User';
+                    document.getElementById('adminName').textContent = name;
+                    document.getElementById('adminEmail').textContent = user.email;
+                    document.getElementById('adminAvatar').textContent = name.charAt(0).toUpperCase();
+                } else {
+                    document.getElementById('adminName').textContent = 'Admin';
+                    document.getElementById('adminEmail').textContent = user.email;
+                    document.getElementById('adminAvatar').textContent = 'A';
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+
+        // ============================================================
+        // GENERATE CLAIM CODE
+        // ============================================================
+        function generateClaimCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = 'DVARY-';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // ============================================================
+        // LOAD USERS LIST
+        // ============================================================
+        async function loadUsersList() {
+            const container = document.getElementById('usersListContainer');
+
+            try {
+                const snapshot = await db.collection('users')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <span class="empty-icon">👥</span>
+                            <h3>No users found</h3>
+                            <p>No users have signed up yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Pata claim ambazo hazijatumika
+                const claimSnapshot = await db.collection('claims')
+                    .where('isUsed', '==', false)
+                    .get();
+
+                const userClaims = {};
+                claimSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.assignedToEmail) {
+                        userClaims[data.assignedToEmail] = {
+                            claimId: doc.id,
+                            code: data.code
+                        };
+                    }
+                });
+
+                // Hifadhi users wote kwa matumizi ya baadaye
+                allUsers = [];
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    user.id = doc.id;
+                    allUsers.push(user);
+                });
+
+                let html = `
+                    <div class="table-wrapper">
+                        <table class="users-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Claim</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                snapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const isAdminUser = isAllowedAdmin(user.email);
+                    const initial = (user.username || user.displayName || 'U')[0].toUpperCase();
+                    const isOnline = user.lastSeen && (new Date() - new Date(user.lastSeen)) < 5 * 60 * 1000;
+
+                    const hasClaim = userClaims[user.email] ? true : false;
+                    const claimData = userClaims[user.email] || null;
+                    const btnId = `claim-btn-${(user.email || '').replace(/[^a-zA-Z0-9]/g, '')}`;
+
+                    html += `
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar">${initial}</div>
+                                    <div class="user-info">
+                                        <span class="user-name">${user.username || user.displayName || 'User'}</span>
+                                        <span class="user-email">${user.email || 'No email'}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${user.email || 'No email'}</td>
+                            <td>
+                                <span class="role-badge ${isAdminUser ? 'admin' : 'user'}">
+                                    ${isAdminUser ? '👑 Admin' : '🎮 User'}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="${isOnline ? 'status-online' : 'status-offline'}">
+                                    ${isOnline ? '🟢 Online' : '⚪ Offline'}
+                                </span>
+                            </td>
+                            <td>
+                                ${hasClaim ?
+                                    `<span class="claim-code-display">${claimData.code}</span>` :
+                                    `<span class="no-claims-text">No claim</span>`
+                                }
+                            </td>
+                            <td>
+                                ${!isAdminUser ? `
+                                    <div class="claim-actions">
+                                        ${hasClaim ? `
+                                            <button class="claim-btn copy-btn" onclick="copyClaimCode('${claimData.code}')">📋</button>
+                                            <button class="claim-btn cancel-btn" onclick="cancelClaim('${claimData.claimId}', '${user.email}')">🗑️</button>
+                                        ` : `
+                                            <button id="${btnId}" class="claim-btn" onclick="assignClaim('${user.email}', '${(user.username || user.displayName || 'User').replace(/'/g, "\\'")}')">
+                                                🎫 Assign Claim
+                                            </button>
+                                        `}
+                                    </div>
+                                ` : `<span style="color:var(--text-secondary);font-size:12px;">Admin</span>`}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading users:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">❌</span>
+                        <h3>Error loading users</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                showNotification('error', 'Failed to load users: ' + error.message);
+            }
+        }
+
+        // ============================================================
+        // ASSIGN CLAIM TO USER
+        // ============================================================
+        async function assignClaim(userEmail, userName) {
+            if (!isAdmin) {
+                showNotification('error', 'You are not authorized to assign claims');
+                return;
+            }
+
+            const btnId = `claim-btn-${userEmail.replace(/[^a-zA-Z0-9]/g, '')}`;
+            const claimBtn = document.getElementById(btnId);
+
+            if (claimBtn) {
+                claimBtn.disabled = true;
+                claimBtn.textContent = '⏳...';
+            }
+
+            try {
+                // Angalia kama user ana claim ambayo haijatumika
+                const existingClaims = await db.collection('claims')
+                    .where('assignedToEmail', '==', userEmail)
+                    .where('isUsed', '==', false)
+                    .get();
+
+                if (!existingClaims.empty) {
+                    showNotification('warning', `${userEmail} already has an unused claim!`);
+                    if (claimBtn) {
+                        claimBtn.disabled = false;
+                        claimBtn.textContent = '🎫 Assign Claim';
+                    }
+                    return;
+                }
+
+                // Tengeneza code ya kipekee
+                let code = generateClaimCode();
+                let isUnique = false;
+                let attempts = 0;
+
+                while (!isUnique && attempts < 10) {
+                    const checkSnapshot = await db.collection('claims')
+                        .where('code', '==', code)
+                        .get();
+
+                    if (checkSnapshot.empty) {
+                        isUnique = true;
+                    } else {
+                        code = generateClaimCode();
+                        attempts++;
+                    }
+                }
+
+                if (!isUnique) {
+                    showNotification('error', 'Failed to generate unique claim code. Please try again.');
+                    if (claimBtn) {
+                        claimBtn.disabled = false;
+                        claimBtn.textContent = '🎫 Assign Claim';
+                    }
+                    return;
+                }
+
+                const claimData = {
+                    code: code,
+                    assignedToEmail: userEmail,
+                    assignedToName: userName || 'User',
+                    isUsed: false,
+                    usedByEmail: null,
+                    usedByUid: null,
+                    usedAt: null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: auth.currentUser.uid,
+                    createdByEmail: auth.currentUser.email
+                };
+
+                await db.collection('claims').add(claimData);
+
+                // Notification kwa mtumiaji
+                await db.collection('notifications').add({
+                    title: '🎫 Umepata Claim!',
+                    message: `Umepata claim code: ${code}. Nenda kwenye ukurasa wa Claim ili kudai mchezo wako.`,
+                    icon: '🎫',
+                    read: false,
+                    userId: userEmail,
+                    claimCode: code,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: auth.currentUser.uid,
+                    createdByEmail: auth.currentUser.email
+                });
+
+                showNotification('success', `✅ Claim "${code}" assigned to ${userEmail}!`);
+
+                loadUsersList();
+
+            } catch (error) {
+                console.error('Error assigning claim:', error);
+                showNotification('error', '❌ Failed to assign claim: ' + error.message);
+                if (claimBtn) {
+                    claimBtn.disabled = false;
+                    claimBtn.textContent = '🎫 Assign Claim';
+                }
+            }
+        }
+
+        // ============================================================
+        // CANCEL CLAIM
+        // ============================================================
+        async function cancelClaim(claimId, userEmail) {
+            if (!isAdmin) {
+                showNotification('error', 'You are not authorized to cancel claims');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to cancel this claim for ${userEmail}?`)) return;
+
+            try {
+                const claimRef = db.collection('claims').doc(claimId);
+                const claimDoc = await claimRef.get();
+
+                if (!claimDoc.exists) {
+                    showNotification('error', 'Claim not found');
+                    return;
+                }
+
+                const claimData = claimDoc.data();
+
+                if (claimData.isUsed === true) {
+                    showNotification('warning', 'This claim has already been used and cannot be cancelled.');
+                    return;
+                }
+
+                await claimRef.delete();
+                showNotification('success', `✅ Claim cancelled for ${userEmail}!`);
+                loadUsersList();
+
+            } catch (error) {
+                console.error('Error cancelling claim:', error);
+                showNotification('error', '❌ Failed to cancel claim: ' + error.message);
+            }
+        }
+
+        // ============================================================
+        // COPY CLAIM CODE
+        // ============================================================
+        function copyClaimCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                showNotification('success', `✅ Claim code "${code}" copied to clipboard!`);
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = code;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification('success', `✅ Claim code "${code}" copied to clipboard!`);
+            });
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showNotification(type, message) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification-toast ${type}`;
+            const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+            notification.innerHTML = `
+                ${icons[type] || 'ℹ️'} ${message}
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(notification);
+            setTimeout(() => { if (notification.parentElement) notification.remove(); }, 5000);
+        }
+
+        console.log('👥 DVARY GAMES — Users Loaded!');
+    </script>
+
+</body>
+</html>
