@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 
-// Njia zote za HTML zikisomwa kutoka ndani ya folda ya public
+// ============================================================
+// PUBLIC PAGES
+// ============================================================
 router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -31,10 +33,6 @@ router.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
-router.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
 router.get('/about', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'about.html'));
 });
@@ -55,5 +53,38 @@ router.get('/rewardclaim', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'rewardclaim.html'));
 });
 
-module.exports = router;
+// ============================================================
+// ADMIN PAGES  →  public/admin/*.html
+// ============================================================
 
+// /admin  →  Dashboard
+router.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
+});
+
+// /admin/dashboard  →  Dashboard (alias, optional)
+router.get('/admin/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
+});
+
+// /admin/businesses  →  Games (Add + Manage)
+router.get('/admin/businesses', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'businesses.html'));
+});
+
+// /admin/claims  →  Claims
+router.get('/admin/claims', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'claims.html'));
+});
+
+// /admin/reviews  →  Users
+router.get('/admin/reviews', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'reviews.html'));
+});
+
+// /admin/settings  →  Notifications + Clean Data
+router.get('/admin/settings', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'settings.html'));
+});
+
+module.exports = router;
