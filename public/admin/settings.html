@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings — DVARY GAMES Admin</title>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1a1a2e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --border: #2d2d44;
+            --shadow: rgba(99, 102, 241, 0.2);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+        }
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --border: #cbd5e1;
+            --shadow: rgba(99, 102, 241, 0.3);
+            --glass-bg: rgba(0, 0, 0, 0.02);
+            --glass-border: rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* ============================================================
+           SIDEBAR
+           ============================================================ */
+        .sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            padding: 30px 20px;
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .sidebar h1 {
+            color: var(--accent);
+            font-size: 28px;
+            margin-bottom: 40px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .sidebar h1 span { color: var(--text-primary); }
+        .nav-links { list-style: none; flex: 1; }
+        .nav-links li { margin-bottom: 12px; }
+        .nav-links a {
+            display: block;
+            padding: 12px 18px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--accent);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* ============================================================
+           MAIN CONTENT
+           ============================================================ */
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .admin-header h2 { font-size: 32px; color: var(--accent); }
+        .admin-header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+        .admin-header .user-info .avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 14px;
+        }
+        .admin-header .user-info .name { color: var(--text-primary); font-weight: 600; font-size: 14px; }
+        .admin-header .user-info .email { color: var(--text-secondary); font-size: 13px; }
+        .admin-badge {
+            background: var(--accent);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* ============================================================
+           ACCESS DENIED / NOT LOGGED IN
+           ============================================================ */
+        .access-denied, .not-logged-in {
+            text-align: center;
+            padding: 80px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+        }
+        .access-denied .denied-icon, .not-logged-in .login-icon {
+            font-size: 80px; display: block; margin-bottom: 20px;
+        }
+        .access-denied h2 { color: var(--danger); font-size: 42px; margin-bottom: 15px; font-weight: 800; }
+        .not-logged-in h2 { color: var(--text-primary); font-size: 38px; margin-bottom: 15px; }
+        .access-denied p, .not-logged-in p {
+            color: var(--text-secondary); font-size: 18px; max-width: 500px; line-height: 1.8;
+        }
+        .access-denied .denied-code {
+            font-size: 14px; color: var(--text-secondary); margin-top: 10px; opacity: 0.5;
+        }
+        .access-denied .btn-go-home, .not-logged-in .btn-login {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 14px 40px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+        .access-denied .btn-go-home:hover, .not-logged-in .btn-login:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        /* ============================================================
+           TABS
+           ============================================================ */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .tabs button {
+            padding: 10px 25px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+        .tabs button:hover {
+            color: var(--text-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .tabs button.active {
+            color: var(--accent);
+            background: rgba(99, 102, 241, 0.15);
+        }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================================
+           FORMS & BUTTONS
+           ============================================================ */
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .form-group label .required { color: var(--danger); }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus { border-color: var(--accent); }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        .submit-btn {
+            padding: 14px 30px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .submit-btn:hover { background: var(--accent-hover); transform: scale(1.02); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-danger {
+            padding: 10px 24px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover { background: #dc2626; transform: scale(1.05); }
+
+        /* ============================================================
+           NOTIFICATIONS
+           ============================================================ */
+        .notif-send-box {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+        .notif-send-box h4 { margin-bottom: 15px; color: var(--text-primary); }
+
+        .notification-item {
+            background: var(--bg-card);
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+        .notification-item:hover { border-color: var(--accent); }
+        .notification-item .notif-content { flex: 1; }
+        .notification-item .notif-content .notif-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+        .notification-item .notif-content .notif-message {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .notification-item .notif-content .notif-date {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 4px;
+            opacity: 0.6;
+        }
+        .notification-item .notif-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .notification-item .notif-actions button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        .notif-delete { background: var(--danger); color: white; }
+        .notif-delete:hover { background: #dc2626; transform: scale(1.05); }
+        .notif-mark-read { background: var(--accent); color: white; }
+        .notif-mark-read:hover { background: var(--accent-hover); transform: scale(1.05); }
+
+        /* ============================================================
+           CLEAN DATA
+           ============================================================ */
+        .clean-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .clean-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .clean-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 68, 68, 0.2);
+        }
+        .clean-card .clean-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+        .clean-card h3 { margin-bottom: 0.3rem; font-size: 1.1rem; color: var(--text-primary); }
+        .clean-card p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem; }
+        .clean-card.danger {
+            border-color: rgba(255, 68, 68, 0.2);
+            background: rgba(255, 68, 68, 0.05);
+        }
+        .clean-card.danger h3 { color: var(--danger); }
+
+        .warning-box {
+            margin-top: 2rem;
+            background: rgba(255, 68, 68, 0.05);
+            border: 1px solid rgba(255, 68, 68, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .warning-box .warning-icon { font-size: 2rem; }
+        .warning-box .warning-text h4 { color: var(--danger); margin-bottom: 0.2rem; }
+        .warning-box .warning-text p { color: var(--text-secondary); font-size: 0.9rem; }
+
+        /* ============================================================
+           LOADING & EMPTY
+           ============================================================ */
+        .loading-spinner { text-align: center; padding: 40px; color: var(--text-secondary); }
+        .loading-spinner .spinner {
+            display: inline-block;
+            width: 40px; height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .empty-state { text-align: center; padding: 60px; color: var(--text-secondary); }
+        .empty-state h3 { color: var(--text-primary); margin-bottom: 10px; }
+        .empty-state .empty-icon { font-size: 48px; display: block; margin-bottom: 15px; }
+
+        /* ============================================================
+           TOAST
+           ============================================================ */
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 3000;
+            animation: slideIn 0.5s ease;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        .notification-toast.success { background: var(--success); }
+        .notification-toast.error { background: var(--danger); }
+        .notification-toast.info { background: var(--accent); }
+        .notification-toast.warning { background: var(--warning); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .notification-toast .close-btn {
+            background: none; border: none; color: white;
+            font-size: 20px; cursor: pointer; margin-left: 15px; opacity: 0.7;
+        }
+        .notification-toast .close-btn:hover { opacity: 1; }
+
+        /* ============================================================
+           THEME TOGGLE
+           ============================================================ */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 48px; height: 48px;
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            color: var(--text-primary);
+        }
+        .theme-toggle:hover { transform: scale(1.1); border-color: var(--accent); }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; padding: 20px 15px; }
+            .main-content { padding: 20px; }
+            .admin-header { flex-direction: column; align-items: flex-start; }
+            .tabs button { font-size: 14px; padding: 8px 16px; }
+            .clean-grid { grid-template-columns: 1fr 1fr; }
+            .warning-box { flex-direction: column; text-align: center; }
+        }
+        @media (max-width: 600px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%; height: auto; position: relative;
+                border-right: none; border-bottom: 1px solid var(--border);
+                padding: 15px;
+            }
+            .sidebar h1 { font-size: 22px; margin-bottom: 15px; }
+            .nav-links { display: flex; flex-wrap: wrap; gap: 8px; }
+            .nav-links li { margin-bottom: 0; }
+            .nav-links a { padding: 8px 14px; font-size: 14px; }
+            .admin-header .user-info { flex-wrap: wrap; width: 100%; }
+            .tabs button { font-size: 12px; padding: 6px 12px; flex: 1; text-align: center; min-width: 60px; }
+            .notification-toast { left: 16px; right: 16px; max-width: none; font-size: 14px; padding: 12px 18px; }
+            .theme-toggle { bottom: 70px; right: 15px; width: 40px; height: 40px; font-size: 18px; }
+            .access-denied .denied-icon, .not-logged-in .login-icon { font-size: 56px; }
+            .access-denied h2, .not-logged-in h2 { font-size: 24px; }
+            .access-denied p, .not-logged-in p { font-size: 15px; }
+            .notification-item { flex-direction: column; align-items: stretch; }
+            .notification-item .notif-actions { justify-content: flex-end; }
+            .clean-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        <ul class="nav-links">
+            <li><a href="/main">🏠 Home</a></li>
+            <li><a href="/games">🎮 Games</a></li>
+            <li><a href="/ai">🤖 AI Chat</a></li>
+            <li><a href="/login">🔑 Login</a></li>
+            <li><a href="/signup">📝 Sign Up</a></li>
+            <li><a href="/profile">👤 Profile</a></li>
+            <li><a href="/settings">⚙️ Settings</a></li>
+        </ul>
+        <hr style="border-color: var(--border); margin: 20px 0; opacity: 0.4;" />
+        <ul class="nav-links">
+            <li><a href="index.html">📊 Dashboard</a></li>
+            <li><a href="businesses.html">🎮 Games</a></li>
+            <li><a href="claims.html">🎫 Claims</a></li>
+            <li><a href="reviews.html">👥 Users</a></li>
+            <li><a href="settings.html" class="active">⚙️ Settings</a></li>
+        </ul>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div id="adminContent">
+
+            <!-- NOT LOGGED IN -->
+            <div id="notLoggedIn" class="not-logged-in" style="display: none;">
+                <span class="login-icon">🔒</span>
+                <h2>Please Login</h2>
+                <p>You need to be logged in to access the admin panel.</p>
+                <a href="/login" class="btn-login">🔑 Login</a>
+            </div>
+
+            <!-- ACCESS DENIED -->
+            <div id="accessDenied" class="access-denied" style="display: none;">
+                <span class="denied-icon">⛔</span>
+                <h2>Access Denied</h2>
+                <p>You do not have permission to access this page.</p>
+                <p style="font-size: 14px; margin-top: 8px; color: var(--text-secondary); opacity: 0.7;">
+                    This area is restricted to authorized administrators only.
+                </p>
+                <p class="denied-code">Error 403 - Forbidden</p>
+                <a href="/main" class="btn-go-home">🏠 Return to Home</a>
+            </div>
+
+            <!-- ADMIN PANEL -->
+            <div id="adminPanel" style="display: none;">
+
+                <!-- HEADER -->
+                <div class="admin-header">
+                    <h2>⚙️ Settings</h2>
+                    <div class="user-info">
+                        <div class="avatar" id="adminAvatar">U</div>
+                        <div>
+                            <div class="name" id="adminName">User</div>
+                            <div class="email" id="adminEmail">user@example.com</div>
+                        </div>
+                        <span class="admin-badge">👑 Admin</span>
+                    </div>
+                </div>
+
+                <!-- TABS -->
+                <div class="tabs">
+                    <button class="active" onclick="switchTab('notifications')">🔔 Notifications</button>
+                    <button onclick="switchTab('clean')">🧹 Clean Data</button>
+                </div>
+
+                <!-- ============================================================
+                     TAB: NOTIFICATIONS
+                     ============================================================ -->
+                <div id="tab-notifications" class="tab-content active">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">🔔 Notifications</h3>
+
+                    <div class="notif-send-box">
+                        <h4>📤 Send Notification to All Users</h4>
+                        <div class="form-group">
+                            <label>Title <span class="required">*</span></label>
+                            <input type="text" id="notifTitle" placeholder="Notification title..." />
+                        </div>
+                        <div class="form-group">
+                            <label>Message <span class="required">*</span></label>
+                            <textarea id="notifMessage" placeholder="Write your message here..." rows="3"></textarea>
+                        </div>
+                        <button class="submit-btn" onclick="sendNotification()">📤 Send Notification</button>
+                    </div>
+
+                    <h4 style="margin-bottom: 15px; color: var(--text-primary);">📋 All Notifications</h4>
+                    <div id="notificationsListContainer">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p>Loading notifications...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     TAB: CLEAN DATA
+                     ============================================================ -->
+                <div id="tab-clean" class="tab-content">
+                    <h3 style="margin-bottom: 20px; color: var(--text-primary);">🧹 Clean / Clear Data</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">Clear all data from the system. This action cannot be undone!</p>
+
+                    <div class="clean-grid">
+                        <div class="clean-card">
+                            <div class="clean-icon">📦</div>
+                            <h3>Clear Products</h3>
+                            <p>Delete all games from the store</p>
+                            <button class="btn-danger" onclick="clearProducts()">🗑️ Clear All</button>
+                        </div>
+
+                        <div class="clean-card">
+                            <div class="clean-icon">📋</div>
+                            <h3>Clear Orders</h3>
+                            <p>Delete all orders from the system</p>
+                            <button class="btn-danger" onclick="clearOrders()">🗑️ Clear All</button>
+                        </div>
+
+                        <div class="clean-card">
+                            <div class="clean-icon">👤</div>
+                            <h3>Clear Users</h3>
+                            <p>Delete all users from the system</p>
+                            <button class="btn-danger" onclick="clearUsers()">🗑️ Clear All</button>
+                        </div>
+
+                        <div class="clean-card">
+                            <div class="clean-icon">💬</div>
+                            <h3>Clear Messages</h3>
+                            <p>Delete all messages from customers</p>
+                            <button class="btn-danger" onclick="clearMessages()">🗑️ Clear All</button>
+                        </div>
+
+                        <div class="clean-card">
+                            <div class="clean-icon">🎫</div>
+                            <h3>Clear Claims</h3>
+                            <p>Delete all claim codes</p>
+                            <button class="btn-danger" onclick="clearClaims()">🗑️ Clear All</button>
+                        </div>
+
+                        <div class="clean-card">
+                            <div class="clean-icon">🔔</div>
+                            <h3>Clear Notifications</h3>
+                            <p>Delete all notifications</p>
+                            <button class="btn-danger" onclick="clearNotifications()">🗑️ Clear All</button>
+                        </div>
+
+                        <div class="clean-card danger">
+                            <div class="clean-icon">⚠️</div>
+                            <h3>Reset Everything</h3>
+                            <p>Delete ALL data from the system</p>
+                            <button class="btn-danger" onclick="clearAllData()" style="background: var(--danger);">🚨 Reset All</button>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <div class="warning-icon">⚠️</div>
+                        <div class="warning-text">
+                            <h4>Important Warning</h4>
+                            <p>
+                                Clearing data is <strong>permanent</strong> and cannot be undone.
+                                Please make sure you have a backup before clearing any data.
+                                You will be asked to confirm twice before any data is deleted.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="notificationContainer"></div>
+
+    <!-- THEME TOGGLE -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</button>
+
+    <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ============================================================
+        // ALLOWED ADMIN EMAILS
+        // ============================================================
+        const ALLOWED_ADMINS = [
+            "dullamanyama0@gmail.com",
+            "admin@dvary.com",
+            "dollary@gmail.com",
+            "dvary@admin.com"
+        ];
+        for (let i = 1; i <= 300; i++) {
+            ALLOWED_ADMINS.push(`admin${i}@dvary.com`);
+        }
+        function isAllowedAdmin(email) {
+            return ALLOWED_ADMINS.includes(email);
+        }
+
+        // ============================================================
+        // THEME
+        // ============================================================
+        function getTheme() {
+            return localStorage.getItem('dvary-theme') || 'dark';
+        }
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('dvary-theme', theme);
+            const btn = document.getElementById('themeToggle');
+            if (btn) btn.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+        setTheme(getTheme());
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const current = getTheme();
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let isAdmin = false;
+        let allNotifications = [];
+
+        // ============================================================
+        // AUTH STATE
+        // ============================================================
+        auth.onAuthStateChanged((user) => {
+            const adminPanel = document.getElementById('adminPanel');
+            const accessDenied = document.getElementById('accessDenied');
+            const notLoggedIn = document.getElementById('notLoggedIn');
+
+            if (user) {
+                currentUser = user;
+                if (isAllowedAdmin(user.email)) {
+                    isAdmin = true;
+                    adminPanel.style.display = 'block';
+                    accessDenied.style.display = 'none';
+                    notLoggedIn.style.display = 'none';
+                    loadUserInfo(user);
+                    loadNotificationsList();
+                } else {
+                    isAdmin = false;
+                    adminPanel.style.display = 'none';
+                    accessDenied.style.display = 'block';
+                    notLoggedIn.style.display = 'none';
+                }
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                adminPanel.style.display = 'none';
+                accessDenied.style.display = 'none';
+                notLoggedIn.style.display = 'block';
+            }
+        });
+
+        // ============================================================
+        // LOAD USER INFO
+        // ============================================================
+        async function loadUserInfo(user) {
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    const name = data.username || data.displayName || 'User';
+                    document.getElementById('adminName').textContent = name;
+                    document.getElementById('adminEmail').textContent = user.email;
+                    document.getElementById('adminAvatar').textContent = name.charAt(0).toUpperCase();
+                } else {
+                    document.getElementById('adminName').textContent = 'Admin';
+                    document.getElementById('adminEmail').textContent = user.email;
+                    document.getElementById('adminAvatar').textContent = 'A';
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+
+        // ============================================================
+        // SWITCH TAB
+        // ============================================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            const map = { 'notifications': 'tab-notifications', 'clean': 'tab-clean' };
+            const target = map[tab];
+            if (target) {
+                document.getElementById(target).classList.add('active');
+                document.querySelectorAll('.tabs button').forEach(btn => {
+                    if (btn.textContent.toLowerCase().includes(tab === 'notifications' ? 'notification' : 'clean')) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            if (tab === 'notifications') loadNotificationsList();
+        }
+
+        // ============================================================
+        // LOAD NOTIFICATIONS LIST
+        // ============================================================
+        async function loadNotificationsList() {
+            const container = document.getElementById('notificationsListContainer');
+
+            try {
+                const snapshot = await db.collection('notifications')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                allNotifications = [];
+                snapshot.forEach(doc => {
+                    const notif = doc.data();
+                    notif.id = doc.id;
+                    allNotifications.push(notif);
+                });
+
+                if (allNotifications.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <span class="empty-icon">🔔</span>
+                            <h3>No notifications</h3>
+                            <p>Send your first notification above.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                allNotifications.forEach((notif) => {
+                    const createdAt = notif.createdAt?.toDate?.() || new Date();
+                    const formattedDate = createdAt.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    html += `
+                        <div class="notification-item" id="notif-${notif.id}">
+                            <div class="notif-content">
+                                <div class="notif-title">${notif.title || 'No Title'}</div>
+                                <div class="notif-message">${notif.message || ''}</div>
+                                <div class="notif-date">📅 ${formattedDate} ${notif.read ? '✅ Read' : '🆕 New'}</div>
+                            </div>
+                            <div class="notif-actions">
+                                ${!notif.read ? `
+                                    <button class="notif-mark-read" onclick="markNotificationRead('${notif.id}')">✅ Mark Read</button>
+                                ` : ''}
+                                <button class="notif-delete" onclick="deleteNotification('${notif.id}')">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">❌</span>
+                        <h3>Error loading notifications</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                showNotification('error', 'Failed to load notifications: ' + error.message);
+            }
+        }
+
+        // ============================================================
+        // SEND NOTIFICATION
+        // ============================================================
+        async function sendNotification() {
+            const title = document.getElementById('notifTitle').value.trim();
+            const message = document.getElementById('notifMessage').value.trim();
+
+            if (!title || !message) {
+                showNotification('error', 'Please fill in both title and message');
+                return;
+            }
+
+            try {
+                const usersSnapshot = await db.collection('users').get();
+
+                const promises = [];
+                usersSnapshot.forEach(doc => {
+                    const userData = doc.data();
+                    promises.push(
+                        db.collection('notifications').add({
+                            title: title,
+                            message: message,
+                            icon: '🔔',
+                            read: false,
+                            userId: doc.id,
+                            userEmail: userData.email || 'unknown',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            createdBy: auth.currentUser.uid,
+                            createdByEmail: auth.currentUser.email
+                        })
+                    );
+                });
+
+                await db.collection('notifications').add({
+                    title: title,
+                    message: message,
+                    icon: '🔔',
+                    read: false,
+                    isGlobal: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: auth.currentUser.uid,
+                    createdByEmail: auth.currentUser.email
+                });
+
+                await Promise.all(promises);
+
+                document.getElementById('notifTitle').value = '';
+                document.getElementById('notifMessage').value = '';
+
+                showNotification('success', `✅ Notification sent to ${usersSnapshot.size} users!`);
+                loadNotificationsList();
+
+            } catch (error) {
+                console.error('Error sending notification:', error);
+                showNotification('error', '❌ Failed to send notification: ' + error.message);
+            }
+        }
+
+        // ============================================================
+        // MARK NOTIFICATION READ
+        // ============================================================
+        async function markNotificationRead(notifId) {
+            try {
+                await db.collection('notifications').doc(notifId).update({
+                    read: true,
+                    readAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showNotification('success', '✅ Notification marked as read');
+                loadNotificationsList();
+            } catch (error) {
+                console.error('Error marking notification:', error);
+                showNotification('error', '❌ Failed to mark notification: ' + error.message);
+            }
+        }
+
+        // ============================================================
+        // DELETE NOTIFICATION
+        // ============================================================
+        async function deleteNotification(notifId) {
+            if (!confirm('Delete this notification?')) return;
+
+            try {
+                await db.collection('notifications').doc(notifId).delete();
+                showNotification('success', '✅ Notification deleted');
+                loadNotificationsList();
+            } catch (error) {
+                console.error('Error deleting notification:', error);
+                showNotification('error', '❌ Failed to delete notification: ' + error.message);
+            }
+        }
+
+        // ============================================================
+        // CLEAN DATA FUNCTIONS
+        // ============================================================
+        function clearProducts() {
+            if (!confirm('⚠️ Are you sure you want to delete ALL products? This cannot be undone!')) return;
+            if (!confirm('⚠️ Final confirmation: Delete all products?')) return;
+            localStorage.setItem('store_products', JSON.stringify([]));
+            showNotification('success', '🗑️ All products cleared');
+        }
+
+        function clearOrders() {
+            if (!confirm('⚠️ Are you sure you want to delete ALL orders? This cannot be undone!')) return;
+            if (!confirm('⚠️ Final confirmation: Delete all orders?')) return;
+            localStorage.setItem('store_orders', JSON.stringify([]));
+            showNotification('success', '🗑️ All orders cleared');
+        }
+
+        function clearUsers() {
+            if (!confirm('⚠️ Are you sure you want to delete ALL users? This cannot be undone!')) return;
+            if (!confirm('⚠️ Final confirmation: Delete all users?')) return;
+            localStorage.setItem('store_users', JSON.stringify([]));
+            showNotification('success', '🗑️ All users cleared');
+        }
+
+        function clearMessages() {
+            if (!confirm('⚠️ Are you sure you want to delete ALL messages? This cannot be undone!')) return;
+            if (!confirm('⚠️ Final confirmation: Delete all messages?')) return;
+            localStorage.setItem('store_messages', JSON.stringify([]));
+            showNotification('success', '🗑️ All messages cleared');
+        }
+
+        function clearClaims() {
+            if (!confirm('⚠️ Are you sure you want to delete ALL claims? This cannot be undone!')) return;
+            if (!confirm('⚠️ Final confirmation: Delete all claims?')) return;
+            localStorage.setItem('store_claims', JSON.stringify([]));
+            showNotification('success', '🗑️ All claims cleared');
+        }
+
+        function clearNotifications() {
+            if (!confirm('⚠️ Are you sure you want to delete ALL notifications? This cannot be undone!')) return;
+            if (!confirm('⚠️ Final confirmation: Delete all notifications?')) return;
+            localStorage.setItem('store_notifications', JSON.stringify([]));
+            loadNotificationsList();
+            showNotification('success', '🗑️ All notifications cleared');
+        }
+
+        function clearAllData() {
+            if (!confirm('🚨 WARNING: This will delete ALL data. Are you sure?')) return;
+            if (!confirm('🚨 FINAL WARNING: This action is PERMANENT. Continue?')) return;
+
+            localStorage.setItem('store_products', JSON.stringify([]));
+            localStorage.setItem('store_orders', JSON.stringify([]));
+            localStorage.setItem('store_users', JSON.stringify([]));
+            localStorage.setItem('store_messages', JSON.stringify([]));
+            localStorage.setItem('store_claims', JSON.stringify([]));
+            localStorage.setItem('store_notifications', JSON.stringify([]));
+
+            loadNotificationsList();
+            showNotification('warning', '🚨 All data has been cleared!');
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showNotification(type, message) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification-toast ${type}`;
+            const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+            notification.innerHTML = `
+                ${icons[type] || 'ℹ️'} ${message}
+                <button class="close-btn" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(notification);
+            setTimeout(() => { if (notification.parentElement) notification.remove(); }, 5000);
+        }
+
+        console.log('⚙️ DVARY GAMES — Settings Loaded!');
+    </script>
+
+</body>
+</html>
