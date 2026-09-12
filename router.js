@@ -5,12 +5,30 @@ const path = require('path');
 // ============================================================
 // PUBLIC PAGES
 // ============================================================
+
+// Landing page
 router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Main hub (Free games moja kwa moja)
 router.get('/main', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'main.html'));
+});
+
+// 🆓 FREE GAMES
+router.get('/free', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'free.html'));
+});
+
+// ⭐ VIP GAMES (Claim only)
+router.get('/vip', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'vip-payment.html'));
+});
+
+// Alias kwa /vip
+router.get('/vip-payment', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'vip-payment.html'));
 });
 
 router.get('/games', (req, res) => {
@@ -62,7 +80,7 @@ router.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
 });
 
-// /admin/dashboard  →  Dashboard (alias, optional)
+// /admin/dashboard  →  Dashboard (alias)
 router.get('/admin/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
 });
