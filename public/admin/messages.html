@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages — DVARY GAMES Admin</title>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #1a1a2e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #8b5cf6;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --border: #2d2d44;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            padding: 30px 20px;
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .sidebar h1 {
+            color: var(--accent);
+            font-size: 26px;
+            margin-bottom: 35px;
+            font-weight: 800;
+        }
+        .sidebar h1 span { color: var(--text-primary); }
+        .nav-links { list-style: none; flex: 1; }
+        .nav-links li { margin-bottom: 8px; }
+        .nav-links a {
+            display: block;
+            padding: 11px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: var(--accent);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        /* MAIN */
+        .main-content {
+            flex: 1;
+            padding: 40px 50px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .admin-header h2 { font-size: 30px; color: var(--accent); }
+        .admin-header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+        .admin-header .user-info .avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 14px;
+        }
+        .admin-header .user-info .name { color: var(--text-primary); font-weight: 600; font-size: 14px; }
+        .admin-header .user-info .email { color: var(--text-secondary); font-size: 12px; }
+        .admin-badge {
+            background: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* ACCESS DENIED */
+        .access-denied, .not-logged-in {
+            text-align: center;
+            padding: 80px 20px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: 60vh;
+        }
+        .access-denied .denied-icon, .not-logged-in .login-icon {
+            font-size: 80px; display: block; margin-bottom: 20px;
+        }
+        .access-denied h2 { color: var(--danger); font-size: 42px; margin-bottom: 15px; font-weight: 800; }
+        .not-logged-in h2 { color: var(--text-primary); font-size: 38px; margin-bottom: 15px; }
+        .access-denied p, .not-logged-in p {
+            color: var(--text-secondary); font-size: 18px; max-width: 500px; line-height: 1.8;
+        }
+        .access-denied .denied-code { font-size: 14px; color: var(--text-secondary); margin-top: 10px; opacity: 0.5; }
+        .access-denied .btn-go-home, .not-logged-in .btn-login {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 14px 40px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        .access-denied .btn-go-home:hover, .not-logged-in .btn-login:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        /* STATS */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .stat-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .stat-box:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .stat-box .s-number { font-size: 26px; font-weight: 800; color: var(--accent); }
+        .stat-box .s-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+        .stat-box.unread .s-number { color: var(--warning); }
+        .stat-box.replied .s-number { color: var(--success); }
+
+        /* TOOLBAR */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .toolbar .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+        .toolbar .search-box:focus { border-color: var(--accent); }
+        .toolbar .filter-btn {
+            padding: 10px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        .toolbar .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .toolbar .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* MESSAGE LIST */
+        .messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        .message-item:hover {
+            border-color: var(--accent);
+            transform: translateX(3px);
+        }
+        .message-item.unread {
+            border-left: 4px solid var(--warning);
+            background: rgba(245, 158, 11, 0.04);
+        }
+        .message-item.replied {
+            border-left: 4px solid var(--success);
+            opacity: 0.85;
+        }
+
+        .message-item .mi-avatar {
+            width: 46px; height: 46px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 18px;
+            flex-shrink: 0;
+        }
+        .message-item .mi-body { flex: 1; min-width: 0; }
+        .message-item .mi-header {
+            display: flex; justify-content: space-between;
+            align-items: center; gap: 10px; margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .message-item .mi-name {
+            font-size: 15px; font-weight: 700;
+            color: var(--text-primary);
+        }
+        .message-item .mi-time {
+            font-size: 12px; color: var(--text-secondary);
+        }
+        .message-item .mi-subject {
+            font-size: 13px; font-weight: 600;
+            color: var(--accent); margin-bottom: 4px;
+        }
+        .message-item .mi-preview {
+            font-size: 13px; color: var(--text-secondary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.5;
+        }
+        .message-item .mi-badge {
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .mi-badge.unread { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .mi-badge.read { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+        .mi-badge.replied { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+
+        /* LOADING & EMPTY */
+        .loading-spinner { text-align: center; padding: 40px; color: var(--text-secondary); }
+        .loading-spinner .spinner {
+            display: inline-block;
+            width: 40px; height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 12px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .empty-state h3 { color: var(--text-primary); margin-bottom: 8px; }
+        .empty-state .empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 9999;
+            display: none;
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            max-width: 640px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px 26px;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute; top: 14px; right: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: none; width: 36px; height: 36px;
+            border-radius: 50%; font-size: 18px; cursor: pointer;
+        }
+        .modal-close:hover { background: var(--danger); color: white; }
+
+        .modal-box h3 {
+            font-size: 20px; color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .modal-box .modal-sub {
+            font-size: 13px; color: var(--text-secondary);
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* MESSAGE DETAIL */
+        .msg-info {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .msg-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            gap: 12px;
+        }
+        .msg-info-row:last-child { margin-bottom: 0; }
+        .msg-info-row .label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .msg-info-row .value {
+            color: var(--text-primary);
+            font-weight: 600;
+            text-align: right;
+            word-break: break-word;
+        }
+        .msg-info-row .value a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .msg-info-row .value a:hover { text-decoration: underline; }
+
+        .msg-content {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+        .msg-content .subject {
+            font-size: 15px; font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .msg-content .body {
+            font-size: 14px; color: var(--text-primary);
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* REPLY FORM */
+        .reply-section {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+        .reply-section h4 {
+            font-size: 15px; color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+        .reply-section textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            line-height: 1.6;
+        }
+        .reply-section textarea:focus { border-color: var(--accent); }
+        .reply-section textarea::placeholder { color: var(--text-secondary); opacity: 0.6; }
+
+        .reply-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .reply-actions button {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-send {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            flex: 1;
+            justify-content: center;
+        }
+        .btn-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+        .btn-send:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .btn-danger-outline {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        }
+        .btn-danger-outline:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .btn-secondary-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border) !important;
+        }
+        .btn-secondary-outline:hover {
+            border-color: var(--accent) !important;
+            color: var(--accent);
+        }
+
+        /* REPLIED BANNER */
+        .replied-banner {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            color: var(--success);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed; top: 20px; right: 20px;
+            padding: 14px 22px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 99999;
+            animation: slideIn 0.4s ease;
+            max-width: 380px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--accent); }
+        .toast.warning { background: var(--warning); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; padding: 20px 12px; }
+            .main-content { padding: 20px; }
+            .admin-header { flex-direction: column; align-items: flex-start; }
+            .admin-header h2 { font-size: 24px; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .modal-box { padding: 22px 18px; }
+            .msg-info-row { flex-direction: column; gap: 4px; }
+            .msg-info-row .value { text-align: left; }
+        }
+        @media (max-width: 600px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%; height: auto; position: relative;
+                border-right: none; border-bottom: 1px solid var(--border);
+                padding: 15px;
+            }
+            .sidebar h1 { font-size: 20px; margin-bottom: 15px; }
+            .nav-links { display: flex; flex-wrap: wrap; gap: 6px; }
+            .nav-links li { margin-bottom: 0; }
+            .nav-links a { padding: 8px 12px; font-size: 13px; }
+            .message-item { flex-direction: column; }
+            .message-item .mi-avatar { width: 38px; height: 38px; font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h1>DVARY <span>GAMES</span></h1>
+        <ul class="nav-links">
+            <li><a href="/admin">📊 Dashboard</a></li>
+            <li><a href="/admin/businesses">🎮 Games</a></li>
+            <li><a href="/admin/claims">🎫 Claims</a></li>
+            <li><a href="/admin/reviews">👥 Users</a></li>
+            <li><a href="/admin/messages" class="active">📧 Messages</a></li>
+            <li><a href="/admin/settings">⚙️ Settings</a></li>
+        </ul>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+
+        <!-- NOT LOGGED IN -->
+        <div id="notLoggedIn" class="not-logged-in" style="display: none;">
+            <span class="login-icon">🔒</span>
+            <h2>Please Login</h2>
+            <p>You need to be logged in to access the admin panel.</p>
+            <a href="/login" class="btn-login">🔑 Login</a>
+        </div>
+
+        <!-- ACCESS DENIED -->
+        <div id="accessDenied" class="access-denied" style="display: none;">
+            <span class="denied-icon">⛔</span>
+            <h2>Access Denied</h2>
+            <p>You do not have permission to access this page.</p>
+            <p class="denied-code">Error 403 - Forbidden</p>
+            <a href="/main" class="btn-go-home">🏠 Return to Home</a>
+        </div>
+
+        <!-- ADMIN PANEL -->
+        <div id="adminPanel" style="display: none;">
+
+            <div class="admin-header">
+                <h2>📧 Messages</h2>
+                <div class="user-info">
+                    <div class="avatar" id="adminAvatar">U</div>
+                    <div>
+                        <div class="name" id="adminName">User</div>
+                        <div class="email" id="adminEmail">user@example.com</div>
+                    </div>
+                    <span class="admin-badge">👑 Admin</span>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-row" id="statsRow">
+                <div class="stat-box">
+                    <div class="s-number" id="statTotal">0</div>
+                    <div class="s-label">Total Messages</div>
+                </div>
+                <div class="stat-box unread">
+                    <div class="s-number" id="statUnread">0</div>
+                    <div class="s-label">Unread</div>
+                </div>
+                <div class="stat-box replied">
+                    <div class="s-number" id="statReplied">0</div>
+                    <div class="s-label">Replied</div>
+                </div>
+                <div class="stat-box">
+                    <div class="s-number" id="statToday">0</div>
+                    <div class="s-label">Today</div>
+                </div>
+            </div>
+
+            <!-- TOOLBAR -->
+            <div class="toolbar">
+                <input type="text" class="search-box" id="searchInput"
+                    placeholder="🔍 Search by name, email, subject..." />
+                <button class="filter-btn active" data-filter="all" onclick="filterMessages('all')">📋 All</button>
+                <button class="filter-btn" data-filter="unread" onclick="filterMessages('unread')">🆕 Unread</button>
+                <button class="filter-btn" data-filter="replied" onclick="filterMessages('replied')">✅ Replied</button>
+                <button class="filter-btn" onclick="loadMessages()">🔄 Refresh</button>
+            </div>
+
+            <!-- LIST -->
+            <div id="messagesList">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading messages...</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="messageModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <h3>📧 Message Details</h3>
+            <p class="modal-sub">Soma na jibu ujumbe wa mtumiaji</p>
+
+            <div id="modalContent"></div>
+
+            <div class="reply-section" id="replySection">
+                <h4>📤 Jibu Mtumiaji</h4>
+                <textarea id="replyText" placeholder="Andika jibu lako hapa... Jibu litaenda kwenye email ya mtumiaji."></textarea>
+                <div class="reply-actions">
+                    <button class="btn-send" id="sendReplyBtn" onclick="sendReply()">
+                        📧 Tuma Jibu
+                    </button>
+                    <button class="btn-danger-outline" onclick="deleteMessage()">
+                        🗑️ Futa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // FIREBASE
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8BYM4LP"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ============================================================
+        // ALLOWED ADMINS
+        // ============================================================
+        const ALLOWED_ADMINS = [
+            "dullamanyama0@gmail.com",
+            "admin@dvary.com",
+            "dollary@gmail.com",
+            "dvary@admin.com"
+        ];
+        for (let i = 1; i <= 300; i++) ALLOWED_ADMINS.push(`admin${i}@dvary.com`);
+
+        function isAllowedAdmin(email) { return ALLOWED_ADMINS.includes(email); }
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let allMessages = [];
+        let filteredMessages = [];
+        let currentFilter = 'all';
+        let currentMessage = null;
+
+        // ============================================================
+        // AUTH
+        // ============================================================
+        auth.onAuthStateChanged((user) => {
+            const adminPanel = document.getElementById('adminPanel');
+            const accessDenied = document.getElementById('accessDenied');
+            const notLoggedIn = document.getElementById('notLoggedIn');
+
+            if (user) {
+                currentUser = user;
+                if (isAllowedAdmin(user.email)) {
+                    adminPanel.style.display = 'block';
+                    accessDenied.style.display = 'none';
+                    notLoggedIn.style.display = 'none';
+                    loadUserInfo(user);
+                    loadMessages();
+                } else {
+                    adminPanel.style.display = 'none';
+                    accessDenied.style.display = 'block';
+                    notLoggedIn.style.display = 'none';
+                }
+            } else {
+                currentUser = null;
+                adminPanel.style.display = 'none';
+                accessDenied.style.display = 'none';
+                notLoggedIn.style.display = 'block';
+            }
+        });
+
+        async function loadUserInfo(user) {
+            try {
+                const doc = await db.collection('users').doc(user.uid).get();
+                if (doc.exists) {
+                    const d = doc.data();
+                    const name = d.username || d.displayName || 'Admin';
+                    document.getElementById('adminName').textContent = name;
+                    document.getElementById('adminEmail').textContent = user.email;
+                    document.getElementById('adminAvatar').textContent = name.charAt(0).toUpperCase();
+                } else {
+                    document.getElementById('adminName').textContent = 'Admin';
+                    document.getElementById('adminEmail').textContent = user.email;
+                    document.getElementById('adminAvatar').textContent = 'A';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // ============================================================
+        // LOAD MESSAGES
+        // ============================================================
+        async function loadMessages() {
+            const container = document.getElementById('messagesList');
+            container.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading messages...</p>
+                </div>
+            `;
+
+            try {
+                const snap = await db.collection('messages')
+                    .orderBy('createdAt', 'desc')
+                    .limit(200)
+                    .get();
+
+                allMessages = [];
+                snap.forEach(doc => {
+                    const m = doc.data(); m.id = doc.id;
+                    allMessages.push(m);
+                });
+
+                updateStats();
+                applyFilterAndSearch();
+
+            } catch (e) {
+                console.error('Load messages error:', e);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">❌</span>
+                        <h3>Hitilafu</h3>
+                        <p>${e.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateStats() {
+            const total = allMessages.length;
+            const unread = allMessages.filter(m => !m.read && m.status !== 'replied').length;
+            const replied = allMessages.filter(m => m.status === 'replied').length;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayCount = allMessages.filter(m => {
+                if (!m.createdAt) return false;
+                const d = m.createdAt.toDate ? m.createdAt.toDate() : new Date(m.createdAt);
+                return d >= today;
+            }).length;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statUnread').textContent = unread;
+            document.getElementById('statReplied').textContent = replied;
+            document.getElementById('statToday').textContent = todayCount;
+        }
+
+        // ============================================================
+        // FILTER & SEARCH
+        // ============================================================
+        function filterMessages(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            applyFilterAndSearch();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', applyFilterAndSearch);
+
+        function applyFilterAndSearch() {
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            filteredMessages = allMessages.filter(m => {
+                // Filter
+                if (currentFilter === 'unread' && (m.read || m.status === 'replied')) return false;
+                if (currentFilter === 'replied' && m.status !== 'replied') return false;
+
+                // Search
+                if (q) {
+                    const text = `${m.name} ${m.email} ${m.subject} ${m.message}`.toLowerCase();
+                    if (!text.includes(q)) return false;
+                }
+                return true;
+            });
+
+            renderMessages();
+        }
+
+        // ============================================================
+        // RENDER MESSAGES
+        // ============================================================
+        function renderMessages() {
+            const container = document.getElementById('messagesList');
+
+            if (filteredMessages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">📭</span>
+                        <h3>No messages</h3>
+                        <p>${currentFilter === 'all' ? 'Hakuna ujumbe bado.' : 'Hakuna ujumbe wa aina hii.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `<div class="messages-list">${filteredMessages.map(m => renderItem(m)).join('')}</div>`;
+        }
+
+        function renderItem(m) {
+            const initial = (m.name || 'U').charAt(0).toUpperCase();
+            const badgeClass = m.status === 'replied' ? 'replied' : (m.read ? 'read' : 'unread');
+            const badgeText = m.status === 'replied' ? 'Replied' : (m.read ? 'Read' : 'New');
+            const itemClass = m.status === 'replied' ? 'replied' : (!m.read ? 'unread' : '');
+
+            return `
+                <div class="message-item ${itemClass}" onclick="openMessage('${m.id}')">
+                    <div class="mi-avatar">${initial}</div>
+                    <div class="mi-body">
+                        <div class="mi-header">
+                            <span class="mi-name">${escapeHtml(m.name || 'Unknown')}</span>
+                            <span class="mi-time">${formatTime(m.createdAt)}</span>
+                        </div>
+                        <div class="mi-subject">${getSubjectIcon(m.subject)} ${escapeHtml(m.subject || 'No subject')}</div>
+                        <div class="mi-preview">${escapeHtml(m.message || '')}</div>
+                    </div>
+                    <span class="mi-badge ${badgeClass}">${badgeText}</span>
+                </div>
+            `;
+        }
+
+        function getSubjectIcon(subject) {
+            const icons = {
+                'Support': '🛠️',
+                'Payment': '💰',
+                'Bug': '🐛',
+                'Suggestion': '💡',
+                'Report': '🚨',
+                'Business': '🤝',
+                'Other': '📝'
+            };
+            return icons[subject] || '📧';
+        }
+
+        function formatTime(ts) {
+            if (!ts) return 'Just now';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            const diff = Date.now() - d;
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+            if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago';
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        // ============================================================
+        // OPEN MESSAGE
+        // ============================================================
+        async function openMessage(id) {
+            const msg = allMessages.find(m => m.id === id);
+            if (!msg) return;
+
+            currentMessage = msg;
+
+            // Mark as read
+            if (!msg.read) {
+                try {
+                    await db.collection('messages').doc(id).update({
+                        read: true,
+                        status: msg.status === 'replied' ? 'replied' : 'read',
+                        readAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    msg.read = true;
+                    if (msg.status !== 'replied') msg.status = 'read';
+                    updateStats();
+                    applyFilterAndSearch();
+                } catch (e) { console.error(e); }
+            }
+
+            renderModalContent(msg);
+            document.getElementById('messageModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function renderModalContent(m) {
+            const content = document.getElementById('modalContent');
+
+            const createdDate = m.createdAt?.toDate?.() || new Date(m.createdAt);
+            const formattedDate = createdDate.toLocaleString('en-GB', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            const repliedDate = m.repliedAt?.toDate?.() || null;
+
+            let repliedBanner = '';
+            if (m.status === 'replied') {
+                repliedBanner = `
+                    <div class="replied-banner">
+                        <span>✅</span>
+                        <div>
+                            <strong>Umejibu ujumbe huu</strong>
+                            ${repliedDate ? `<br><span style="opacity: 0.8; font-size: 12px;">${repliedDate.toLocaleString('en-GB')}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = `
+                ${repliedBanner}
+                <div class="msg-info">
+                    <div class="msg-info-row">
+                        <span class="label">👤 Jina</span>
+                        <span class="value">${escapeHtml(m.name || 'Unknown')}</span>
+                    </div>
+                    <div class="msg-info-row">
+                        <span class="label">✉️ Email</span>
+                        <span class="value"><a href="mailto:${escapeHtml(m.email)}">${escapeHtml(m.email)}</a></span>
+                    </div>
+                    ${m.phone ? `
+                        <div class="msg-info-row">
+                            <span class="label">📱 Simu</span>
+                            <span class="value"><a href="tel:${escapeHtml(m.phone)}">${escapeHtml(m.phone)}</a></span>
+                        </div>
+                    ` : ''}
+                    <div class="msg-info-row">
+                        <span class="label">📅 Tarehe</span>
+                        <span class="value">${formattedDate}</span>
+                    </div>
+                </div>
+
+                <div class="msg-content">
+                    <div class="subject">${getSubjectIcon(m.subject)} ${escapeHtml(m.subject || 'No subject')}</div>
+                    <div class="body">${escapeHtml(m.message || '')}</div>
+                </div>
+
+                ${m.replyMessage ? `
+                    <div class="msg-content" style="border-color: rgba(34, 197, 94, 0.3);">
+                        <div class="subject" style="color: var(--success);">✅ Jibu Lililotumwa</div>
+                        <div class="body">${escapeHtml(m.replyMessage)}</div>
+                    </div>
+                ` : ''}
+            `;
+
+            // Badilisha textarea
+            const replyText = document.getElementById('replyText');
+            replyText.value = '';
+            replyText.placeholder = m.status === 'replied'
+                ? `Unaweza kutuma jibu lingine kwa ${m.email}...`
+                : `Andika jibu lako hapa... Litaenda kwa ${m.email}`;
+        }
+
+        function closeModal() {
+            document.getElementById('messageModal').classList.remove('active');
+            document.body.style.overflow = '';
+            currentMessage = null;
+        }
+
+        document.getElementById('messageModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // ============================================================
+        // SEND REPLY
+        // ============================================================
+        async function sendReply() {
+            if (!currentMessage) return;
+
+            const replyText = document.getElementById('replyText').value.trim();
+
+            if (!replyText || replyText.length < 3) {
+                showToast('❌ Andika jibu lako (herufi 3+)', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('sendReplyBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Inatuma...';
+
+            try {
+                const res = await fetch('/api/send-reply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messageId: currentMessage.id,
+                        to: currentMessage.email,
+                        subject: currentMessage.subject,
+                        replyMessage: replyText,
+                        adminName: currentUser.displayName || 'DVARY GAMES Team'
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('✅ Jibu limetumwa kwa ' + currentMessage.email, 'success');
+
+                    // Sasisha local
+                    currentMessage.status = 'replied';
+                    currentMessage.read = true;
+                    currentMessage.replyMessage = replyText;
+                    currentMessage.repliedAt = new Date();
+
+                    // Sasisha kwenye allMessages
+                    const idx = allMessages.findIndex(m => m.id === currentMessage.id);
+                    if (idx >= 0) allMessages[idx] = currentMessage;
+
+                    updateStats();
+                    applyFilterAndSearch();
+                    closeModal();
+                } else {
+                    showToast('❌ ' + (data.error || 'Imeshindwa kutuma'), 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('❌ Hitilafu ya mtandao', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📧 Tuma Jibu';
+            }
+        }
+
+        // ============================================================
+        // DELETE MESSAGE
+        // ============================================================
+        async function deleteMessage() {
+            if (!currentMessage) return;
+            if (!confirm('Una uhakika unataka kufuta ujumbe huu?')) return;
+
+            try {
+                await db.collection('messages').doc(currentMessage.id).delete();
+                allMessages = allMessages.filter(m => m.id !== currentMessage.id);
+                updateStats();
+                applyFilterAndSearch();
+                closeModal();
+                showToast('✅ Ujumbe umefutwa', 'success');
+            } catch (e) {
+                console.error(e);
+                showToast('❌ Imeshindwa kufuta', 'error');
+            }
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, type = 'info') {
+            const e = document.querySelector('.toast'); if (e) e.remove();
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.innerHTML = msg;
+            document.body.appendChild(t);
+            setTimeout(() => { if (t.parentElement) t.remove(); }, 4000);
+        }
+
+        console.log('📧 DVARY GAMES — Admin Messages Loaded!');
+    </script>
+
+</body>
+</html>
