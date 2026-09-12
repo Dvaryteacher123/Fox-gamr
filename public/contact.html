@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - DVARY GAMES</title>
+    <meta property="og:title" content="Wasiliana Nasi - DVARY GAMES">
+    <meta property="og:image" content="https://files.catbox.moe/0qzkam.png">
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121f;
+            --bg-card: rgba(26, 26, 46, 0.7);
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --accent-hover: #8b5cf6;
+            --border: rgba(255, 255, 255, 0.06);
+            --shadow: rgba(99, 102, 241, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.2);
+            --accent-hover: #818cf8;
+            --border: rgba(0, 0, 0, 0.06);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(0, 0, 0, 0.06);
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            padding-top: 60px;
+            padding-bottom: 80px;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+        /* ============================================================
+           TOP HEADER
+           ============================================================ */
+        .top-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 12px 24px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+            height: 60px;
+        }
+        .top-header .logo {
+            font-size: 20px; font-weight: 800;
+            color: var(--text-primary); text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        .top-header .logo span { color: var(--accent); }
+        .top-header .logo .icon { margin-right: 4px; }
+
+        .header-right { display: flex; align-items: center; gap: 8px; }
+        .header-btn {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 22px; cursor: pointer; transition: all 0.3s ease;
+            position: relative; padding: 8px; border-radius: 50%;
+            text-decoration: none; display: flex; align-items: center;
+            justify-content: center; width: 40px; height: 40px;
+        }
+        .header-btn:hover { color: var(--text-primary); background: var(--glass-bg); }
+        .header-btn .badge {
+            position: absolute; top: 2px; right: 2px;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            background: var(--danger); color: white;
+            border-radius: 50%; font-size: 10px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--bg-primary);
+        }
+        .header-btn .badge.hidden { display: none; }
+
+        /* NOTIFICATIONS */
+        .notification-dropdown {
+            position: fixed; top: 68px; right: 24px;
+            width: 340px; max-height: 450px; overflow-y: auto;
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 12px 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: none; z-index: 300;
+        }
+        .notification-dropdown.open { display: block; }
+        .notification-dropdown .notif-header {
+            padding: 8px 16px 12px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .notification-dropdown .notif-header h4 { font-size: 14px; color: var(--text-primary); }
+        .notification-dropdown .notif-header button {
+            background: none; border: none; color: var(--accent);
+            font-size: 12px; font-weight: 600; cursor: pointer;
+        }
+        .notification-dropdown .notif-item {
+            padding: 12px 16px; border-bottom: 1px solid var(--border);
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; gap: 12px; align-items: flex-start;
+        }
+        .notification-dropdown .notif-item:hover { background: var(--glass-bg); }
+        .notification-dropdown .notif-item .notif-icon {
+            font-size: 18px; width: 32px; height: 32px;
+            background: var(--glass-bg); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .notification-dropdown .notif-item .notif-content { flex: 1; }
+        .notification-dropdown .notif-item .notif-content .title {
+            font-size: 13px; font-weight: 600; color: var(--text-primary);
+        }
+        .notification-dropdown .notif-item .notif-content .desc {
+            font-size: 12px; color: var(--text-secondary); margin-top: 2px;
+        }
+        .notification-dropdown .notif-item .notif-content .time {
+            font-size: 11px; color: var(--text-secondary); margin-top: 4px; opacity: 0.7;
+        }
+        .notification-dropdown .notif-empty {
+            padding: 30px 20px; text-align: center; color: var(--text-secondary);
+        }
+        .notification-dropdown .notif-empty .icon {
+            font-size: 40px; display: block; margin-bottom: 10px;
+        }
+
+        /* MENU BAR */
+        .menu-bar {
+            position: fixed; top: 60px; left: 0; right: 0; z-index: 99;
+            padding: 10px 24px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; gap: 8px; align-items: center;
+            overflow-x: auto; scrollbar-width: none;
+        }
+        .menu-bar::-webkit-scrollbar { display: none; }
+
+        .menu-btn {
+            padding: 8px 20px; border: none; border-radius: 30px;
+            background: transparent; color: var(--text-secondary);
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; white-space: nowrap;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+            font-family: inherit;
+        }
+        .menu-btn:hover { color: var(--text-primary); background: var(--glass-bg); }
+        .menu-btn.free-btn {
+            background: linear-gradient(135deg, var(--success), #16a34a);
+            color: white;
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.25);
+        }
+        .menu-btn.free-btn:hover { transform: scale(1.05); }
+        .menu-btn.vip-btn {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            color: white;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
+        }
+        .menu-btn.vip-btn:hover { transform: scale(1.05); }
+        .menu-btn.contact-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        .menu-btn.contact-btn.active {
+            box-shadow: 0 4px 25px var(--accent-glow);
+        }
+        .menu-btn.more-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            margin-left: auto;
+        }
+        .menu-btn.more-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* MORE MENU */
+        .more-menu {
+            position: fixed; top: 112px; right: 24px;
+            width: 220px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border); border-radius: 14px;
+            padding: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: none; z-index: 300;
+        }
+        .more-menu.open { display: block; }
+        .more-menu a {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 14px;
+            color: var(--text-secondary); text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-size: 14px; font-weight: 500;
+        }
+        .more-menu a:hover {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            transform: translateX(3px);
+        }
+        .more-menu a .m-icon { font-size: 18px; width: 24px; text-align: center; }
+        .more-menu .divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+        /* ============================================================
+           MAIN
+           ============================================================ */
+        .main-content {
+            max-width: 900px; margin: 0 auto;
+            padding: 30px 24px 100px;
+        }
+
+        /* HERO */
+        .contact-hero {
+            text-align: center;
+            padding: 30px 20px 40px;
+        }
+        .contact-hero .hero-icon {
+            font-size: 64px; display: block; margin-bottom: 14px;
+            animation: bounce 3s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .contact-hero h1 {
+            font-size: 32px; font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+        .contact-hero h1 span { color: var(--accent); }
+        .contact-hero p {
+            font-size: 15px; color: var(--text-secondary);
+            max-width: 500px; margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* INFO CARDS */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 18px 14px;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+        .info-card .ic-icon {
+            font-size: 28px; display: block; margin-bottom: 8px;
+        }
+        .info-card .ic-title {
+            font-size: 14px; font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .info-card .ic-desc {
+            font-size: 12px; color: var(--text-secondary);
+        }
+        .info-card.whatsapp .ic-icon { color: #25D366; }
+        .info-card.whatsapp:hover { border-color: #25D366; }
+        .info-card.email .ic-icon { color: var(--info); }
+        .info-card.email:hover { border-color: var(--info); }
+        .info-card.social .ic-icon { color: var(--warning); }
+        .info-card.social:hover { border-color: var(--warning); }
+
+        /* FORM */
+        .contact-form-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 32px 28px;
+            margin-bottom: 30px;
+        }
+        .contact-form-wrapper h2 {
+            font-size: 20px; font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .contact-form-wrapper .form-sub {
+            font-size: 13px; color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .form-group label .required {
+            color: var(--danger);
+            margin-left: 2px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+        .form-group select option {
+            background: var(--bg-secondary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .char-count {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-align: right;
+            margin-top: 4px;
+            opacity: 0.7;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* SUCCESS STATE */
+        .success-view {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .success-view.show { display: block; }
+        .success-view .success-icon {
+            font-size: 72px; display: block; margin-bottom: 16px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        .success-view h3 {
+            font-size: 22px;
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+        .success-view p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .success-view .btn-again {
+            padding: 12px 26px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .success-view .btn-again:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* FAQ */
+        .faq-section {
+            margin-top: 30px;
+        }
+        .faq-section h2 {
+            font-size: 20px; font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .faq-item.open {
+            border-color: var(--accent);
+        }
+        .faq-question {
+            width: 100%;
+            padding: 14px 18px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .faq-question:hover { background: var(--glass-bg); }
+        .faq-question .arrow {
+            transition: transform 0.3s ease;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+        .faq-item.open .faq-question .arrow {
+            transform: rotate(180deg);
+            color: var(--accent);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+            padding: 0 18px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 300px;
+            padding: 0 18px 16px;
+        }
+
+        /* ============================================================
+           FLOATING AI
+           ============================================================ */
+        .ai-float-btn {
+            position: fixed; right: 24px; bottom: 90px; z-index: 999;
+            width: 58px; height: 58px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white; font-size: 26px;
+            cursor: pointer; text-decoration: none;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 30px var(--accent-glow);
+            animation: floatAI 3s ease-in-out infinite;
+        }
+        @keyframes floatAI {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .ai-float-btn:hover { animation: none; transform: scale(1.1); }
+        .ai-float-btn .tooltip {
+            position: absolute; right: 72px;
+            background: var(--bg-secondary); padding: 6px 14px;
+            border-radius: 10px; font-size: 12px; font-weight: 600;
+            color: var(--text-primary); border: 1px solid var(--glass-border);
+            white-space: nowrap; opacity: 0; pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .ai-float-btn:hover .tooltip { opacity: 1; }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+            height: 68px;
+        }
+        .bottom-nav .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 10px; font-weight: 600;
+            transition: all 0.3s ease; padding: 4px 10px;
+            border-radius: 8px; min-width: 48px;
+        }
+        .bottom-nav .nav-item .nav-icon { font-size: 22px; line-height: 1; }
+        .bottom-nav .nav-item:hover { color: var(--text-primary); }
+        .bottom-nav .nav-item.active { color: var(--accent); }
+        .bottom-nav .nav-item.active .nav-icon {
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed; top: 80px; right: 20px;
+            padding: 14px 24px; border-radius: 12px; color: white;
+            font-weight: 600; z-index: 1000;
+            animation: slideIn 0.4s ease; max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: flex; align-items: center; gap: 12px;
+            font-size: 14px;
+        }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--accent); }
+        .toast.warning { background: var(--warning); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .toast .close {
+            background: none; border: none; color: white;
+            font-size: 20px; cursor: pointer; opacity: 0.7;
+        }
+        .toast .close:hover { opacity: 1; }
+
+        /* MOBILE DRAWER */
+        .mobile-menu-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6);
+            z-index: 500; opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .mobile-menu-overlay.open { opacity: 1; pointer-events: all; }
+        .mobile-drawer {
+            position: fixed; top: 0; right: -320px;
+            width: 320px; max-width: 85vw; height: 100vh;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--glass-border); z-index: 600;
+            padding: 30px 24px;
+            transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .mobile-drawer.open { right: 0; }
+        .mobile-drawer .drawer-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 20px; border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .mobile-drawer .drawer-header .drawer-logo { font-size: 20px; font-weight: 800; }
+        .mobile-drawer .drawer-header .drawer-logo span { color: var(--accent); }
+        .mobile-drawer .drawer-header .drawer-close {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 24px; cursor: pointer; padding: 4px;
+        }
+        .mobile-drawer .drawer-links { list-style: none; flex: 1; }
+        .mobile-drawer .drawer-links li { margin-bottom: 2px; }
+        .mobile-drawer .drawer-links a {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 16px; color: var(--text-secondary);
+            text-decoration: none; border-radius: 12px;
+            transition: all 0.3s ease; font-size: 15px; font-weight: 500;
+        }
+        .mobile-drawer .drawer-links a:hover,
+        .mobile-drawer .drawer-links a.active {
+            background: var(--glass-bg); color: var(--text-primary);
+        }
+        .mobile-drawer .drawer-links a .link-icon {
+            font-size: 20px; width: 28px; text-align: center;
+        }
+        .mobile-drawer .drawer-user {
+            padding: 16px; background: var(--glass-bg);
+            border-radius: 12px; border: 1px solid var(--glass-border);
+            margin-top: auto;
+        }
+        .mobile-drawer .drawer-user .user-name { font-weight: 600; font-size: 15px; }
+        .mobile-drawer .drawer-user .user-email {
+            font-size: 13px; color: var(--text-secondary);
+        }
+        .mobile-drawer .drawer-user .logout-drawer {
+            margin-top: 10px; padding: 8px 16px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px; color: var(--danger);
+            cursor: pointer; font-weight: 600; width: 100%;
+        }
+        .mobile-drawer .drawer-user .logout-drawer:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            body { padding-top: 56px; padding-bottom: 68px; }
+            .top-header { padding: 10px 16px; height: 56px; }
+            .top-header .logo { font-size: 18px; }
+            .header-btn { width: 36px; height: 36px; font-size: 20px; }
+
+            .menu-bar { top: 56px; padding: 8px 16px; gap: 6px; }
+            .menu-btn { font-size: 13px; padding: 7px 16px; }
+            .menu-btn.more-btn { padding: 7px 14px; }
+
+            .main-content { padding: 16px 16px 90px; }
+            .contact-hero { padding: 20px 12px 30px; }
+            .contact-hero .hero-icon { font-size: 56px; }
+            .contact-hero h1 { font-size: 24px; }
+            .contact-hero p { font-size: 14px; }
+
+            .info-cards { grid-template-columns: 1fr; gap: 10px; }
+            .info-card { padding: 14px 12px; }
+
+            .contact-form-wrapper { padding: 22px 18px; }
+            .contact-form-wrapper h2 { font-size: 18px; }
+
+            .form-row { grid-template-columns: 1fr; gap: 0; }
+
+            .ai-float-btn { width: 52px; height: 52px; font-size: 22px; bottom: 80px; right: 16px; }
+            .ai-float-btn .tooltip { display: none; }
+
+            .notification-dropdown {
+                width: calc(100vw - 32px); right: 16px; top: 62px;
+            }
+            .more-menu {
+                width: calc(100vw - 32px); right: 16px; top: 104px;
+            }
+
+            .bottom-nav {
+                height: 60px; padding: 4px 0 max(4px, env(safe-area-inset-bottom));
+            }
+            .bottom-nav .nav-item {
+                font-size: 9px; padding: 2px 6px; min-width: 44px;
+            }
+            .bottom-nav .nav-item .nav-icon { font-size: 18px; }
+        }
+        @media (max-width: 480px) {
+            .contact-hero h1 { font-size: 22px; }
+            .contact-hero .hero-icon { font-size: 48px; }
+            .menu-btn { font-size: 12px; padding: 6px 14px; }
+        }
+    </style>
+</head>
+<body data-page="contact">
+
+    <!-- ============================================================
+         TOP HEADER
+         ============================================================ -->
+    <header class="top-header">
+        <a href="/" class="logo">
+            <span class="icon">🎮</span> DVARY <span>GAMES</span>
+        </a>
+        <div class="header-right">
+            <button class="header-btn" id="notifBtn" onclick="toggleNotifications()" title="Notifications">
+                🔔<span class="badge hidden" id="notifBadge">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- NOTIFICATIONS -->
+    <div class="notification-dropdown" id="notifDropdown">
+        <div class="notif-header">
+            <h4>🔔 Notifications</h4>
+            <button onclick="clearNotifications()">Clear all</button>
+        </div>
+        <div id="notifList">
+            <div class="notif-empty">
+                <span class="icon">🔕</span>
+                <p>No notifications yet</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU BAR -->
+    <nav class="menu-bar">
+        <a href="/main" class="menu-btn free-btn">🆓 Free</a>
+        <a href="/vip" class="menu-btn vip-btn">⭐ VIP</a>
+        <a href="/contact" class="menu-btn contact-btn active">📧 Contact</a>
+        <button class="menu-btn more-btn" id="moreBtn" onclick="toggleMoreMenu()">
+            ☰ Menu
+        </button>
+    </nav>
+
+    <!-- MORE MENU -->
+    <div class="more-menu" id="moreMenu">
+        <a href="/rewardclaim"><span class="m-icon">🎁</span> Claim Reward</a>
+        <a href="/ai"><span class="m-icon">🤖</span> AI Chat</a>
+        <a href="/community"><span class="m-icon">💬</span> Community</a>
+        <a href="/about"><span class="m-icon">ℹ️</span> About</a>
+        <div class="divider"></div>
+        <a href="/login"><span class="m-icon">👤</span> Login</a>
+        <a href="https://whatsapp.com/channel/0029VbCRC9b5fM5cruU8PF2M" target="_blank">
+            <span class="m-icon">📱</span> WhatsApp
+        </a>
+    </div>
+
+    <!-- ============================================================
+         MAIN
+         ============================================================ -->
+    <main class="main-content">
+
+        <!-- HERO -->
+        <div class="contact-hero">
+            <span class="hero-icon">📧</span>
+            <h1>Wasiliana <span>Nasi</span></h1>
+            <p>Una swali, tatizo, au pendekezo? Tutumie ujumbe — tutakujibu haraka iwezekanavyo.</p>
+        </div>
+
+        <!-- INFO CARDS -->
+        <div class="info-cards">
+            <a href="https://whatsapp.com/channel/0029VbCRC9b5fM5cruU8PF2M" target="_blank" class="info-card whatsapp">
+                <span class="ic-icon">💬</span>
+                <div class="ic-title">WhatsApp</div>
+                <div class="ic-desc">Jiunge na channel yetu</div>
+            </a>
+            <a href="mailto:support@dvary.space" class="info-card email">
+                <span class="ic-icon">✉️</span>
+                <div class="ic-title">Email</div>
+                <div class="ic-desc">support@dvary.space</div>
+            </a>
+            <a href="/community" class="info-card social">
+                <span class="ic-icon">👥</span>
+                <div class="ic-title">Community</div>
+                <div class="ic-desc">Jiunge na jamii</div>
+            </a>
+        </div>
+
+        <!-- FORM -->
+        <div class="contact-form-wrapper" id="formWrapper">
+            <h2>Tuma Ujumbe</h2>
+            <p class="form-sub">Jaza fomu hapa chini na tutakujibu kwa haraka</p>
+
+            <form id="contactForm" autocomplete="on">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Jina lako <span class="required">*</span></label>
+                        <input type="text" id="contactName" placeholder="Mfano: Juma Ali"
+                               required maxlength="80" />
+                    </div>
+                    <div class="form-group">
+                        <label>Email <span class="required">*</span></label>
+                        <input type="email" id="contactEmail" placeholder="juma@example.com"
+                               required maxlength="100" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Namba ya Simu</label>
+                        <input type="tel" id="contactPhone" placeholder="0712 345 678"
+                               maxlength="20" />
+                    </div>
+                    <div class="form-group">
+                        <label>Somo <span class="required">*</span></label>
+                        <select id="contactSubject" required>
+                            <option value="">-- Chagua somo --</option>
+                            <option value="Support">🛠️ Msaada wa Kiufundi</option>
+                            <option value="Payment">💰 Malipo / Claim</option>
+                            <option value="Bug">🐛 Ripoti Tatizo</option>
+                            <option value="Suggestion">💡 Pendekezo</option>
+                            <option value="Report">🚨 Ripoti Mtumiaji</option>
+                            <option value="Business">🤝 Ushirikiano</option>
+                            <option value="Other">📝 Nyingine</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ujumbe wako <span class="required">*</span></label>
+                    <textarea id="contactMessage" placeholder="Eleza kwa ufupi..."
+                              required minlength="10" maxlength="1000"
+                              oninput="updateCharCount(this)"></textarea>
+                    <div class="char-count" id="charCount">0 / 1000</div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="contactSubmit">
+                    📤 Tuma Ujumbe
+                </button>
+            </form>
+        </div>
+
+        <!-- SUCCESS VIEW -->
+        <div class="success-view" id="successView">
+            <span class="success-icon">🎉</span>
+            <h3>Ujumbe Wako Umepokelewa!</h3>
+            <p>
+                Asante kwa kuwasiliana nasi. Tutakujibu kwa haraka iwezekanavyo
+                kupitia email au simu uliyotupa.
+            </p>
+            <button class="btn-again" onclick="resetForm()">
+                📝 Tuma Ujumbe Mwingine
+            </button>
+        </div>
+
+        <!-- FAQ -->
+        <div class="faq-section">
+            <h2>Maswali ya Mara kwa Mara</h2>
+
+            <div class="faq-item" onclick="toggleFAQ(this)">
+                <button class="faq-question">
+                    <span>🎫 Nashindwa kufungua VIP game, nifanye nini?</span>
+                    <span class="arrow">▼</span>
+                </button>
+                <div class="faq-answer">
+                    Hakikisha una claim code sahihi kutoka kwa admin. Ingia kwenye ukurasa wa VIP,
+                    bofya "Weka Claim Code", weka code yako, na ubofye "Thibitisha".
+                    Kama bado inashindwa, wasiliana nasi kupitia fomu hii.
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFAQ(this)">
+                <button class="faq-question">
+                    <span>💰 Ninalipaje kwa vip game?</span>
+                    <span class="arrow">▼</span>
+                </button>
+                <div class="faq-answer">
+                    Kwa sasa tunatumia **Claim Code**. Wasiliana nasi kupitia WhatsApp au
+                    fomu hii ili tukupe maelekezo ya malipo (M-Pesa, Tigo Pesa, Airtel Money).
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFAQ(this)">
+                <button class="faq-question">
+                    <span>🔓 Game imefunguliwa lakini siwezi kupakua?</span>
+                    <span class="arrow">▼</span>
+                </button>
+                <div class="faq-answer">
+                    Kama download link haifanyi kazi, jaribu:
+                    1. Onyesha upya ukurasa
+                    2. Angalia kama una internet
+                    3. Jaribu browser nyingine
+                    Kama bado, tuma screenshot kwa fomu hii.
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFAQ(this)">
+                <button class="faq-question">
+                    <span>👤 Nimepoteza account yangu, nifanye nini?</span>
+                    <span class="arrow">▼</span>
+                </button>
+                <div class="faq-answer">
+                    Tuma email yako ya account + jina lako kwa fomu hii, tutakusaidia kupata
+                    account yako tena.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FLOATING AI -->
+    <a href="/ai" class="ai-float-btn">
+        🤖
+        <span class="tooltip">AI Assistant</span>
+    </a>
+
+    <!-- MOBILE DRAWER -->
+    <div class="mobile-menu-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+    <nav class="mobile-drawer" id="mobileDrawer">
+        <div class="drawer-header">
+            <div class="drawer-logo">DVARY <span>GAMES</span></div>
+            <button class="drawer-close" onclick="closeMobileMenu()">✕</button>
+        </div>
+        <ul class="drawer-links">
+            <li><a href="/main" onclick="closeMobileMenu();">
+                <span class="link-icon">🏠</span> Home</a></li>
+            <li><a href="/main" onclick="closeMobileMenu();">
+                <span class="link-icon">🆓</span> Free Games</a></li>
+            <li><a href="/vip" onclick="closeMobileMenu();">
+                <span class="link-icon">⭐</span> VIP Games</a></li>
+            <li><a href="/rewardclaim" onclick="closeMobileMenu();">
+                <span class="link-icon">🎁</span> Claim Reward</a></li>
+            <li><a href="/contact" onclick="closeMobileMenu();" class="active">
+                <span class="link-icon">📧</span> Contact</a></li>
+            <li><a href="/ai" onclick="closeMobileMenu();">
+                <span class="link-icon">🤖</span> AI Chat</a></li>
+            <li><a href="/community" onclick="closeMobileMenu();">
+                <span class="link-icon">💬</span> Community</a></li>
+            <li><a href="/about" onclick="closeMobileMenu();">
+                <span class="link-icon">ℹ️</span> About</a></li>
+            <li><a href="https://whatsapp.com/channel/0029VbCRC9b5fM5cruU8PF2M"
+                   target="_blank" onclick="closeMobileMenu();">
+                <span class="link-icon">📱</span> WhatsApp</a></li>
+        </ul>
+        <div class="drawer-user">
+            <div class="user-name" id="drawerUserName">Guest</div>
+            <div class="user-email" id="drawerUserEmail">Please login</div>
+            <button class="logout-drawer" id="drawerLoginBtn"
+                onclick="window.location.href='/login'">🔑 Login</button>
+            <button class="logout-drawer" id="drawerLogoutBtn"
+                style="display:none;" onclick="logoutDrawer()">🚪 Logout</button>
+        </div>
+    </nav>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <a href="/main" class="nav-item"><span class="nav-icon">🏠</span> Home</a>
+        <a href="/main" class="nav-item"><span class="nav-icon">🆓</span> Free</a>
+        <a href="/vip" class="nav-item"><span class="nav-icon">⭐</span> VIP</a>
+        <a href="/contact" class="nav-item active"><span class="nav-icon">📧</span> Contact</a>
+        <a href="/ai" class="nav-item"><span class="nav-icon">🤖</span> AI</a>
+    </nav>
+
+    <!-- ============================================================
+         JAVASCRIPT
+         ============================================================ -->
+    <script>
+        // ============================================================
+        // FIREBASE
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnaIWkHEwoWQgjadYLyfVoMWZK0x6toxA",
+            authDomain: "enjoy-game-6c05c.firebaseapp.com",
+            projectId: "enjoy-game-6c05c",
+            storageBucket: "enjoy-game-6c05c.firebasestorage.app",
+            messagingSenderId: "512924203714",
+            appId: "1:512924203714:web:47b16f7ce1b786a224195b",
+            measurementId: "G-Y2H8YBM4LP"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let notifications = [];
+
+        // ============================================================
+        // AUTH
+        // ============================================================
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            updateDrawerUser(user);
+
+            // Pre-fill form kama user ameingia
+            if (user) {
+                const nameInput = document.getElementById('contactName');
+                const emailInput = document.getElementById('contactEmail');
+
+                if (nameInput && !nameInput.value) {
+                    nameInput.value = user.displayName || '';
+                }
+                if (emailInput && !emailInput.value) {
+                    emailInput.value = user.email || '';
+                }
+            }
+
+            loadNotifications();
+        });
+
+        function updateDrawerUser(user) {
+            const n = document.getElementById('drawerUserName');
+            const e = document.getElementById('drawerUserEmail');
+            const lb = document.getElementById('drawerLoginBtn');
+            const lo = document.getElementById('drawerLogoutBtn');
+            if (!n) return;
+            if (user) {
+                n.textContent = user.displayName || user.email.split('@')[0];
+                e.textContent = user.email;
+                lb.style.display = 'none';
+                lo.style.display = 'block';
+            } else {
+                n.textContent = 'Guest';
+                e.textContent = 'Please login';
+                lb.style.display = 'block';
+                lo.style.display = 'none';
+            }
+        }
+
+        // ============================================================
+        // CHARACTER COUNT
+        // ============================================================
+        function updateCharCount(el) {
+            const count = el.value.length;
+            const counter = document.getElementById('charCount');
+            counter.textContent = `${count} / 1000`;
+
+            if (count > 900) {
+                counter.style.color = 'var(--warning)';
+            } else if (count > 990) {
+                counter.style.color = 'var(--danger)';
+            } else {
+                counter.style.color = 'var(--text-secondary)';
+            }
+        }
+
+        // ============================================================
+        // SUBMIT FORM
+        // ============================================================
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('contactName').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            const phone = document.getElementById('contactPhone').value.trim();
+            const subject = document.getElementById('contactSubject').value;
+            const message = document.getElementById('contactMessage').value.trim();
+
+            // Validation
+            if (!name || name.length < 2) {
+                showToast('❌ Weka jina lako kamili', 'error');
+                return;
+            }
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showToast('❌ Weka email sahihi', 'error');
+                return;
+            }
+            if (!subject) {
+                showToast('❌ Chagua somo la ujumbe', 'error');
+                return;
+            }
+            if (!message || message.length < 10) {
+                showToast('❌ Ujumbe ni mfupi sana (herufi 10+)', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('contactSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Inatuma...';
+
+            try {
+                await db.collection('messages').add({
+                    name,
+                    email,
+                    phone: phone || null,
+                    subject,
+                    message,
+                    userId: currentUser?.uid || null,
+                    userEmail: currentUser?.email || null,
+                    status: 'unread',      // unread | read | replied
+                    read: false,
+                    replied: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    userAgent: navigator.userAgent.substring(0, 200)
+                });
+
+                // Onyesha success
+                document.getElementById('formWrapper').style.display = 'none';
+                document.getElementById('successView').classList.add('show');
+
+                showToast('✅ Ujumbe wako umepokelewa!', 'success');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Message send error:', error);
+                showToast('❌ Hitilafu: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📤 Tuma Ujumbe';
+            }
+        });
+
+        function resetForm() {
+            document.getElementById('contactForm').reset();
+            document.getElementById('charCount').textContent = '0 / 1000';
+            document.getElementById('formWrapper').style.display = 'block';
+            document.getElementById('successView').classList.remove('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ============================================================
+        // FAQ TOGGLE
+        // ============================================================
+        function toggleFAQ(el) {
+            el.classList.toggle('open');
+        }
+
+        // ============================================================
+        // NOTIFICATIONS
+        // ============================================================
+        async function loadNotifications() {
+            try {
+                const snap = await db.collection('notifications')
+                    .orderBy('createdAt', 'desc').limit(20).get();
+                notifications = [];
+                snap.forEach(d => {
+                    const n = d.data(); n.id = d.id;
+                    notifications.push(n);
+                });
+                updateNotifUI();
+            } catch (e) { console.error(e); }
+        }
+        function updateNotifUI() {
+            const list = document.getElementById('notifList');
+            const badge = document.getElementById('notifBadge');
+            const unread = notifications.filter(n => !n.read).length;
+            if (unread > 0) {
+                badge.textContent = unread > 9 ? '9+' : unread;
+                badge.classList.remove('hidden');
+            } else badge.classList.add('hidden');
+
+            if (notifications.length === 0) {
+                list.innerHTML = `<div class="notif-empty"><span class="icon">🔕</span><p>No notifications yet</p></div>`;
+                return;
+            }
+            list.innerHTML = notifications.map(n => `
+                <div class="notif-item" onclick="markNotifRead('${n.id}')">
+                    <div class="notif-icon">${n.icon || '📢'}</div>
+                    <div class="notif-content">
+                        <div class="title">${n.title || 'Update'}</div>
+                        <div class="desc">${n.message || ''}</div>
+                        <div class="time">${formatTime(n.createdAt)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        function formatTime(ts) {
+            if (!ts) return 'Just now';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            const diff = Date.now() - d;
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+            return d.toLocaleDateString();
+        }
+        function toggleNotifications() {
+            document.getElementById('notifDropdown').classList.toggle('open');
+            document.getElementById('moreMenu').classList.remove('open');
+        }
+        function clearNotifications() {
+            notifications = [];
+            document.getElementById('notifList').innerHTML =
+                `<div class="notif-empty"><span class="icon">🔕</span><p>No notifications</p></div>`;
+            document.getElementById('notifBadge').classList.add('hidden');
+            document.getElementById('notifDropdown').classList.remove('open');
+        }
+        async function markNotifRead(id) {
+            try {
+                await db.collection('notifications').doc(id).update({ read: true });
+                notifications = notifications.map(n => n.id === id ? { ...n, read: true } : n);
+                updateNotifUI();
+            } catch (e) { console.error(e); }
+        }
+
+        // ============================================================
+        // MORE MENU
+        // ============================================================
+        function toggleMoreMenu() {
+            document.getElementById('moreMenu').classList.toggle('open');
+            document.getElementById('notifDropdown').classList.remove('open');
+        }
+
+        // ============================================================
+        // MOBILE MENU
+        // ============================================================
+        function toggleMobileMenu() {
+            document.getElementById('mobileDrawer').classList.toggle('open');
+            document.getElementById('mobileOverlay').classList.toggle('open');
+        }
+        function closeMobileMenu() {
+            document.getElementById('mobileDrawer').classList.remove('open');
+            document.getElementById('mobileOverlay').classList.remove('open');
+        }
+        function logoutDrawer() {
+            auth.signOut().then(() => {
+                closeMobileMenu();
+                window.location.reload();
+            });
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, type = 'info') {
+            const e = document.querySelector('.toast'); if (e) e.remove();
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.innerHTML = `${msg}<button class="close" onclick="this.parentElement.remove()">×</button>`;
+            document.body.appendChild(t);
+            setTimeout(() => { if (t.parentElement) t.remove(); }, 5000);
+        }
+
+        // ============================================================
+        // CLOSE ON OUTSIDE CLICK
+        // ============================================================
+        document.addEventListener('click', e => {
+            const dd = document.getElementById('notifDropdown');
+            const btn = document.getElementById('notifBtn');
+            const mm = document.getElementById('moreMenu');
+            const mBtn = document.getElementById('moreBtn');
+
+            if (dd && btn && !dd.contains(e.target) && !btn.contains(e.target)) {
+                dd.classList.remove('open');
+            }
+            if (mm && mBtn && !mm.contains(e.target) && !mBtn.contains(e.target)) {
+                mm.classList.remove('open');
+            }
+        });
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        console.log('📧 DVARY GAMES — Contact Loaded!');
+    </script>
+
+</body>
+                          </html>
