@@ -1,0 +1,1275 @@
+<!DOCTYPE html><html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>DVARY — Digital Services Platform</title>
+
+<meta name="description" content="DVARY ni platform ya huduma mbalimbali za kidigitali kwa urahisi, haraka na usalama.">
+<meta name="theme-color" content="#08090d">
+
+<meta property="og:title" content="DVARY — Digital Services Platform">
+<meta property="og:description" content="Huduma zako za kidigitali, sehemu moja.">
+<meta property="og:image" content="https://files.catbox.moe/0qzkam.png">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --bg: #07080c;
+        --bg2: #0c0e14;
+        --card: rgba(255,255,255,.045);
+        --border: rgba(255,255,255,.09);
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --primary: #6366f1;
+        --secondary: #8b5cf6;
+        --cyan: #22d3ee;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        background:
+            radial-gradient(circle at 15% 10%, rgba(99,102,241,.16), transparent 30%),
+            radial-gradient(circle at 85% 20%, rgba(139,92,246,.12), transparent 30%),
+            var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+            linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+        background-size: 45px 45px;
+        mask-image: linear-gradient(to bottom, black, transparent 85%);
+    }
+
+    /* NAVBAR */
+
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        padding: 18px 6%;
+        transition: .35s ease;
+    }
+
+    .navbar.scrolled {
+        background: rgba(7,8,12,.78);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,.07);
+        padding-top: 13px;
+        padding-bottom: 13px;
+    }
+
+    .nav-inner {
+        max-width: 1250px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .logo {
+        color: white;
+        text-decoration: none;
+        font-size: 22px;
+        font-weight: 900;
+        letter-spacing: -1px;
+    }
+
+    .logo span {
+        background: linear-gradient(135deg, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .nav-links a {
+        color: #cbd5e1;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: .25s;
+    }
+
+    .nav-links a:hover {
+        color: white;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .nav-login,
+    .nav-start {
+        text-decoration: none;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .nav-login {
+        color: white;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,.035);
+    }
+
+    .nav-start {
+        color: white;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        box-shadow: 0 8px 25px rgba(99,102,241,.25);
+    }
+
+    /* HERO */
+
+    .hero {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 140px 20px 90px;
+    }
+
+    .hero-content {
+        max-width: 950px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 15px;
+        border: 1px solid rgba(129,140,248,.25);
+        background: rgba(99,102,241,.08);
+        color: #c7d2fe;
+        border-radius: 100px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        animation: fadeUp .8s ease both;
+    }
+
+    .badge-dot {
+        width: 7px;
+        height: 7px;
+        background: #4ade80;
+        border-radius: 50%;
+        box-shadow: 0 0 12px #4ade80;
+    }
+
+    .hero h1 {
+        font-size: clamp(46px, 7vw, 86px);
+        line-height: .98;
+        letter-spacing: -4px;
+        font-weight: 950;
+        margin-bottom: 28px;
+        animation: fadeUp .9s .1s ease both;
+    }
+
+    .gradient-text {
+        background: linear-gradient(
+            110deg,
+            #ffffff 10%,
+            #818cf8 42%,
+            #c084fc 72%,
+            #67e8f9 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .hero p {
+        max-width: 700px;
+        margin: auto;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.8;
+        animation: fadeUp 1s .2s ease both;
+    }
+
+    .hero-actions {
+        margin-top: 38px;
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        animation: fadeUp 1s .3s ease both;
+    }
+
+    .btn-primary,
+    .btn-outline {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 16px 27px;
+        border-radius: 13px;
+        text-decoration: none;
+        font-weight: 800;
+        transition: .3s ease;
+    }
+
+    .btn-primary {
+        color: white;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        box-shadow: 0 15px 45px rgba(99,102,241,.32);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 55px rgba(99,102,241,.45);
+    }
+
+    .btn-outline {
+        color: #e2e8f0;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,.035);
+    }
+
+    .btn-outline:hover {
+        background: rgba(255,255,255,.08);
+        transform: translateY(-3px);
+    }
+
+    /* FLOATING ORBS */
+
+    .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(2px);
+        pointer-events: none;
+    }
+
+    .orb.one {
+        width: 180px;
+        height: 180px;
+        left: 4%;
+        top: 28%;
+        background: rgba(99,102,241,.09);
+        animation: float 7s ease-in-out infinite;
+    }
+
+    .orb.two {
+        width: 130px;
+        height: 130px;
+        right: 6%;
+        top: 22%;
+        background: rgba(34,211,238,.07);
+        animation: float 9s 1s ease-in-out infinite;
+    }
+
+    .orb.three {
+        width: 90px;
+        height: 90px;
+        right: 20%;
+        bottom: 12%;
+        background: rgba(192,132,252,.09);
+        animation: float 6s 2s ease-in-out infinite;
+    }
+
+    /* SERVICES */
+
+    .section {
+        max-width: 1250px;
+        margin: auto;
+        padding: 100px 25px;
+        position: relative;
+    }
+
+    .section-heading {
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto 55px;
+    }
+
+    .eyebrow {
+        color: #818cf8;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-weight: 900;
+        margin-bottom: 12px;
+    }
+
+    .section-heading h2 {
+        font-size: clamp(30px, 4vw, 48px);
+        letter-spacing: -2px;
+        margin-bottom: 15px;
+    }
+
+    .section-heading p {
+        color: var(--muted);
+        line-height: 1.7;
+    }
+
+    .services {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+    }
+
+    .service {
+        position: relative;
+        padding: 28px;
+        min-height: 205px;
+        border: 1px solid var(--border);
+        background: linear-gradient(
+            145deg,
+            rgba(255,255,255,.055),
+            rgba(255,255,255,.018)
+        );
+        border-radius: 20px;
+        overflow: hidden;
+        transition: .35s ease;
+    }
+
+    .service::before {
+        content: "";
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        right: -70px;
+        top: -70px;
+        border-radius: 50%;
+        background: rgba(99,102,241,.08);
+        transition: .4s;
+    }
+
+    .service:hover {
+        transform: translateY(-7px);
+        border-color: rgba(129,140,248,.35);
+        box-shadow: 0 25px 60px rgba(0,0,0,.25);
+    }
+
+    .service:hover::before {
+        transform: scale(1.5);
+    }
+
+    .service-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 15px;
+        background: rgba(99,102,241,.11);
+        border: 1px solid rgba(129,140,248,.14);
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .service h3 {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .service p {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    /* WHY DVARY */
+
+    .why {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 70px;
+        align-items: center;
+    }
+
+    .why h2 {
+        font-size: clamp(32px, 4vw, 50px);
+        letter-spacing: -2px;
+        margin-bottom: 20px;
+    }
+
+    .why > div > p {
+        color: var(--muted);
+        line-height: 1.8;
+        margin-bottom: 28px;
+    }
+
+    .features {
+        display: grid;
+        gap: 15px;
+    }
+
+    .feature {
+        display: flex;
+        gap: 15px;
+        align-items: flex-start;
+        padding: 17px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,.025);
+        border-radius: 15px;
+    }
+
+    .check {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(74,222,128,.09);
+        color: #4ade80;
+        border-radius: 9px;
+    }
+
+    .feature h4 {
+        margin-bottom: 4px;
+    }
+
+    .feature p {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .visual-card {
+        min-height: 440px;
+        border-radius: 30px;
+        border: 1px solid var(--border);
+        background:
+            radial-gradient(circle at 50% 30%, rgba(99,102,241,.2), transparent 30%),
+            linear-gradient(145deg, #11131d, #08090e);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .visual-logo {
+        width: 155px;
+        height: 155px;
+        border-radius: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 65px;
+        background: linear-gradient(145deg, rgba(99,102,241,.25), rgba(139,92,246,.08));
+        border: 1px solid rgba(165,180,252,.2);
+        box-shadow:
+            0 0 0 15px rgba(99,102,241,.035),
+            0 0 0 35px rgba(99,102,241,.018),
+            0 30px 80px rgba(99,102,241,.25);
+        animation: pulse 4s ease-in-out infinite;
+    }
+
+    .mini-card {
+        position: absolute;
+        padding: 13px 16px;
+        border: 1px solid var(--border);
+        background: rgba(10,11,17,.8);
+        backdrop-filter: blur(12px);
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .mini-card.a {
+        top: 20%;
+        left: 9%;
+    }
+
+    .mini-card.b {
+        right: 8%;
+        top: 35%;
+    }
+
+    .mini-card.c {
+        left: 16%;
+        bottom: 17%;
+    }
+
+    .mini-card.d {
+        right: 14%;
+        bottom: 13%;
+    }
+
+    /* CTA */
+
+    .cta {
+        margin: 50px auto 100px;
+        max-width: 1100px;
+        padding: 70px 30px;
+        text-align: center;
+        border: 1px solid rgba(129,140,248,.18);
+        border-radius: 30px;
+        background:
+            radial-gradient(circle at 50% 0%, rgba(99,102,241,.2), transparent 50%),
+            rgba(255,255,255,.025);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta h2 {
+        font-size: clamp(32px, 5vw, 55px);
+        letter-spacing: -2px;
+        margin-bottom: 15px;
+    }
+
+    .cta p {
+        color: var(--muted);
+        max-width: 600px;
+        margin: auto;
+        line-height: 1.7;
+    }
+
+    .cta .btn-primary {
+        margin-top: 30px;
+    }
+
+    /* FOOTER */
+
+    footer {
+        border-top: 1px solid rgba(255,255,255,.07);
+        background: rgba(0,0,0,.2);
+        padding: 45px 25px 25px;
+    }
+
+    .footer-inner {
+        max-width: 1250px;
+        margin: auto;
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .footer-brand {
+        max-width: 330px;
+    }
+
+    .footer-brand .logo {
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+
+    .footer-brand p {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .footer-links {
+        display: flex;
+        gap: 45px;
+    }
+
+    .footer-column h4 {
+        margin-bottom: 15px;
+        font-size: 13px;
+    }
+
+    .footer-column a {
+        display: block;
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 9px;
+        transition: .2s;
+    }
+
+    .footer-column a:hover {
+        color: white;
+    }
+
+    .copyright {
+        max-width: 1250px;
+        margin: 35px auto 0;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,.06);
+        color: #64748b;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    /* SCROLL REVEAL */
+
+    .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity .8s ease, transform .8s ease;
+    }
+
+    .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* ANIMATIONS */
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0%,100% {
+            transform: translateY(0) translateX(0);
+        }
+        50% {
+            transform: translateY(-25px) translateX(10px);
+        }
+    }
+
+    @keyframes pulse {
+        0%,100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.04);
+        }
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 900px) {
+
+        .nav-links {
+            display: none;
+        }
+
+        .services {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .why {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        .visual-card {
+            min-height: 350px;
+        }
+    }
+
+    @media (max-width: 600px) {
+
+        .navbar {
+            padding: 15px;
+        }
+
+        .logo {
+            font-size: 19px;
+        }
+
+        .nav-login {
+            display: none;
+        }
+
+        .nav-start {
+            padding: 9px 14px;
+            font-size: 12px;
+        }
+
+        .hero {
+            padding: 125px 18px 70px;
+        }
+
+        .hero h1 {
+            letter-spacing: -2.5px;
+        }
+
+        .hero p {
+            font-size: 15px;
+        }
+
+        .hero-actions {
+            flex-direction: column;
+        }
+
+        .hero-actions a {
+            width: 100%;
+        }
+
+        .section {
+            padding: 70px 18px;
+        }
+
+        .services {
+            grid-template-columns: 1fr;
+        }
+
+        .service {
+            min-height: auto;
+        }
+
+        .visual-card {
+            min-height: 320px;
+        }
+
+        .mini-card {
+            font-size: 11px;
+            padding: 10px;
+        }
+
+        .visual-logo {
+            width: 120px;
+            height: 120px;
+            font-size: 50px;
+        }
+
+        .footer-inner {
+            flex-direction: column;
+        }
+
+        .footer-links {
+            gap: 35px;
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+</head><body><!-- NAVBAR -->
+
+<nav class="navbar" id="navbar">
+    <div class="nav-inner">
+
+        <a href="#" class="logo">
+            DVARY <span>PLATFORM</span>
+        </a>
+
+        <div class="nav-links">
+            <a href="#services">Services</a>
+            <a href="#about">Kuhusu</a>
+            <a href="#why">Faida</a>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="/login" class="nav-login">Ingia</a>
+            <a href="main.html" class="nav-start">Get Started →</a>
+        </div>
+
+    </div>
+</nav>
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+    <div class="orb three"></div>
+
+    <div class="hero-content">
+
+        <div class="badge">
+            <span class="badge-dot"></span>
+            Platform yako ya kidigitali
+        </div>
+
+        <h1>
+            Kila kitu unachohitaji,
+            <br>
+            <span class="gradient-text">sehemu moja.</span>
+        </h1>
+
+        <p>
+            Karibu DVARY — platform iliyoundwa kukupa huduma mbalimbali
+            za kidigitali kwa njia rahisi, haraka na yenye experience
+            ya kisasa.
+        </p>
+
+        <div class="hero-actions">
+
+            <a href="main.html" class="btn-primary">
+                🚀 Get Started
+            </a>
+
+            <a href="#services" class="btn-outline">
+                Explore Services
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- SERVICES -->
+
+<section class="section" id="services">
+
+    <div class="section-heading reveal">
+
+        <div class="eyebrow">DVARY SERVICES</div>
+
+        <h2>
+            Huduma zote,
+            <span class="gradient-text">sehemu moja.</span>
+        </h2>
+
+        <p>
+            DVARY inakusogezea huduma mbalimbali za kidigitali
+            katika platform moja iliyo rahisi kutumia.
+        </p>
+
+    </div>
+
+
+    <div class="services">
+
+        <div class="service reveal">
+            <div class="service-icon">💻</div>
+            <h3>Digital Services</h3>
+            <p>
+                Fikia huduma mbalimbali za kidigitali kwa urahisi
+                bila kupitia sehemu nyingi tofauti.
+            </p>
+        </div>
+
+
+        <div class="service reveal">
+            <div class="service-icon">📱</div>
+            <h3>Mobile Services</h3>
+            <p>
+                Experience iliyoboreshwa kwa simu, tablet na
+                vifaa vingine vya kisasa.
+            </p>
+        </div>
+
+
+        <div class="service reveal">
+            <div class="service-icon">⚡</div>
+            <h3>Fast Access</h3>
+            <p>
+                Mfumo uliotengenezwa kwa speed na navigation
+                rahisi ili ufikie unachohitaji haraka.
+            </p>
+        </div>
+
+
+        <div class="service reveal">
+            <div class="service-icon">🔐</div>
+            <h3>Account & Security</h3>
+            <p>
+                Mfumo wa account unaokusaidia kusimamia taarifa
+                zako kwa usalama.
+            </p>
+        </div>
+
+
+        <div class="service reveal">
+            <div class="service-icon">⭐</div>
+            <h3>Premium Access</h3>
+            <p>
+                Sehemu maalum kwa huduma na features zinazohitaji
+                access ya ziada.
+            </p>
+        </div>
+
+
+        <div class="service reveal">
+            <div class="service-icon">🎧</div>
+            <h3>Support</h3>
+            <p>
+                Pata msaada na maelezo pale unapohitaji
+                kuelewa au kutumia huduma.
+            </p>
+        </div>
+
+
+        <div class="service reveal">
+            <div class="service-icon">📊</div>
+            <h3>Dashboard</h3>
+            <p>
+                Simamia huduma na taarifa zako kupitia dashboard
+                iliyo wazi na rahisi kutumia.
+            </p>
+        </div>
+
+
+        <div class="service reveal">
+            <div class="service-icon">🌍</div>
+            <h3>Online Platform</h3>
+            <p>
+                Tumia DVARY kutoka popote ukiwa na internet
+                na kifaa chako.
+            </p>
+        </div>
+
+
+        <div class="service reveal">
+            <div class="service-icon">✨</div>
+            <h3>Modern Experience</h3>
+            <p>
+                Interface safi, animations laini na design
+                iliyotengenezwa kwa kizazi cha sasa.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ABOUT / WHY -->
+
+<section class="section" id="about">
+
+    <div class="why">
+
+        <div class="reveal">
+
+            <div class="eyebrow">ABOUT DVARY</div>
+
+            <h2>
+                Built for a
+                <span class="gradient-text">better digital experience.</span>
+            </h2>
+
+            <p>
+                DVARY inalenga kufanya matumizi ya huduma za kidigitali
+                yawe rahisi, clean na ya kueleweka. Badala ya interface
+                yenye vitu vingi visivyo muhimu, tunazingatia experience
+                ambayo mtumiaji anaweza kuielewa haraka.
+            </p>
+
+            <a href="main.html" class="btn-primary">
+                Ingia DVARY →
+            </a>
+
+        </div>
+
+
+        <div class="visual-card reveal">
+
+            <div class="mini-card a">
+                ⚡ Fast
+            </div>
+
+            <div class="mini-card b">
+                🔐 Secure
+            </div>
+
+            <div class="mini-card c">
+                📱 Mobile Ready
+            </div>
+
+            <div class="mini-card d">
+                ✨ Modern
+            </div>
+
+            <div class="visual-logo">
+                D
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- WHY -->
+
+<section class="section" id="why">
+
+    <div class="section-heading reveal">
+
+        <div class="eyebrow">WHY DVARY</div>
+
+        <h2>
+            Simple.
+            <span class="gradient-text">Fast. Modern.</span>
+        </h2>
+
+        <p>
+            Kila sehemu ya platform imeundwa kwa kuzingatia
+            matumizi rahisi na experience nzuri.
+        </p>
+
+    </div>
+
+
+    <div class="features">
+
+        <div class="feature reveal">
+
+            <div class="check">✓</div>
+
+            <div>
+                <h4>Rahisi kutumia</h4>
+                <p>
+                    Navigation rahisi inayokusaidia kufikia
+                    huduma bila kuchanganyikiwa.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="feature reveal">
+
+            <div class="check">✓</div>
+
+            <div>
+                <h4>Responsive</h4>
+                <p>
+                    Design inayofanya kazi vizuri kwenye
+                    simu, tablet na desktop.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="feature reveal">
+
+            <div class="check">✓</div>
+
+            <div>
+                <h4>Modern Interface</h4>
+                <p>
+                    Interface yenye muonekano wa kisasa,
+                    animations laini na visual hierarchy nzuri.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="feature reveal">
+
+            <div class="check">✓</div>
+
+            <div>
+                <h4>Everything in one place</h4>
+                <p>
+                    Huduma mbalimbali zinapatikana kupitia
+                    platform moja.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- CTA -->
+
+<section class="cta reveal">
+
+    <div class="eyebrow">READY?</div>
+
+    <h2>
+        Anza kutumia
+        <span class="gradient-text">DVARY.</span>
+    </h2>
+
+    <p>
+        Fungua platform na uanze experience yako ya DVARY
+        leo. Hakuna navigation ngumu — ingia tu na uanze.
+    </p>
+
+    <a href="main.html" class="btn-primary">
+        🚀 Get Started Now
+    </a>
+
+</section>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <div class="footer-inner">
+
+        <div class="footer-brand">
+
+            <a href="#" class="logo">
+                DVARY <span>PLATFORM</span>
+            </a>
+
+            <p>
+                Platform ya huduma za kidigitali iliyoundwa
+                kwa simplicity, speed na modern experience.
+            </p>
+
+        </div>
+
+
+        <div class="footer-links">
+
+            <div class="footer-column">
+
+                <h4>Platform</h4>
+
+                <a href="#services">Services</a>
+                <a href="#about">Kuhusu DVARY</a>
+                <a href="#why">Faida</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h4>Account</h4>
+
+                <a href="/login">Ingia</a>
+                <a href="/signup">Jiunge</a>
+                <a href="main.html">Dashboard</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h4>Msaada</h4>
+
+                <a href="/contact">Contact</a>
+                <a href="/help">Help Center</a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="copyright">
+        © 2026 DVARY. Haki zote zimehifadhiwa.
+    </div>
+
+</footer>
+
+
+<script>
+
+    /* NAVBAR SCROLL EFFECT */
+
+    const navbar = document.getElementById("navbar");
+
+    window.addEventListener("scroll", () => {
+
+        if (window.scrollY > 30) {
+            navbar.classList.add("scrolled");
+        } else {
+            navbar.classList.remove("scrolled");
+        }
+
+    });
+
+
+    /* SCROLL REVEAL */
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+
+            entries.forEach((entry) => {
+
+                if (entry.isIntersecting) {
+
+                    entry.target.classList.add("visible");
+
+                    observer.unobserve(entry.target);
+
+                }
+
+            });
+
+        },
+        {
+            threshold: 0.12
+        }
+    );
+
+
+    document.querySelectorAll(".reveal").forEach((element) => {
+        observer.observe(element);
+    });
+
+
+    /* SMOOTH NAVIGATION */
+
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+
+        link.addEventListener("click", function(e) {
+
+            const target = document.querySelector(
+                this.getAttribute("href")
+            );
+
+            if (!target) return;
+
+            e.preventDefault();
+
+            target.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        });
+
+    });
+
+
+    /* SUBTLE MOUSE PARALLAX */
+
+    const orbs = document.querySelectorAll(".orb");
+
+    document.addEventListener("mousemove", (e) => {
+
+        const x = (window.innerWidth / 2 - e.clientX) / 100;
+        const y = (window.innerHeight / 2 - e.clientY) / 100;
+
+        orbs.forEach((orb, index) => {
+
+            const speed = (index + 1) * 0.7;
+
+            orb.style.marginLeft = `${x * speed}px`;
+            orb.style.marginTop = `${y * speed}px`;
+
+        });
+
+    });
+
+</script>
+
+</body>
+  </html>
